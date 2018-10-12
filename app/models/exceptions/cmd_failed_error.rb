@@ -1,2 +1,0 @@
-class CmdFailedError < StandardError
-end

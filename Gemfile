@@ -34,6 +34,7 @@ gem 'dotenv-rails', require: 'dotenv/rails-now', group: [:development, :test]
 gem 'jwt'
 
 gem 'resque'
+gem 'typhoeus'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

@@ -5,11 +5,19 @@ class ProcessSubmissionJob < ApplicationJob
     @submission = Submission.find(submission_id)
     @submission.update_status(:processing)
 
-    @submission.complete
+    url_file_map = retrieve_all_in_parallel!(@submission.unique_urls)
+
+
+    @submission.complete!
   end
 
+  def retrieve_all_in_parallel!(urls)
+    
+  end
+
+
   def on_retryable_exception(error)
-    logger.warn "RETRYABLE EXCEPTION! @deployment #{@deployment.inspect}"
+    logger.warn "RETRYABLE EXCEPTION! @submission #{@submission.inspect}"
     @submission.fail!(retryable: true) if @submission
     super
   end
