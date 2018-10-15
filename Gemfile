@@ -22,6 +22,9 @@ gem 'puma', '~> 3.11'
 # Use Capistrano for deployment
 # gem 'capistrano-rails', group: :development
 
+# we use this for sending email via Amazon SES
+gem 'aws-sdk'
+
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.1.0', require: false
 
@@ -33,6 +36,7 @@ gem 'dotenv-rails', require: 'dotenv/rails-now', group: [:development, :test]
 
 gem 'jwt'
 
+gem 'mimemagic'
 gem 'resque'
 gem 'typhoeus'
 

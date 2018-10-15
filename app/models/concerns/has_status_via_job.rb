@@ -8,7 +8,7 @@ module Concerns
         failed_retryable: 'failed_retryable',
         failed_non_retryable: 'failed_non_retryable',
         queued: 'queued',
-        deploying: 'deploying'
+        processing: 'processing'
       }.freeze
       validates :status, inclusion: {in: STATUS.values}
 
