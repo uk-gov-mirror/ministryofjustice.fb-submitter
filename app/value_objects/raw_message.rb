@@ -11,7 +11,6 @@ class RawMessage
   end
 
   def to_s
-    byebug
     <<-END
 From: #{@from}
 To: #{@to}
