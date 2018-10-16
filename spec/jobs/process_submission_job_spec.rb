@@ -33,13 +33,14 @@ describe ProcessSubmissionJob do
         'text/html' => '<html>some html</html>'
       }
     end
+    let(:mock_send_response){ {'key' => 'send response'} }
     before do
-      allow(EmailService).to receive(:send).and_return( {'key' => 'send response'} )
+      allow(submission).to receive(:detail_objects).and_return(detail_objects)
+      allow(EmailService).to receive(:send).and_return( mock_send_response )
       allow(DownloadService).to receive(:download_in_parallel).and_return(
         mock_downloaded_files
       )
-      allow(subject).to receive(:download_body_parts).and_return(downloaded_body_parts)
-      allow(subject).to receive(:read_downloaded_body_parts).and_return(body_part_content)
+      allow(subject).to receive(:retrieve_mail_body_parts).and_return(body_part_content)
     end
 
     context 'given a valid submission_id' do
@@ -73,6 +74,52 @@ describe ProcessSubmissionJob do
       it 'gets the detail_objects from the Submission' do
         expect(submission).to receive(:detail_objects).at_least(:once).and_return(detail_objects)
         subject.perform(submission_id: submission_id)
+      end
+
+      describe 'for each detail object' do
+        let(:detail_object){ detail_objects.first }
+        before do
+          allow(subject).to receive(:attachment_file_paths)
+                          .and_return(['file1', 'file2'])
+        end
+
+        it 'retrieves the mail body parts' do
+          expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object).and_return(body_part_content)
+          subject.perform(submission_id: submission_id)
+        end
+
+        it 'gets the attachment_file_paths' do
+          expect(subject).to receive(:attachment_file_paths)
+                          .with(detail_object, mock_downloaded_files)
+                          .and_return(['file1', 'file2'])
+          subject.perform(submission_id: submission_id)
+        end
+
+        it 'asks the EmailService to send an email' do
+          expect(EmailService).to receive(:send).with(
+            from: detail_object.from,
+            to: detail_object.to,
+            subject: detail_object.subject,
+            body_parts: body_part_content,
+            attachments: ['file1', 'file2']
+          ).and_return(mock_send_response)
+          subject.perform(submission_id: submission_id)
+        end
+
+        it 'adds the response to the submission responses' do
+          subject.perform(submission_id: submission_id)
+          expect(submission.responses).to eq([mock_send_response])
+        end
+
+        it 'saves the submission' do
+          expect(submission).to receive(:save!)
+          subject.perform(submission_id: submission_id)
+        end
+
+        it 'completes the submission' do
+          subject.perform(submission_id: submission_id)
+          expect(submission.status).to eq('completed')
+        end
       end
     end
   end

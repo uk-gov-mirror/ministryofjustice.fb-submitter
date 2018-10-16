@@ -14,16 +14,17 @@ class ProcessSubmissionJob < ApplicationJob
     )
 
     @submission.responses = []
+
     @submission.detail_objects.to_a.each do |mail|
-      body_part_map = download_body_parts(mail)
-      body_part_content = read_downloaded_body_parts(mail, body_part_map)
+      body_part_content = retrieve_mail_body_parts(mail)
+      attachment_files = attachment_file_paths(mail, url_file_map)
 
       response = EmailService.send(
         from:         mail.from,
         to:           mail.to,
         subject:      mail.subject,
         body_parts:   body_part_content,
-        attachments:  mail.attachments.map{|url| url_file_map[url]}
+        attachments:  attachment_files
       )
 
       @submission.responses << response.to_h
@@ -35,10 +36,19 @@ class ProcessSubmissionJob < ApplicationJob
     @submission.complete!
   end
 
+  def attachment_file_paths(mail, url_file_map)
+    mail.attachments.map{|url| url_file_map[url]}
+  end
+
   def unique_attachment_urls(submission = @submission)
     submission.detail_objects.map do |detail|
       detail.attachments
     end.flatten.compact.sort.uniq
+  end
+
+  def retrieve_mail_body_parts(mail)
+    body_part_map = download_body_parts(mail)
+    read_downloaded_body_parts(mail, body_part_map)
   end
 
   def download_body_parts(mail)
