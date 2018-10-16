@@ -23,7 +23,7 @@ class DownloadService
   end
 
   def self.construct_request(url:, file_path:)
-    request = Typhoeus::Request.new(url)
+    request = Typhoeus::Request.new(url, followlocation: true)
     request.on_headers do |response|
       if response.code != 200
         raise "Request failed"
