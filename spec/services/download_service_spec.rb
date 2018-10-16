@@ -82,7 +82,7 @@ describe DownloadService do
       described_class.download(args)
     end
 
-    it 'constructs a request for the given url and the file_path_for_download' do
+    it 'constructs a request for the correct url and the file_path_for_download' do
       expect(described_class).to receive(:construct_request).with(url: url, file_path: path + '/file.ext').and_return(mock_request)
       described_class.download(args)
     end
