@@ -1,12 +1,12 @@
 class DownloadService
-  def self.download(url:, target_dir: nil)
+  def self.download(url:, target_dir: nil, headers: {})
     path = file_path_for_download(url: url, target_dir: target_dir)
-    request = construct_request(url: url, file_path: path)
+    request = construct_request(url: url, file_path: path, headers: headers)
     request.run
     path
   end
 
-  def self.download_in_parallel(urls:, target_dir: nil)
+  def self.download_in_parallel(urls:, target_dir: nil, headers: {})
     actual_dir = target_dir || Dir.mktmpdir
     results = {}
 
@@ -14,7 +14,7 @@ class DownloadService
 
     urls.each do |url|
       file = file_path_for_download(url: url, target_dir: actual_dir)
-      request = construct_request(url: url, file_path: file)
+      request = construct_request(url: url, file_path: file, headers: headers)
       results[url] = file
       hydra.queue(request)
     end
@@ -22,8 +22,8 @@ class DownloadService
     results
   end
 
-  def self.construct_request(url:, file_path:)
-    request = Typhoeus::Request.new(url, followlocation: true)
+  def self.construct_request(url:, file_path:, headers: {})
+    request = Typhoeus::Request.new(url, followlocation: true, headers: headers)
     request.on_headers do |response|
       if response.code != 200
         raise "Request failed"
