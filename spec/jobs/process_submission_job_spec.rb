@@ -9,6 +9,8 @@ describe ProcessSubmissionJob do
       'text/html' => '<html>some html</html>'
     }
   end
+  let(:token) { 'some token' }
+  let(:headers) { {'x-encrypted-user-id-and-token' => token} }
   let(:url_resolver) { double('url_resolver', ensure_absolute_urls: ['abs url1', 'abs url2'])}
   before do
     allow(Adapters::ServiceUrlResolver).to receive(:new).and_return(url_resolver)
@@ -30,6 +32,7 @@ describe ProcessSubmissionJob do
     end
     let(:submission) do
       Submission.create!(
+        encrypted_user_id_and_token: token,
         status: 'queued',
         submission_details: [submission_detail]
       )
@@ -77,7 +80,7 @@ describe ProcessSubmissionJob do
 
       it 'downloads the resolved unique_attachment_urls in parallel' do
         expect(DownloadService).to receive(:download_in_parallel)
-                                .with(urls: ['abs url1', 'abs url2'])
+                                .with(urls: ['abs url1', 'abs url2'], headers: headers)
                                 .and_return(mock_downloaded_files)
         subject.perform(submission_id: submission_id)
       end
@@ -95,7 +98,7 @@ describe ProcessSubmissionJob do
         end
 
         it 'retrieves the mail body parts' do
-          expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object, url_resolver).and_return(body_part_content)
+          expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object, url_resolver, headers).and_return(body_part_content)
           subject.perform(submission_id: submission_id)
         end
 
@@ -179,19 +182,19 @@ describe ProcessSubmissionJob do
   describe '#retrieve_mail_body_parts' do
     let(:mail) { double('mail') }
     before do
-      allow(subject).to receive(:download_body_parts).with(mail, url_resolver).and_return(mock_downloaded_files)
+      allow(subject).to receive(:download_body_parts).with(mail, url_resolver, headers).and_return(mock_downloaded_files)
       allow(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
     end
     it 'downloads the body parts' do
-      expect(subject).to receive(:download_body_parts).with(mail, url_resolver).and_return(mock_downloaded_files)
-      subject.send(:retrieve_mail_body_parts, mail, url_resolver)
+      expect(subject).to receive(:download_body_parts).with(mail, url_resolver, headers).and_return(mock_downloaded_files)
+      subject.send(:retrieve_mail_body_parts, mail, url_resolver, headers)
     end
     it 'reads the downloaded body parts' do
       expect(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
-      subject.send(:retrieve_mail_body_parts, mail, url_resolver)
+      subject.send(:retrieve_mail_body_parts, mail, url_resolver, headers)
     end
     it 'returns the map of content type to content' do
-      expect(subject.send(:retrieve_mail_body_parts, mail, url_resolver)).to eq(body_part_content)
+      expect(subject.send(:retrieve_mail_body_parts, mail, url_resolver, headers)).to eq(body_part_content)
     end
   end
 
@@ -199,23 +202,25 @@ describe ProcessSubmissionJob do
     let(:mail) { double('mail', body_parts: {'text/plain' => 'url1', 'text/html' => 'url2'}) }
     before do
       allow(DownloadService).to receive(:download_in_parallel).with(
-        urls: ['abs url1', 'abs url2']
+        urls: ['abs url1', 'abs url2'],
+        headers: headers
       ).and_return('download result')
     end
     it 'resolves the urls' do
       expect(url_resolver).to receive(:ensure_absolute_urls).with(['url1', 'url2']).and_return(['abs url1', 'abs url2'])
-      subject.send(:download_body_parts, mail, url_resolver)
+      subject.send(:download_body_parts, mail, url_resolver, headers)
     end
 
     it 'asks the DownloadService to download the resolved body part urls in parallel' do
       expect(DownloadService).to receive(:download_in_parallel).with(
-        urls: ['abs url1', 'abs url2']
+        urls: ['abs url1', 'abs url2'],
+        headers: headers
       )
-      subject.send(:download_body_parts, mail, url_resolver)
+      subject.send(:download_body_parts, mail, url_resolver, headers)
     end
 
     it 'returns the result of the download call' do
-      expect(subject.send(:download_body_parts, mail, url_resolver)).to eq('download result')
+      expect(subject.send(:download_body_parts, mail, url_resolver, headers)).to eq('download result')
     end
   end
 

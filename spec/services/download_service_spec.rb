@@ -2,7 +2,8 @@ require 'rails_helper'
 
 describe DownloadService do
   let(:url) { 'https://my.domain/some/path/file.ext' }
-  let(:args) { {url: url, target_dir: '/my/target/dir'} }
+  let(:headers) { {'x-access-token' => 'sometoken'} }
+  let(:args) { {url: url, target_dir: '/my/target/dir', headers: headers} }
   let(:mock_hydra) { double('hydra', run: 'run result', queue: 'queue result') }
   before do
     allow(Typhoeus::Hydra).to receive(:hydra).and_return(mock_hydra)
@@ -74,16 +75,16 @@ describe DownloadService do
     let(:mock_request) { double('request', run: 'run result') }
     before do
       allow(described_class).to receive(:construct_request).and_return(mock_request)
-      allow(described_class).to receive(:file_path_for_download).with(args).and_return(path + '/file.ext')
+      allow(described_class).to receive(:file_path_for_download).with(url: url, target_dir: '/my/target/dir').and_return(path + '/file.ext')
     end
 
     it 'gets the file_path_for_download with the given args' do
-      expect(described_class).to receive(:file_path_for_download).with(args).and_return(path)
+      expect(described_class).to receive(:file_path_for_download).with(url: url, target_dir: '/my/target/dir').and_return(path)
       described_class.download(args)
     end
 
     it 'constructs a request for the correct url and the file_path_for_download' do
-      expect(described_class).to receive(:construct_request).with(url: url, file_path: path + '/file.ext').and_return(mock_request)
+      expect(described_class).to receive(:construct_request).with(url: url, file_path: path + '/file.ext', headers: headers).and_return(mock_request)
       described_class.download(args)
     end
 
@@ -130,15 +131,15 @@ describe DownloadService do
     context 'given an array of urls' do
       let(:url1) { 'https://my.domain/some/path/file.ext' }
       let(:url2) { 'https://another.domain/some/otherfile.ext' }
-      let(:args) { {urls: [url1, url2], target_dir: path} }
+      let(:args) { {urls: [url1, url2], target_dir: path, headers: headers} }
       let(:mock_request_1) { double('request1') }
       let(:mock_request_2) { double('request2') }
 
       before do
         allow(described_class).to receive(:file_path_for_download).with(url: url1, target_dir: path).and_return('/tmp/file1')
         allow(described_class).to receive(:file_path_for_download).with(url: url2, target_dir: path).and_return('/tmp/file2')
-        allow(described_class).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1').and_return(mock_request_1)
-        allow(described_class).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2').and_return(mock_request_2)
+        allow(described_class).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1', headers: headers).and_return(mock_request_1)
+        allow(described_class).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers: headers).and_return(mock_request_2)
       end
 
       describe 'for each url' do
@@ -149,8 +150,8 @@ describe DownloadService do
         end
 
         it 'constructs a request, passing the url and file path for download' do
-          expect(described_class).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1')
-          expect(described_class).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2')
+          expect(described_class).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1', headers: headers)
+          expect(described_class).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers: headers)
           described_class.download_in_parallel(args)
         end
 
