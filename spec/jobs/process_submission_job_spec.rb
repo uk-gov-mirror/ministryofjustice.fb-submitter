@@ -44,7 +44,7 @@ describe ProcessSubmissionJob do
     let(:mock_send_response){ {'key' => 'send response'} }
     before do
       allow(submission).to receive(:detail_objects).and_return(detail_objects)
-      allow(EmailService).to receive(:send).and_return( mock_send_response )
+      allow(EmailService).to receive(:send_mail).and_return( mock_send_response )
       allow(DownloadService).to receive(:download_in_parallel).and_return(
         mock_downloaded_files
       )
@@ -110,7 +110,7 @@ describe ProcessSubmissionJob do
         end
 
         it 'asks the EmailService to send an email' do
-          expect(EmailService).to receive(:send).with(
+          expect(EmailService).to receive(:send_mail).with(
             from: detail_object.from,
             to: detail_object.to,
             subject: detail_object.subject,
