@@ -26,7 +26,7 @@ class ProcessSubmissionJob < ApplicationJob
       body_part_content = retrieve_mail_body_parts(mail, url_resolver, headers)
       attachment_files = attachment_file_paths(mail, url_file_map)
 
-      response = EmailService.send(
+      response = EmailService.send_mail(
         from:         mail.from,
         to:           mail.to,
         subject:      mail.subject,
