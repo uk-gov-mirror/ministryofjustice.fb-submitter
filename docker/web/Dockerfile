@@ -1,5 +1,5 @@
 # Base image
-FROM aldavidson/fb-publisher-base
+FROM aldavidson/fb-submitter-base
 
 # allow access to port 3000
 ENV APP_PORT 3000
