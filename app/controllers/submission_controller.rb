@@ -16,11 +16,13 @@ class SubmissionController < ApplicationController
   private
 
   def submission_params(opts=params)
-    opts.permit(
-      :encrypted_user_id_and_token,
+    # we must use slice(..).permit! rather than permitting individual params, as
+    # submission_details is an arbitrary hash, which AC Strong Params *really*
+    # doesn't like
+    opts.slice(
       :service_slug,
-      :submission_details,
-      :submission_type,
-    )
+      :encrypted_user_id_and_token,
+      :submission_details
+    ).permit!
   end
 end
