@@ -1,17 +1,22 @@
 ALL_ENVS = {
   dev: {
     name: 'Development',
-    protocol: 'https://',
+    internal_service_port: 3000,
+    # we're still using internal http until Cloud Platforms
+    # come up with a platform solution
+    protocol: 'http://',
     url_root: 'apps.cloud-platform-live-0.k8s.integration.dsd.io'
   },
   staging: {
     name: 'Staging',
-    protocol: 'https://',
+    internal_service_port: 3000,
+    protocol: 'http://',
     url_root: 'apps.cloud-platform-live-0.k8s.integration.dsd.io'
   },
   production: {
     name: 'Production',
-    protocol: 'https://',
+    internal_service_port: 3000,
+    protocol: 'http://',
     url_root: 'apps.cloud-platform-live-0.k8s.integration.dsd.io'
   }
 }
