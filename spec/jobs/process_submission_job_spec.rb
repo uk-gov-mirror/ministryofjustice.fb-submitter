@@ -11,9 +11,8 @@ describe ProcessSubmissionJob do
   end
   let(:token) { 'some token' }
   let(:headers) { {'x-encrypted-user-id-and-token' => token} }
-  let(:url_resolver) { double('url_resolver', ensure_absolute_urls: ['abs url1', 'abs url2'], ensure_absolute_url: 'abs url1')}
   before do
-    allow(Adapters::ServiceUrlResolver).to receive(:new).and_return(url_resolver)
+    allow_any_instance_of(EmailSubmissionDetail).to receive(:make_urls_absolute!)
   end
 
   describe '#perform' do
@@ -72,15 +71,9 @@ describe ProcessSubmissionJob do
         subject.perform(submission_id: submission_id)
       end
 
-      it 'resolves the unique_attachment_urls' do
-        expect(url_resolver).to receive(:ensure_absolute_urls).with(['https://tools.ietf.org/pdf/rfc2324']).and_return(['abs url1'])
-        subject.perform(submission_id: submission_id)
-      end
-
-
       it 'downloads the resolved unique_attachment_urls in parallel' do
         expect(DownloadService).to receive(:download_in_parallel)
-                                .with(urls: ['abs url1', 'abs url2'], headers: headers)
+                                .with(urls: ['https://tools.ietf.org/pdf/rfc2324'], headers: headers)
                                 .and_return(mock_downloaded_files)
         subject.perform(submission_id: submission_id)
       end
@@ -98,7 +91,7 @@ describe ProcessSubmissionJob do
         end
 
         it 'retrieves the mail body parts' do
-          expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object, url_resolver, headers).and_return(body_part_content)
+          expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object, headers).and_return(body_part_content)
           subject.perform(submission_id: submission_id)
         end
 
@@ -182,19 +175,19 @@ describe ProcessSubmissionJob do
   describe '#retrieve_mail_body_parts' do
     let(:mail) { double('mail') }
     before do
-      allow(subject).to receive(:download_body_parts).with(mail, url_resolver, headers).and_return(mock_downloaded_files)
-      allow(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files, url_resolver).and_return(body_part_content)
+      allow(subject).to receive(:download_body_parts).with(mail, headers).and_return(mock_downloaded_files)
+      allow(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
     end
     it 'downloads the body parts' do
-      expect(subject).to receive(:download_body_parts).with(mail, url_resolver, headers).and_return(mock_downloaded_files)
-      subject.send(:retrieve_mail_body_parts, mail, url_resolver, headers)
+      expect(subject).to receive(:download_body_parts).with(mail, headers).and_return(mock_downloaded_files)
+      subject.send(:retrieve_mail_body_parts, mail, headers)
     end
     it 'reads the downloaded body parts' do
-      expect(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files, url_resolver).and_return(body_part_content)
-      subject.send(:retrieve_mail_body_parts, mail, url_resolver, headers)
+      expect(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
+      subject.send(:retrieve_mail_body_parts, mail, headers)
     end
     it 'returns the map of content type to content' do
-      expect(subject.send(:retrieve_mail_body_parts, mail, url_resolver, headers)).to eq(body_part_content)
+      expect(subject.send(:retrieve_mail_body_parts, mail, headers)).to eq(body_part_content)
     end
   end
 
@@ -202,38 +195,30 @@ describe ProcessSubmissionJob do
     let(:mail) { double('mail', body_parts: {'text/plain' => 'url1', 'text/html' => 'url2'}) }
     before do
       allow(DownloadService).to receive(:download_in_parallel).with(
-        urls: ['abs url1', 'abs url2'],
+        urls: ['url1', 'url2'],
         headers: headers
       ).and_return('download result')
-    end
-    it 'resolves the urls' do
-      expect(url_resolver).to receive(:ensure_absolute_urls).with(['url1', 'url2']).and_return(['abs url1', 'abs url2'])
-      subject.send(:download_body_parts, mail, url_resolver, headers)
     end
 
     it 'asks the DownloadService to download the resolved body part urls in parallel' do
       expect(DownloadService).to receive(:download_in_parallel).with(
-        urls: ['abs url1', 'abs url2'],
+        urls: ['url1', 'url2'],
         headers: headers
       )
-      subject.send(:download_body_parts, mail, url_resolver, headers)
+      subject.send(:download_body_parts, mail, headers)
     end
 
     it 'returns the result of the download call' do
-      expect(subject.send(:download_body_parts, mail, url_resolver, headers)).to eq('download result')
+      expect(subject.send(:download_body_parts, mail, headers)).to eq('download result')
     end
   end
 
   describe '#read_downloaded_body_parts' do
     context 'given a mail with body parts' do
       let(:mail) { double('mail', body_parts: {'text/plain' => 'url1', 'text/html' => 'url2'}) }
-      before do
-        allow(url_resolver).to receive(:ensure_absolute_url).with('url1').and_return('abs url1')
-        allow(url_resolver).to receive(:ensure_absolute_url).with('url2').and_return('abs url2')
-      end
 
       context 'and a map of urls to file paths' do
-        let(:file_map) { {'abs url1' => 'file1', 'abs url2' => 'file2'} }
+        let(:file_map) { {'url1' => 'file1', 'url2' => 'file2'} }
         let(:mock_file_1) { double('File1', read: 'file 1 content')}
         let(:mock_file_2) { double('File2', read: 'file 2 content')}
         before do
@@ -244,11 +229,11 @@ describe ProcessSubmissionJob do
         it 'reads each file' do
           expect(File).to receive(:open).with('file1').and_yield(mock_file_1)
           expect(File).to receive(:open).with('file2').and_yield(mock_file_2)
-          subject.send(:read_downloaded_body_parts, mail, file_map, url_resolver)
+          subject.send(:read_downloaded_body_parts, mail, file_map)
         end
 
         it 'returns a map of content types to file content' do
-          expect(subject.send(:read_downloaded_body_parts, mail, file_map, url_resolver)).to eq(
+          expect(subject.send(:read_downloaded_body_parts, mail, file_map)).to eq(
             'text/plain' => 'file 1 content', 'text/html' => 'file 2 content'
           )
         end

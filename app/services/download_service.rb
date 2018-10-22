@@ -26,7 +26,7 @@ class DownloadService
     request = Typhoeus::Request.new(url, followlocation: true, headers: headers)
     request.on_headers do |response|
       if response.code != 200
-        raise "Request failed"
+        raise "Request failed (#{response.code}: #{response.return_code} #{request.url})"
       end
     end
     open_file = File.open(file_path, 'wb')
@@ -37,6 +37,9 @@ class DownloadService
     end
     request.on_complete do |response|
       open_file.close
+      if response.code != 200
+        raise "Request failed (#{response.code}: #{response.return_code} #{request.url})"
+      end
       # Note that response.body is "", cause it's been cleared as we go
     end
     request
