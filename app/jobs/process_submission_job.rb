@@ -11,10 +11,7 @@ class ProcessSubmissionJob < ApplicationJob
       'x-encrypted-user-id-and-token' => @submission.encrypted_user_id_and_token
     }
     @submission.update_status(:processing)
-    url_resolver = Adapters::ServiceUrlResolver.new(
-      service_slug: @submission.service_slug,
-      environment_slug: ENV['FB_ENVIRONMENT_SLUG']
-    )
+
     url_file_map = DownloadService.download_in_parallel(
       urls: url_resolver.ensure_absolute_urls(unique_attachment_urls),
       headers: headers
@@ -43,6 +40,13 @@ class ProcessSubmissionJob < ApplicationJob
     @submission.complete!
   end
 
+  def url_resolver(submission: @submission, environment_slug: ENV['FB_ENVIRONMENT_SLUG'])
+    @url_resolver ||= Adapters::ServiceUrlResolver.new(
+      service_slug: submission.service_slug,
+      environment_slug: environment_slug
+    )
+  end
+
   def attachment_file_paths(mail, url_file_map)
     mail.attachments.map{|url| url_file_map[url]}
   end
@@ -55,7 +59,7 @@ class ProcessSubmissionJob < ApplicationJob
 
   def retrieve_mail_body_parts(mail, url_resolver, headers)
     body_part_map = download_body_parts(mail, url_resolver, headers)
-    read_downloaded_body_parts(mail, body_part_map)
+    read_downloaded_body_parts(mail, body_part_map, url_resolver)
   end
 
   def download_body_parts(mail, url_resolver, headers)
@@ -65,11 +69,12 @@ class ProcessSubmissionJob < ApplicationJob
     )
   end
 
-  def read_downloaded_body_parts(mail, body_part_map)
+  def read_downloaded_body_parts(mail, body_part_map, url_resolver)
     # we need to send the body parts as strings
     body_part_content = {}
     mail.body_parts.each do |type, url|
-      body_part_content[type] = File.open(body_part_map[url]){|f| f.read}
+      absolute_url = url_resolver.ensure_absolute_url(url)
+      body_part_content[type] = File.open(body_part_map[absolute_url]){|f| f.read}
     end
     body_part_content
   end

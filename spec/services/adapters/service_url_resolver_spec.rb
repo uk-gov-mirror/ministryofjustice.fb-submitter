@@ -14,16 +14,12 @@ describe Adapters::ServiceUrlResolver do
       end
 
       it 'sets the scheme to the scheme for the right environment from Rails config' do
-        expect(subject.send(:resolve_uri_to_service, uri).scheme).to eq('https')
+        expect(subject.send(:resolve_uri_to_service, uri).scheme).to eq('http')
       end
 
       it 'gets the internal TLD for the given service slug and environment slug' do
         expect(subject).to receive(:internal_tld).with(service_slug, environment_slug).and_return('my-internal-tld')
         subject.send(:resolve_uri_to_service, uri)
-      end
-
-      it 'sets the host to the service_slug-(env slug).(internal_tld)' do
-        expect(subject.send(:resolve_uri_to_service, uri).host).to eq('my-service-dev.my-internal-tld')
       end
 
       it 'sets the port to the internal_service_port from Rails config' do

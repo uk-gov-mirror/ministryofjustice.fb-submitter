@@ -34,7 +34,7 @@ module Adapters
 
     def internal_host(service_slug, environment_slug)
       [
-        [service_slug, environment_slug].join('-'),
+        service_slug,
         internal_tld(service_slug, environment_slug)
       ].join('.')
     end
