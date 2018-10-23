@@ -23,6 +23,7 @@ gem 'puma', '~> 3.11'
 # gem 'capistrano-rails', group: :development
 
 # we use this for sending email via Amazon SES
+gem 'aws-sdk-core', '>= 3.32.0'
 gem 'aws-sdk'
 
 # Reduces boot times through caching; required in config/boot.rb

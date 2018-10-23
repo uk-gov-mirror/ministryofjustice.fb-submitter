@@ -5,7 +5,7 @@ module Adapters
     def self.send_mail( opts = {} )
       Rails.logger.info "send_mail with opts #{opts.inspect}"
       Rails.logger.info "raw_message: #{opts[:raw_message].to_s}"
-      
+
       client.send_raw_email({
         destinations: [ opts[:to] ],
         raw_message: {
