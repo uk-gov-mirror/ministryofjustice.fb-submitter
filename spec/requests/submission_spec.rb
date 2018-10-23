@@ -84,11 +84,16 @@ describe 'UserData API', type: :request do
             {
             	service_slug: service_slug,
             	encrypted_user_id_and_token: encrypted_user_id_and_token,
-            	submission_type: "email",
             	submission_details: [
             		{
-            			destination: "destination@example.com",
-            			files: [
+                  type: "email",
+                  from: "from@example.com",
+            			to: "destination@example.com",
+                  body_parts: {
+                    'text/html' => '/some/html',
+                    'text/plain' => '/some/plain.txt'
+                  },
+            			attachments: [
             				"relative_url_1",
             				"relative_url_2"
                   ]
@@ -115,9 +120,20 @@ describe 'UserData API', type: :request do
                 expect(created_record.status).to eq('queued')
               end
 
-              it 'has submission_type "email"' do
+              it 'has the given service_slug' do
                 post_request
-                expect(created_record.submission_type).to eq('email')
+                expect(created_record.service_slug).to eq(service_slug)
+              end
+
+              it 'has given encrypted_user_id_and_token' do
+                post_request
+                expect(created_record.encrypted_user_id_and_token).to eq(encrypted_user_id_and_token)
+              end
+
+              it 'has the given submission_details' do
+                post_request
+                # NOTE: .to_json is the easiest way to stringify an arbitrary hash/array structure
+                expect(created_record.submission_details.to_json).to eq(params[:submission_details].to_json)
               end
             end
 

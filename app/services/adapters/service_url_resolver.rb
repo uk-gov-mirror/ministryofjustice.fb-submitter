@@ -21,9 +21,22 @@ module Adapters
 
     def resolve_uri_to_service(uri)
       env = Rails.configuration.x.service_environments[environment_slug.to_sym]
-      uri.host = [service_slug, env[:url_root]].join('.')
+
+      uri.host = internal_host(service_slug, environment_slug)
       uri.scheme = env[:protocol].split(':').first
+      uri.port = env[:internal_service_port]
       uri
+    end
+
+    def internal_tld(service_slug, environment_slug)
+      ['formbuilder', 'services', environment_slug].join('-')
+    end
+
+    def internal_host(service_slug, environment_slug)
+      [
+        service_slug,
+        internal_tld(service_slug, environment_slug)
+      ].join('.')
     end
   end
 end

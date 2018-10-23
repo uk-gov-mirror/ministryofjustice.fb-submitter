@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# exit as soon as any command fails
+set -e
 
 REPO_SCOPE=${REPO_SCOPE:-aldavidson}
 

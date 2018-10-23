@@ -11,19 +11,16 @@ class ProcessSubmissionJob < ApplicationJob
       'x-encrypted-user-id-and-token' => @submission.encrypted_user_id_and_token
     }
     @submission.update_status(:processing)
-    url_resolver = Adapters::ServiceUrlResolver.new(
-      service_slug: @submission.service_slug,
-      environment_slug: ENV['FB_ENVIRONMENT_SLUG']
-    )
+
     url_file_map = DownloadService.download_in_parallel(
-      urls: url_resolver.ensure_absolute_urls(unique_attachment_urls),
+      urls: unique_attachment_urls,
       headers: headers
     )
 
     @submission.responses = []
 
     @submission.detail_objects.to_a.each do |mail|
-      body_part_content = retrieve_mail_body_parts(mail, url_resolver, headers)
+      body_part_content = retrieve_mail_body_parts(mail, headers)
       attachment_files = attachment_file_paths(mail, url_file_map)
 
       response = EmailService.send_mail(
@@ -44,7 +41,9 @@ class ProcessSubmissionJob < ApplicationJob
   end
 
   def attachment_file_paths(mail, url_file_map)
-    mail.attachments.map{|url| url_file_map[url]}
+    mail.attachments.map do |url|
+      url_file_map[url]
+    end
   end
 
   def unique_attachment_urls(submission = @submission)
@@ -53,14 +52,14 @@ class ProcessSubmissionJob < ApplicationJob
     end.flatten.compact.sort.uniq
   end
 
-  def retrieve_mail_body_parts(mail, url_resolver, headers)
-    body_part_map = download_body_parts(mail, url_resolver, headers)
+  def retrieve_mail_body_parts(mail, headers)
+    body_part_map = download_body_parts(mail, headers)
     read_downloaded_body_parts(mail, body_part_map)
   end
 
-  def download_body_parts(mail, url_resolver, headers)
+  def download_body_parts(mail, headers)
     DownloadService.download_in_parallel(
-      urls: url_resolver.ensure_absolute_urls(mail.body_parts.values),
+      urls: mail.body_parts.values,
       headers: headers
     )
   end
