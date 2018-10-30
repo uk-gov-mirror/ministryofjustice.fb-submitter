@@ -9,5 +9,5 @@ for TYPE in base api worker
 do
   REPO_NAME=${REPO_SCOPE}/fb-submitter-${TYPE}
   echo "Building ${REPO_NAME}"
-  docker build -f docker/${TYPE}/Dockerfile -t ${REPO_NAME}:${TAG} .
+  docker build -f docker/${TYPE}/Dockerfile -t ${REPO_NAME}:${TAG} --build-arg BASE_IMAGE=${REPO_SCOPE}/fb-submitter-base .
 done

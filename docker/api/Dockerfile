@@ -1,5 +1,6 @@
 # Base image
-FROM aldavidson/fb-submitter-base
+ARG BASE_IMAGE=aldavidson/fb-submitter-base
+FROM $BASE_IMAGE
 
 # allow access to port 3000
 ENV APP_PORT 3000
