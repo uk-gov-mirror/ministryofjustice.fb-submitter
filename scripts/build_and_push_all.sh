@@ -28,7 +28,7 @@ for TYPE in base api worker
 do
   REPO_NAME=${REPO_SCOPE}/fb-submitter-${TYPE}
   echo "Building ${REPO_NAME}"
-  docker build -f docker/${TYPE}/Dockerfile -t ${REPO_NAME}:${TAG} --build-arg BASE_IMAGE=${REPO_SCOPE}/fb-submitter-base .
+  docker build -f docker/${TYPE}/Dockerfile -t ${REPO_NAME}:${TAG} --build-arg BASE_IMAGE=${REPO_SCOPE}/fb-submitter-base:${TAG} .
 
   login_to_ecr_with_creds_for ${TYPE}
   echo "Pushing ${REPO_NAME}"
