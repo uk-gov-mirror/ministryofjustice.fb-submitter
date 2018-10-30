@@ -28,4 +28,7 @@ build: install_build_dependencies
 push: init
 	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/push_all.sh
 
+build_and_push: install_build_dependencies
+	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/build_and_push_all.sh
+
 .PHONY := init push build login
