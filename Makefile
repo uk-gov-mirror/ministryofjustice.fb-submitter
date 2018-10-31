@@ -25,13 +25,10 @@ install_build_dependencies: init
 build: install_build_dependencies
 	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/build_all.sh
 
-login: init
-	@eval $(shell aws ecr get-login --no-include-email --region eu-west-1)
+push: init
+	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/push_all.sh
 
-push: login
-	docker push ${ECR_REPO_URL_ROOT}/fb-submitter-base:latest-${env_stub} && \
-		docker push ${ECR_REPO_URL_ROOT}/fb-submitter-worker:latest-${env_stub} && \
-		docker push ${ECR_REPO_URL_ROOT}/fb-submitter-api:latest-${env_stub}
-
+build_and_push: install_build_dependencies
+	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/build_and_push_all.sh
 
 .PHONY := init push build login

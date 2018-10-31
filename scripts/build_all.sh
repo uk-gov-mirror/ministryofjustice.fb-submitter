@@ -3,7 +3,7 @@
 set -e
 
 REPO_SCOPE=${REPO_SCOPE:-aldavidson}
-TAG=${TAG:- latest}
+TAG=${TAG:-latest}
 
 for TYPE in base api worker
 do
