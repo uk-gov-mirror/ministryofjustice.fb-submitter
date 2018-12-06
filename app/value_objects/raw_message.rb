@@ -34,7 +34,7 @@ Content-Transfer-Encoding: quoted-printable
 #{[@body_parts['text/plain']].pack('M')}
 
 --NextPart
-#{@attachments.map{ |attachment| inline_attachment(attachment) }.join("\n\n--NextPart")}
+#{@attachments.map{ |attachment| inline_attachment(attachment) }.join("\n\n--NextPart\n")}
 
 END
   end
