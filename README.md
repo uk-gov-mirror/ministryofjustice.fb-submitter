@@ -14,3 +14,7 @@ The following environment variables are either needed, or read if present:
 * RAILS_ENV: 'development' or 'production'
 * SERVICE_TOKEN_CACHE_ROOT_URL: protocol + hostname of the
   [service token cache](https://github.com/ministryofjustice/fb-service-token-cache)
+
+## To deploy and run on Cloud Platforms
+
+See `fb-submitter-deploy`
