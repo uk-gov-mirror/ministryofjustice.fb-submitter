@@ -1,5 +1,6 @@
 {
   "name": "fb-submitter",
+  "private": true,
   "version": "1.0.0",
   "description": "Form Builder Submitter",
   "scripts": {
