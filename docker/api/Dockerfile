@@ -8,4 +8,4 @@ EXPOSE $APP_PORT
 
 # run the rails server
 ARG RAILS_ENV=production
-CMD bundle exec rails s -e ${RAILS_ENV} -p ${APP_PORT} --binding=0.0.0.0
+CMD bundle exec rake db:migrate && bundle exec rails s -e ${RAILS_ENV} -p ${APP_PORT} --binding=0.0.0.0

@@ -58,7 +58,7 @@ All these scripts print out their usage instructions by being run with the `-h` 
 
 
 ```bash
-make $PLATFORM build_and_push
+make $PLATFORM_ENV build_and_push
 ```
 
 having set the following ENV variables:
@@ -74,7 +74,11 @@ having set the following ENV variables:
 
 eg. `AWS_ACCESS_KEY_ID_API` is the `access_key_id` value and `AWS_SECRET_ACCESS_KEY_API` the `secret_access_key` value of the `ecr-repo-fb-submitter-api` secret
 
-This creates a base image from which the images for the `fb-submitter-api` and `fb-submitter-worker` instances are then created. All images are pushed to Cloud Platform's ECR.
+This creates a base image from which the images for the `fb-submitter-api` and `fb-submitter-worker` instances are then created.
+
+All images are tagged `latest:$PLATFORM_ENV` and pushed to Cloud Platform's ECR.
+
+See the `Makefile` for more info.
 
 ### 2. Provisioning namespaces/infrastructure
 
@@ -101,14 +105,6 @@ This creates a base image from which the images for the `fb-submitter-api` and `
     NB. as the network policies define cross-namespace access, you MUST NOT supply a namespace parameter for the service token cache app - each item defines its own namespace metadata
 
 The generated config for each platform/deployment environment combination is written to `/tmp/fb-submitter-$PLATFORM_ENV-$DEPLOYMENT_ENV.yaml`
-
-### 4. Running the Rails setup scripts
-
-The first time the infrastructure is created, the Rails setup scripts need to be run. This needs to be run on one of the pods that has been created 
-
-```bash
-kubectl exec -ti $PODNAME --namespace=formbuilder-platform-$PLATFORM_ENV-$DEPLOYMENT_ENV  -- bundle exec rails db:setup db:migrate
-```
 
 ### 4. Deploying an updated docker image to existing infrastructure
 
