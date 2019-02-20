@@ -1,0 +1,122 @@
+---
+# api front-end
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "fb-submitter-api-{{ .Values.environmentName }}"
+  namespace: formbuilder-platform-{{ .Values.environmentName }}
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "fb-submitter-api-{{ .Values.environmentName }}"
+        appGroup: "fb-submitter"
+        tier: "frontend"
+    spec:
+      containers:
+      - name: "fb-submitter-api-{{ .Values.environmentName }}"
+        image: "926803513772.dkr.ecr.eu-west-1.amazonaws.com/formbuilder/fb-submitter-api:latest-{{ .Values.platformEnv }}"
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 3000
+        # non-secret env vars
+        # defined in config_map.yaml
+        envFrom:
+          - configMapRef:
+              name: fb-submitter-env-{{ .Values.environmentName }}
+        env:
+          - name: SECRET_KEY_BASE
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: secret_key_base
+          # secrets created by terraform
+          # which may or may not depend on values
+          # canonically defined in secrets.tfvars
+          # Some assets aren't loading properly yet
+          # ...maybe an issue with how they're referenced,
+          # maybe something else - re-enabled this later
+          #
+          # Created by cloud-platforms-environments
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: rds-instance-formbuilder-submitter-{{ .Values.environmentName }}
+                key: url
+          - name: REDIS_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
+                key: auth_token
+          - name: REDIS_URL
+            valueFrom:
+              secretKeyRef:
+                name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
+                key: primary_endpoint_address
+---
+# workers
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: "fb-submitter-workers-{{ .Values.environmentName }}"
+  namespace: formbuilder-platform-{{ .Values.environmentName }}
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "fb-submitter-workers-{{ .Values.environmentName }}"
+        appGroup: "fb-submitter"
+        tier: "workers"
+    spec:
+      serviceAccountName: "formbuilder-submitter-workers-{{ .Values.environmentName }}"
+      containers:
+      - name: "fb-submitter-worker"
+        image: "926803513772.dkr.ecr.eu-west-1.amazonaws.com/formbuilder/fb-submitter-worker:latest-{{ .Values.platformEnv }}"
+        imagePullPolicy: Always
+        # command:
+        #   - "cd /var/www/fb-submitter && bundle exec rake resque:work"
+        # ports:
+        #   - containerPort: 3000
+        # non-secret env vars
+        # defined in config_map.yaml
+        envFrom:
+          - configMapRef:
+              name: fb-submitter-env-{{ .Values.environmentName }}
+        env:
+          # third-party access keys etc, defined in secrets.yml
+          - name: AWS_ACCESS_KEY_ID
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: aws_access_key
+          - name: AWS_SECRET_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: aws_secret_key
+          - name: SECRET_KEY_BASE
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: secret_key_base
+          # secrets created by terraform
+          # defined in secrets.tfvars
+          #
+          # Created by cloud-platforms-environments
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: rds-instance-formbuilder-submitter-{{ .Values.environmentName }}
+                key: url
+          - name: REDIS_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
+                key: auth_token
+          - name: REDIS_URL
+            valueFrom:
+              secretKeyRef:
+                name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
+                key: primary_endpoint_address

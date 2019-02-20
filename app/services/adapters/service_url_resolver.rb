@@ -20,11 +20,9 @@ module Adapters
     end
 
     def resolve_uri_to_service(uri)
-      env = Rails.configuration.x.service_environments[environment_slug.to_sym]
-
       uri.host = internal_host(service_slug, environment_slug)
-      uri.scheme = env[:protocol].split(':').first
-      uri.port = env[:internal_service_port]
+      uri.scheme = ENV['INTERNAL_SERVICE_PROTOCOL'] || 'http'
+      uri.port = ENV['INTERNAL_SERVICE_PORT'] || 3000
       uri
     end
 

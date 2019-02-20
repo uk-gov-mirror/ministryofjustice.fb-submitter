@@ -1,7 +1,6 @@
 # fb-submitter
 API for services built &amp; deployed on Form Builder to send the user data to
-where it ultimately needs to go. Only PDFs-by-email supported at first, more to
-come later
+where it ultimately needs to go.
 
 
 # Environment Variables
@@ -17,4 +16,4 @@ The following environment variables are either needed, or read if present:
 
 ## To deploy and run on Cloud Platforms
 
-See `fb-submitter-deploy`
+See [deployment instructions](DEPLOY.md)

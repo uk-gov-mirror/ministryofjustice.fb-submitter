@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fb-submitter-env-{{ .Values.environmentName }}
+  namespace: formbuilder-platform-{{ .Values.environmentName }}
+data:
+  AWS_REGION: eu-west-1
+  FB_ENVIRONMENT_SLUG: '{{ .Values.environmentName }}'
+  MAX_IAT_SKEW_SECONDS: "60"
+  RAILS_ENV: production
+  REDIS_PROTOCOL: rediss://
+  RAILS_SERVE_STATIC_FILES: "true"
+  SERVICE_TOKEN_CACHE_ROOT_URL: "http://fb-service-token-cache-svc-{{ .Values.environmentName }}/"
+  QUEUES: "*"
