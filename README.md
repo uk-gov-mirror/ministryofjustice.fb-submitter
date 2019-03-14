@@ -1,7 +1,8 @@
 # fb-submitter
+[![Build Status](https://travis-ci.org/ministryofjustice/fb-submitter.svg?branch=master)](https://travis-ci.org/ministryofjustice/fb-submitter)
+
 API for services built &amp; deployed on Form Builder to send the user data to
 where it ultimately needs to go.
-
 
 # Environment Variables
 
