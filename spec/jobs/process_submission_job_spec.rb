@@ -22,11 +22,14 @@ describe ProcessSubmissionJob do
         'to' => 'destination@example.com',
         'subject' => 'mail subject',
         'type' => 'email',
-        "body_parts" => {
-          "text/html"=>"https://tools.ietf.org/html/rfc2324",
-          "text/plain"=>"https://tools.ietf.org/rfc/rfc2324.txt"
+        'body_parts' => {
+          'text/html' => 'https://tools.ietf.org/html/rfc2324',
+          'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
         },
-        "attachments"=>["https://tools.ietf.org/pdf/rfc2324"]
+        'attachments' => [
+          '28d-fingerprint1',
+          '28d-fingerprint2'
+        ]
       }
     end
     let(:submission) do
@@ -73,7 +76,7 @@ describe ProcessSubmissionJob do
 
       it 'downloads the resolved unique_attachment_urls in parallel' do
         expect(DownloadService).to receive(:download_in_parallel)
-                                .with(urls: ['https://tools.ietf.org/pdf/rfc2324'], headers: headers)
+                                .with(urls: ['28d-fingerprint1', '28d-fingerprint2'], headers: headers)
                                 .and_return(mock_downloaded_files)
         subject.perform(submission_id: submission_id)
       end
@@ -240,5 +243,4 @@ describe ProcessSubmissionJob do
       end
     end
   end
-
 end

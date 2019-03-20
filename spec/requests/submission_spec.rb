@@ -82,20 +82,20 @@ describe 'UserData API', type: :request do
           let(:encrypted_user_id_and_token) { 'kdjh9s8db9s87dbosd7b0sd8b70s9d8bs98d7b9s8db' }
           let(:params) do
             {
-            	service_slug: service_slug,
-            	encrypted_user_id_and_token: encrypted_user_id_and_token,
-            	submission_details: [
-            		{
+              service_slug: service_slug,
+              encrypted_user_id_and_token: encrypted_user_id_and_token,
+              submission_details: [
+                {
                   type: "email",
                   from: "from@example.com",
-            			to: "destination@example.com",
+                  to: "destination@example.com",
                   body_parts: {
                     'text/html' => '/some/html',
                     'text/plain' => '/some/plain.txt'
                   },
-            			attachments: [
-            				"relative_url_1",
-            				"relative_url_2"
+                  attachments: [
+                    "28d-fingerprint1",
+                    "28d-fingerprint2"
                   ]
                 }
               ]
