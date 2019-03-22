@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe ProcessSubmissionJob do
-  let(:mock_downloaded_files) { {'url1' => 'file1', 'url2' => 'file2'} }
+  let(:mock_downloaded_files) { {'/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', '/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2'} }
   let(:downloaded_body_parts) { mock_downloaded_files }
   let(:body_part_content) do
     {
@@ -27,8 +27,18 @@ describe ProcessSubmissionJob do
           'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
         },
         'attachments' => [
-          '28d-fingerprint1',
-          '28d-fingerprint2'
+          {
+            'type' => 'output',
+            'mimetype' => 'application/pdf',
+            'url' => '/api/submitter/pdf/default/guid1.pdf',
+            'filename' => 'form1'
+          },
+          {
+            'type' => 'output',
+            'mimetype' => 'application/pdf',
+            'url' => '/api/submitter/pdf/default/guid2.pdf',
+            'filename' => 'form2'
+          }
         ]
       }
     end
@@ -42,7 +52,7 @@ describe ProcessSubmissionJob do
     let(:detail_objects) do
       [EmailSubmissionDetail.new(submission_detail)]
     end
-    let(:urls) { ['url1', 'url2'] }
+    let(:urls) { ['/api/submitter/pdf/default/guid1.pdf', '/api/submitter/pdf/default/guid2.pdf'] }
     let(:mock_send_response){ {'key' => 'send response'} }
     before do
       allow(submission).to receive(:detail_objects).and_return(detail_objects)
@@ -55,6 +65,7 @@ describe ProcessSubmissionJob do
 
     context 'given a valid submission_id' do
       let(:submission_id) { submission.id }
+
       before do
         allow(Submission).to receive(:find).with(submission_id).and_return(submission)
       end
@@ -76,7 +87,7 @@ describe ProcessSubmissionJob do
 
       it 'downloads the resolved unique_attachment_urls in parallel' do
         expect(DownloadService).to receive(:download_in_parallel)
-                                .with(urls: ['28d-fingerprint1', '28d-fingerprint2'], headers: headers)
+                                .with(urls: urls, headers: headers)
                                 .and_return(mock_downloaded_files)
         subject.perform(submission_id: submission_id)
       end
@@ -154,13 +165,39 @@ describe ProcessSubmissionJob do
       let(:submission_detail_1) do
         {
           'type' => 'email',
-          'attachments'=>['url1', 'url2']
+          'attachments' => [
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid1.pdf',
+              filename: 'form1'
+            },
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid2.pdf',
+              filename: 'form2'
+            }
+          ]
         }
       end
       let(:submission_detail_2) do
         {
           'type' => 'email',
-          'attachments'=>['url2', 'url3']
+          'attachments' => [
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid2.pdf',
+              filename: 'form2'
+            },
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid3.pdf',
+              filename: 'form3'
+            }
+          ]
         }
       end
       let(:submission) do
@@ -169,7 +206,7 @@ describe ProcessSubmissionJob do
 
       it 'returns a single array of unique urls' do
         expect(subject.send(:unique_attachment_urls, submission)).to eq(
-          ['url1', 'url2', 'url3']
+          ['/api/submitter/pdf/default/guid1.pdf', '/api/submitter/pdf/default/guid2.pdf', '/api/submitter/pdf/default/guid3.pdf']
         )
       end
     end

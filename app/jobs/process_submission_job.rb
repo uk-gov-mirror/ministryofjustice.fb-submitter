@@ -46,10 +46,12 @@ class ProcessSubmissionJob < ApplicationJob
     end
   end
 
+  # returns array of urls
   def unique_attachment_urls(submission = @submission)
-    submission.detail_objects.map do |detail|
-      detail.attachments
-    end.flatten.compact.sort.uniq
+    attachments = submission.detail_objects.map(&:attachments).flatten
+    output_attachments = attachments.select { |o| o['type'] == 'output' }
+    urls = output_attachments.map { |e| e['url'] }
+    urls.sort.uniq
   end
 
   def retrieve_mail_body_parts(mail, headers)

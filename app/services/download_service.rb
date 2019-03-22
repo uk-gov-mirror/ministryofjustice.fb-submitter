@@ -6,6 +6,8 @@ class DownloadService
     path
   end
 
+  # returns Hash
+  # {"https://my.domain/some/path/file.ext"=>"/the/file/path/file.ext"}
   def self.download_in_parallel(urls:, target_dir: nil, headers: {})
     actual_dir = target_dir || Dir.mktmpdir
     results = {}

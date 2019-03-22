@@ -94,14 +94,29 @@ describe 'UserData API', type: :request do
                     'text/plain' => '/some/plain.txt'
                   },
                   attachments: [
-                    "28d-fingerprint1",
-                    "28d-fingerprint2"
+                    {
+                      type: 'output',
+                      mimetype: 'application/pdf',
+                      url: '/api/submitter/pdf/default/7a9a5124-0ab2-43f1-b345-0685fced5705.pdf',
+                      filename: 'form'
+                    },
+                    {
+                      type: 'filestore',
+                      mimetype: 'image/png',
+                      url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+                      filename: 'doge'
+                    },
+                    {
+                      type: 'filestore',
+                      mimetype: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                      url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-aaa59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e1187aaa',
+                      filename: 'word'
+                    }
                   ]
                 }
               ]
             }
           end
-
 
           context 'when the request is successful' do
             before do
