@@ -7,7 +7,7 @@ class EmailSubmissionDetail
     symbol_params = params.symbolize_keys!
     @submission   = symbol_params[:submission]
     @attachments  = symbol_params[:attachments]
-    @body_parts   = symbol_params[:body_parts]
+    @body_parts   = symbol_params[:body_parts] || []
     @from         = symbol_params[:from]
     @subject      = symbol_params[:subject]
     @to           = symbol_params[:to]
@@ -16,7 +16,8 @@ class EmailSubmissionDetail
   end
 
   def make_urls_absolute!
-    @attachments = url_resolver.ensure_absolute_urls(@attachments)
+    attachments.each {|h| h['url'] = url_resolver.ensure_absolute_url(h['url']) if h['type'] == 'output' }
+
     @body_parts.each do |content_type, url|
       @body_parts[content_type] = url_resolver.ensure_absolute_url(url)
     end

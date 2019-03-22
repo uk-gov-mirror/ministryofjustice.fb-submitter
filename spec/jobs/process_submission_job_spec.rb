@@ -11,9 +11,6 @@ describe ProcessSubmissionJob do
   end
   let(:token) { 'some token' }
   let(:headers) { {'x-encrypted-user-id-and-token' => token} }
-  before do
-    allow_any_instance_of(EmailSubmissionDetail).to receive(:make_urls_absolute!)
-  end
 
   describe '#perform' do
     let(:submission_detail) do
@@ -46,16 +43,18 @@ describe ProcessSubmissionJob do
       Submission.create!(
         encrypted_user_id_and_token: token,
         status: 'queued',
-        submission_details: [submission_detail]
+        submission_details: [submission_detail],
+        service_slug: 'service-slug'
       )
     end
     let(:detail_objects) do
       [EmailSubmissionDetail.new(submission_detail)]
     end
-    let(:urls) { ['/api/submitter/pdf/default/guid1.pdf', '/api/submitter/pdf/default/guid2.pdf'] }
+    let(:urls) do
+      ['http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf']
+    end
     let(:mock_send_response){ {'key' => 'send response'} }
     before do
-      allow(submission).to receive(:detail_objects).and_return(detail_objects)
       allow(EmailService).to receive(:send_mail).and_return( mock_send_response )
       allow(DownloadService).to receive(:download_in_parallel).and_return(
         mock_downloaded_files
@@ -93,12 +92,12 @@ describe ProcessSubmissionJob do
       end
 
       it 'gets the detail_objects from the Submission' do
-        expect(submission).to receive(:detail_objects).at_least(:once).and_return(detail_objects)
+        expect(submission).to receive(:detail_objects).at_least(:once).and_return(submission.detail_objects)
         subject.perform(submission_id: submission_id)
       end
 
       describe 'for each detail object' do
-        let(:detail_object){ detail_objects.first }
+        let(:detail_object){ submission.detail_objects.first }
         before do
           allow(subject).to receive(:attachment_file_paths)
                           .and_return(['file1', 'file2'])
@@ -200,13 +199,16 @@ describe ProcessSubmissionJob do
           ]
         }
       end
+
       let(:submission) do
         Submission.new(submission_details: [submission_detail_1, submission_detail_2])
       end
 
       it 'returns a single array of unique urls' do
         expect(subject.send(:unique_attachment_urls, submission)).to eq(
-          ['/api/submitter/pdf/default/guid1.pdf', '/api/submitter/pdf/default/guid2.pdf', '/api/submitter/pdf/default/guid3.pdf']
+          ['http://.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
+           'http://.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf',
+           'http://.formbuilder-services-test:3000/api/submitter/pdf/default/guid3.pdf']
         )
       end
     end
