@@ -144,21 +144,6 @@ describe ProcessSubmissionJob do
     end
   end
 
-  describe '#attachment_file_paths' do
-    context 'given a mail with attachment urls' do
-      let(:mail) { double('mail', attachments: ['url1', 'url2']) }
-      context 'and a map of urls to file paths' do
-        let(:url_file_map) { {'url1' => 'file path 1', 'url2' => 'file path 2'} }
-
-        it 'returns the corresponding file paths' do
-          expect(subject.send(:attachment_file_paths, mail, url_file_map)).to eq(
-            ['file path 1', 'file path 2']
-          )
-        end
-      end
-    end
-  end
-
   describe '#unique_attachment_urls' do
     context 'given a submission with multiple detail objects, each with attachments' do
       let(:submission_detail_1) do
@@ -279,6 +264,79 @@ describe ProcessSubmissionJob do
             'text/plain' => 'file 1 content', 'text/html' => 'file 2 content'
           )
         end
+      end
+    end
+  end
+
+  describe '#perform' do
+    context 'with filestore attachments' do
+      let(:submission) do
+        Submission.new(
+          encrypted_user_id_and_token: 'encrypted_user_id_and_token',
+          status: 'queued',
+          submission_details: [submission_detail],
+          service_slug: 'service-slug'
+        )
+      end
+
+      let(:submission_detail) do
+        {
+          'from' => 'some.one@example.com',
+          'to' => 'destination@example.com',
+          'subject' => 'mail subject',
+          'type' => 'email',
+          'body_parts' => {
+            'text/html' => 'https://tools.ietf.org/html/rfc2324',
+            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
+          },
+          'attachments' => [
+            {
+              'type' => 'output',
+              'mimetype' => 'application/pdf',
+              'url' => '/api/submitter/pdf/default/guid1.pdf',
+              'filename' => 'form1'
+            },
+            {
+              'type' => 'filestore',
+              'mimetype' => 'image/png',
+              'url' => 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+              'filename' => 'image2.png'
+            }
+          ]
+        }
+      end
+
+      before :each do
+        allow(Submission).to receive(:find).and_return(submission)
+      end
+
+      it 'converts output urls to absolute urls' do
+        url = submission.detail_objects.dig(0).attachments.dig(0, 'url')
+        expect(url).to start_with('http')
+      end
+
+      it 'attaches filestore attachments' do
+        expect(DownloadService).to receive(:download_in_parallel)
+          .with(headers: {
+            "x-encrypted-user-id-and-token" => "encrypted_user_id_and_token"
+          }, urls: [
+            "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8",
+            "http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf"
+          ]).and_return({
+            "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8" => "/tmp/filestore.png",
+            "http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf" => "/tmp/output.pdf"
+          })
+
+        # only testing file attachments here
+        allow(subject).to receive(:retrieve_mail_body_parts).and_return([])
+
+        expect(EmailService).to receive(:send_mail).with(attachments: ["/tmp/output.pdf", "/tmp/filestore.png"],
+                                                         body_parts: [],
+                                                         from: "some.one@example.com",
+                                                         subject: "mail subject",
+                                                         to: "destination@example.com")
+
+        subject.perform(submission_id: 1)
       end
     end
   end

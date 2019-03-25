@@ -40,17 +40,10 @@ class ProcessSubmissionJob < ApplicationJob
     @submission.complete!
   end
 
-  def attachment_file_paths(mail, url_file_map)
-    mail.attachments.map do |url|
-      url_file_map[url]
-    end
-  end
-
   # returns array of urls
   def unique_attachment_urls(submission = @submission)
     attachments = submission.detail_objects.map(&:attachments).flatten
-    output_attachments = attachments.select { |o| o['type'] == 'output' }
-    urls = output_attachments.map { |e| e['url'] }
+    urls = attachments.map { |e| e['url'] }
     urls.sort.uniq
   end
 
@@ -86,4 +79,13 @@ class ProcessSubmissionJob < ApplicationJob
     super
   end
 
+  private
+
+  # returns an array of paths
+  # ["/path/to/file1.ext", "/path/to/file2.ext"]
+  def attachment_file_paths(mail, url_file_map)
+    mail.attachments.map do |object|
+      url_file_map[object['url']]
+    end
+  end
 end
