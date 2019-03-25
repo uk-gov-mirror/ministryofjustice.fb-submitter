@@ -9,7 +9,7 @@ describe DownloadService do
     allow(Typhoeus::Hydra).to receive(:hydra).and_return(mock_hydra)
   end
 
-  describe '.download_in_parallel' do
+  describe '#download_in_parallel' do
     let(:path) { '/the/file/path' }
     let(:mock_request) { double('request', run: 'run result') }
 
@@ -75,6 +75,25 @@ describe DownloadService do
           expect(subject).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1', headers: headers)
           expect(subject).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers: headers)
           subject.download_in_parallel
+        end
+
+        it 'includes x-access-token header with JWT' do
+          time = Time.new(2019, 1, 1, 13, 57).utc
+
+          Timecop.freeze(time) do
+            allow(subject).to receive(:construct_request).and_call_original
+
+            expected_url1 = "https://my.domain:443/some/path/file.ext?payload=eyJlbmNyeXB0ZWRfdXNlcl9pZF9hbmRfdG9rZW4iOm51bGwsImlhdCI6MTU0NjM1MTAyMH0"
+            expected_headers1 = { "x-access-token" => "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDYzNTEwMjAsImNoZWNrc3VtIjoiZGRiOWI2MzQ1NWVjYzc4ODRkMjViZDE1ZjI2MWViNzNiMDVlYjM2ZGI2ZDJjNTAwOTAyNjRlY2RlMzllMDljYSJ9.kZAk4g5u-Qkj_qSzIu2HGdqAdEB6MqQ3eFQizgCMZu0" }
+
+            expected_url2 = "https://another.domain:443/some/otherfile.ext?payload=eyJlbmNyeXB0ZWRfdXNlcl9pZF9hbmRfdG9rZW4iOm51bGwsImlhdCI6MTU0NjM1MTAyMH0"
+            expected_headers = { "x-access-token" => "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDYzNTEwMjAsImNoZWNrc3VtIjoiZGRiOWI2MzQ1NWVjYzc4ODRkMjViZDE1ZjI2MWViNzNiMDVlYjM2ZGI2ZDJjNTAwOTAyNjRlY2RlMzllMDljYSJ9.kZAk4g5u-Qkj_qSzIu2HGdqAdEB6MqQ3eFQizgCMZu0" }
+
+            expect(Typhoeus::Request).to receive(:new).with(expected_url1, followlocation: true, headers: expected_headers).and_return(double.as_null_object)
+            expect(Typhoeus::Request).to receive(:new).with(expected_url2, followlocation: true, headers: expected_headers).and_return(double.as_null_object)
+
+            subject.download_in_parallel
+          end
         end
 
         it 'queues the request' do

@@ -38,8 +38,33 @@ class DownloadService
     path
   end
 
+  def now
+    @now ||= Time.now.to_i
+  end
+
+  def payload
+    @payload ||= { encrypted_user_id_and_token: headers['x-encrypted-user-id-and-token'], iat: now }
+  end
+
+  def jwt_payload
+    @jwt_payload ||= { iat: now, checksum: Digest::SHA256.hexdigest(payload.to_json) }
+  end
+
+  def query_string_payload
+    @query_string_payload ||= Base64.urlsafe_encode64(payload.to_json, padding: false)
+  end
+
+  def request_headers
+    @request_headers ||= { 'x-access-token' => JWT.encode(jwt_payload, 'service-token', 'HS256') }
+  end
+
+  def request_url_from_url(url)
+    uri = URI.parse(url)
+    URI::Generic.build(scheme: uri.scheme, host: uri.host, port: uri.port, path: uri.path, query: "payload=#{query_string_payload}").to_s
+  end
+
   def construct_request(url:, file_path:, headers: {})
-    request = Typhoeus::Request.new(url, followlocation: true, headers: headers)
+    request = Typhoeus::Request.new(request_url_from_url(url), followlocation: true, headers: request_headers)
     request.on_headers do |response|
       if response.code != 200
         raise "Request failed (#{response.code}: #{response.return_code} #{request.url})"
