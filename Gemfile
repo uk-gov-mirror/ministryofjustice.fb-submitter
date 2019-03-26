@@ -11,9 +11,9 @@ gem 'aws-sdk-ses', '~> 1.16.0'
 
 gem 'jwt'
 
-gem 'mimemagic'
 gem 'resque'
 gem 'typhoeus'
+gem 'mime-types'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]

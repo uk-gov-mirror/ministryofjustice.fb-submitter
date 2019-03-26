@@ -39,20 +39,16 @@ Content-Transfer-Encoding: quoted-printable
 END
   end
 
+  private
+
   def inline_attachment(attachment)
     <<-END
-Content-Type: #{guess_mime_type(attachment)}
-Content-Disposition: attachment; filename="#{File.basename(attachment)}"
+Content-Type: #{attachment.mimetype}
+Content-Disposition: attachment; filename="#{attachment.filename_with_extension}"
 Content-Transfer-Encoding: base64
 
-#{Base64.encode64(File.open(attachment, 'rb'){|file| file.read})}
+#{Base64.encode64(File.open(attachment.path, 'rb'){|file| file.read})}
 
 END
-  end
-
-  def guess_mime_type(file_path)
-    MimeMagic.by_path(file_path) \
-      || MimeMagic.by_magic(File.open(file_path)) \
-      || "application/octet-stream"
   end
 end

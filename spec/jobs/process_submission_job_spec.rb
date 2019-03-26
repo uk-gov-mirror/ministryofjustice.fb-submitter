@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe ProcessSubmissionJob do
-  let(:mock_downloaded_files) { {'/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', '/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2'} }
+  let(:mock_downloaded_files) { {'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2'} }
   let(:downloaded_body_parts) { mock_downloaded_files }
   let(:body_part_content) do
     {
@@ -38,6 +38,24 @@ describe ProcessSubmissionJob do
           }
         ]
       }
+    end
+    let(:processed_attachments) do
+      [
+        Attachment.new({
+          path: '/path/to/file1',
+          type: 'output',
+          mimetype: 'application/pdf',
+          url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
+          filename: 'form1'
+        }),
+        Attachment.new({
+          path: '/path/to/file2',
+          type: 'output',
+          mimetype: 'application/pdf',
+          url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf',
+          filename: 'form2'
+        })
+      ]
     end
     let(:submission) do
       Submission.create!(
@@ -98,30 +116,21 @@ describe ProcessSubmissionJob do
 
       describe 'for each detail object' do
         let(:detail_object){ submission.detail_objects.first }
-        before do
-          allow(subject).to receive(:attachment_file_paths)
-                          .and_return(['file1', 'file2'])
-        end
 
         it 'retrieves the mail body parts' do
           expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object, headers).and_return(body_part_content)
           subject.perform(submission_id: submission_id)
         end
 
-        it 'gets the attachment_file_paths' do
-          expect(subject).to receive(:attachment_file_paths)
-                          .with(detail_object, mock_downloaded_files)
-                          .and_return(['file1', 'file2'])
-          subject.perform(submission_id: submission_id)
-        end
-
         it 'asks the EmailService to send an email' do
+          allow(subject).to receive(:attachments).and_return(processed_attachments)
+
           expect(EmailService).to receive(:send_mail).with(
             from: detail_object.from,
             to: detail_object.to,
             subject: detail_object.subject,
             body_parts: body_part_content,
-            attachments: ['file1', 'file2']
+            attachments: processed_attachments
           ).and_return(mock_send_response)
           subject.perform(submission_id: submission_id)
         end
@@ -330,7 +339,25 @@ describe ProcessSubmissionJob do
         # only testing file attachments here
         allow(subject).to receive(:retrieve_mail_body_parts).and_return([])
 
-        expect(EmailService).to receive(:send_mail).with(attachments: ["/tmp/output.pdf", "/tmp/filestore.png"],
+        expected_attachments = [
+          Attachment.new({
+          path: '/tmp/output.pdf',
+          type: 'output',
+          mimetype: 'application/pdf',
+          url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
+          filename: 'form1'
+        }),
+        Attachment.new({
+          path: '/tmp/filestore.png',
+          type: 'filestore',
+          mimetype: 'image/png',
+          url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+          filename: 'image2.png'
+        })]
+
+        allow(subject).to receive(:attachments).and_return(expected_attachments)
+
+        expect(EmailService).to receive(:send_mail).with(attachments: expected_attachments,
                                                          body_parts: [],
                                                          from: "some.one@example.com",
                                                          subject: "mail subject",

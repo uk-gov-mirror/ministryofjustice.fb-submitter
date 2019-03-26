@@ -21,14 +21,13 @@ class ProcessSubmissionJob < ApplicationJob
 
     @submission.detail_objects.to_a.each do |mail|
       body_part_content = retrieve_mail_body_parts(mail, headers)
-      attachment_files = attachment_file_paths(mail, url_file_map)
 
       response = EmailService.send_mail(
         from:         mail.from,
         to:           mail.to,
         subject:      mail.subject,
         body_parts:   body_part_content,
-        attachments:  attachment_files
+        attachments:  attachments(mail, url_file_map)
       )
 
       @submission.responses << response.to_h
@@ -83,9 +82,11 @@ class ProcessSubmissionJob < ApplicationJob
 
   # returns an array of paths
   # ["/path/to/file1.ext", "/path/to/file2.ext"]
-  def attachment_file_paths(mail, url_file_map)
-    mail.attachments.map do |object|
-      url_file_map[object['url']]
+  def attachments(mail, url_file_map)
+    array = mail.attachments.map do |object|
+      object['path'] = url_file_map[object['url']]
+      object
     end
+    array.map{|o| Attachment.new(o.symbolize_keys)}
   end
 end
