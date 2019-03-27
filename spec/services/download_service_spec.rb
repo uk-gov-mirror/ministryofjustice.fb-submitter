@@ -2,7 +2,7 @@ require 'rails_helper'
 
 describe DownloadService do
   let(:url) { 'https://my.domain/some/path/file.ext' }
-  let(:headers) { {'x-access-token' => 'sometoken'} }
+  let(:headers) { { 'x-encrypted-user-id-and-token' => 'sometoken' } }
   let(:args) { {url: url, target_dir: '/my/target/dir', headers: headers} }
   let(:mock_hydra) { double('hydra', run: 'run result', queue: 'queue result') }
   before do
@@ -47,7 +47,7 @@ describe DownloadService do
     end
 
     context 'given an array of urls' do
-      let(:url1) { 'https://my.domain/some/path/file.ext' }
+      let(:url1) { 'https://example.com/service/some-service/user/some-user/fingerprint' }
       let(:url2) { 'https://another.domain/some/otherfile.ext' }
       let(:args) { {urls: [url1, url2], target_dir: path, headers: headers} }
       let(:mock_request_1) { double('request1') }
@@ -83,11 +83,9 @@ describe DownloadService do
           Timecop.freeze(time) do
             allow(subject).to receive(:construct_request).and_call_original
 
-            expected_url1 = "https://my.domain:443/some/path/file.ext?payload=eyJlbmNyeXB0ZWRfdXNlcl9pZF9hbmRfdG9rZW4iOm51bGwsImlhdCI6MTU0NjM1MTAyMH0"
-            expected_headers1 = { "x-access-token" => "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDYzNTEwMjAsImNoZWNrc3VtIjoiZGRiOWI2MzQ1NWVjYzc4ODRkMjViZDE1ZjI2MWViNzNiMDVlYjM2ZGI2ZDJjNTAwOTAyNjRlY2RlMzllMDljYSJ9.kZAk4g5u-Qkj_qSzIu2HGdqAdEB6MqQ3eFQizgCMZu0" }
-
-            expected_url2 = "https://another.domain:443/some/otherfile.ext?payload=eyJlbmNyeXB0ZWRfdXNlcl9pZF9hbmRfdG9rZW4iOm51bGwsImlhdCI6MTU0NjM1MTAyMH0"
-            expected_headers = { "x-access-token" => "eyJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1NDYzNTEwMjAsImNoZWNrc3VtIjoiZGRiOWI2MzQ1NWVjYzc4ODRkMjViZDE1ZjI2MWViNzNiMDVlYjM2ZGI2ZDJjNTAwOTAyNjRlY2RlMzllMDljYSJ9.kZAk4g5u-Qkj_qSzIu2HGdqAdEB6MqQ3eFQizgCMZu0" }
+            expected_url1 = "https://example.com/service/some-service/user/some-user/fingerprint"
+            expected_url2 = "https://another.domain/some/otherfile.ext"
+            expected_headers = { 'x-encrypted-user-id-and-token' => 'sometoken' }
 
             expect(Typhoeus::Request).to receive(:new).with(expected_url1, followlocation: true, headers: expected_headers).and_return(double.as_null_object)
             expect(Typhoeus::Request).to receive(:new).with(expected_url2, followlocation: true, headers: expected_headers).and_return(double.as_null_object)
