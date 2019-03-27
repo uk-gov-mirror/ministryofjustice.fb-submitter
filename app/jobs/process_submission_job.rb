@@ -80,8 +80,7 @@ class ProcessSubmissionJob < ApplicationJob
 
   private
 
-  # returns an array of paths
-  # ["/path/to/file1.ext", "/path/to/file2.ext"]
+  # returns an array of Attachment objects
   def attachments(mail, url_file_map)
     array = mail.attachments.map do |object|
       object['path'] = url_file_map[object['url']]
