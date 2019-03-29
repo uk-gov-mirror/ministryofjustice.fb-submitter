@@ -26,15 +26,10 @@ module Adapters
       uri
     end
 
-    def internal_tld(service_slug, environment_slug)
-      ['formbuilder', 'services', environment_slug].join('-')
-    end
+    private
 
     def internal_host(service_slug, environment_slug)
-      [
-        service_slug,
-        internal_tld(service_slug, environment_slug)
-      ].join('.')
+      "#{service_slug}.formbuilder-services-#{environment_slug}"
     end
   end
 end

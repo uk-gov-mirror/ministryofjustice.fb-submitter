@@ -21,14 +21,13 @@ class ProcessSubmissionJob < ApplicationJob
 
     @submission.detail_objects.to_a.each do |mail|
       body_part_content = retrieve_mail_body_parts(mail, headers)
-      attachment_files = attachment_file_paths(mail, url_file_map)
 
       response = EmailService.send_mail(
         from:         mail.from,
         to:           mail.to,
         subject:      mail.subject,
         body_parts:   body_part_content,
-        attachments:  attachment_files
+        attachments:  attachments(mail, url_file_map)
       )
 
       @submission.responses << response.to_h
@@ -40,16 +39,11 @@ class ProcessSubmissionJob < ApplicationJob
     @submission.complete!
   end
 
-  def attachment_file_paths(mail, url_file_map)
-    mail.attachments.map do |url|
-      url_file_map[url]
-    end
-  end
-
+  # returns array of urls
   def unique_attachment_urls(submission = @submission)
-    submission.detail_objects.map do |detail|
-      detail.attachments
-    end.flatten.compact.sort.uniq
+    attachments = submission.detail_objects.map(&:attachments).flatten
+    urls = attachments.map { |e| e['url'] }
+    urls.sort.uniq
   end
 
   def retrieve_mail_body_parts(mail, headers)
@@ -84,4 +78,14 @@ class ProcessSubmissionJob < ApplicationJob
     super
   end
 
+  private
+
+  # returns an array of Attachment objects
+  def attachments(mail, url_file_map)
+    array = mail.attachments.map do |object|
+      object['path'] = url_file_map[object['url']]
+      object
+    end
+    array.map{|o| Attachment.new(o.symbolize_keys)}
+  end
 end

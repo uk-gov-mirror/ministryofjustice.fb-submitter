@@ -1,12 +1,19 @@
 class DownloadService
-  def self.download(url:, target_dir: nil, headers: {})
-    path = file_path_for_download(url: url, target_dir: target_dir)
-    request = construct_request(url: url, file_path: path, headers: headers)
-    request.run
-    path
+  # returns Hash
+  # {"https://my.domain/some/path/file.ext"=>"/the/file/path/file.ext"}
+  def self.download_in_parallel(urls:, target_dir: nil, headers: {})
+    new(urls: urls, target_dir: target_dir, headers: headers).download_in_parallel
   end
 
-  def self.download_in_parallel(urls:, target_dir: nil, headers: {})
+  attr_reader :urls, :target_dir, :headers
+
+  def initialize(urls:, target_dir: nil, headers: {})
+    @urls = urls
+    @target_dir = target_dir
+    @headers = headers
+  end
+
+  def download_in_parallel
     actual_dir = target_dir || Dir.mktmpdir
     results = {}
 
@@ -22,7 +29,16 @@ class DownloadService
     results
   end
 
-  def self.construct_request(url:, file_path:, headers: {})
+  private
+
+  def download(url:, target_dir: nil, headers: {})
+    path = file_path_for_download(url: url, target_dir: target_dir)
+    request = construct_request(url: url, file_path: path, headers: headers)
+    request.run
+    path
+  end
+
+  def construct_request(url:, file_path:, headers: {})
     request = Typhoeus::Request.new(url, followlocation: true, headers: headers)
     request.on_headers do |response|
       if response.code != 200
@@ -45,10 +61,9 @@ class DownloadService
     request
   end
 
-  def self.file_path_for_download(url:, target_dir: nil)
+  def file_path_for_download(url:, target_dir: nil)
     actual_dir = target_dir || Dir.mktmpdir
     filename = File.basename(URI.parse(url).path)
     File.join(actual_dir, filename)
   end
-
 end

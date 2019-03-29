@@ -3,7 +3,7 @@ class Submission < ActiveRecord::Base
 
   # returns an array of value objects of class (submission_type)
   def detail_objects
-    submission_details.to_a.map do |detail|
+    @detail_objects ||= submission_details.to_a.map do |detail|
       details_class(detail).new(detail.merge(submission: self))
     end
   end

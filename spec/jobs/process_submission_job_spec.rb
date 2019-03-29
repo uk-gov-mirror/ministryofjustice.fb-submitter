@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe ProcessSubmissionJob do
-  let(:mock_downloaded_files) { {'url1' => 'file1', 'url2' => 'file2'} }
+  let(:mock_downloaded_files) { {'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2'} }
   let(:downloaded_body_parts) { mock_downloaded_files }
   let(:body_part_content) do
     {
@@ -11,9 +11,6 @@ describe ProcessSubmissionJob do
   end
   let(:token) { 'some token' }
   let(:headers) { {'x-encrypted-user-id-and-token' => token} }
-  before do
-    allow_any_instance_of(EmailSubmissionDetail).to receive(:make_urls_absolute!)
-  end
 
   describe '#perform' do
     let(:submission_detail) do
@@ -22,27 +19,60 @@ describe ProcessSubmissionJob do
         'to' => 'destination@example.com',
         'subject' => 'mail subject',
         'type' => 'email',
-        "body_parts" => {
-          "text/html"=>"https://tools.ietf.org/html/rfc2324",
-          "text/plain"=>"https://tools.ietf.org/rfc/rfc2324.txt"
+        'body_parts' => {
+          'text/html' => 'https://tools.ietf.org/html/rfc2324',
+          'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
         },
-        "attachments"=>["https://tools.ietf.org/pdf/rfc2324"]
+        'attachments' => [
+          {
+            'type' => 'output',
+            'mimetype' => 'application/pdf',
+            'url' => '/api/submitter/pdf/default/guid1.pdf',
+            'filename' => 'form1'
+          },
+          {
+            'type' => 'output',
+            'mimetype' => 'application/pdf',
+            'url' => '/api/submitter/pdf/default/guid2.pdf',
+            'filename' => 'form2'
+          }
+        ]
       }
+    end
+    let(:processed_attachments) do
+      [
+        Attachment.new({
+          path: '/path/to/file1',
+          type: 'output',
+          mimetype: 'application/pdf',
+          url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
+          filename: 'form1'
+        }),
+        Attachment.new({
+          path: '/path/to/file2',
+          type: 'output',
+          mimetype: 'application/pdf',
+          url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf',
+          filename: 'form2'
+        })
+      ]
     end
     let(:submission) do
       Submission.create!(
         encrypted_user_id_and_token: token,
         status: 'queued',
-        submission_details: [submission_detail]
+        submission_details: [submission_detail],
+        service_slug: 'service-slug'
       )
     end
     let(:detail_objects) do
       [EmailSubmissionDetail.new(submission_detail)]
     end
-    let(:urls) { ['url1', 'url2'] }
+    let(:urls) do
+      ['http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf']
+    end
     let(:mock_send_response){ {'key' => 'send response'} }
     before do
-      allow(submission).to receive(:detail_objects).and_return(detail_objects)
       allow(EmailService).to receive(:send_mail).and_return( mock_send_response )
       allow(DownloadService).to receive(:download_in_parallel).and_return(
         mock_downloaded_files
@@ -52,6 +82,7 @@ describe ProcessSubmissionJob do
 
     context 'given a valid submission_id' do
       let(:submission_id) { submission.id }
+
       before do
         allow(Submission).to receive(:find).with(submission_id).and_return(submission)
       end
@@ -73,42 +104,33 @@ describe ProcessSubmissionJob do
 
       it 'downloads the resolved unique_attachment_urls in parallel' do
         expect(DownloadService).to receive(:download_in_parallel)
-                                .with(urls: ['https://tools.ietf.org/pdf/rfc2324'], headers: headers)
+                                .with(urls: urls, headers: headers)
                                 .and_return(mock_downloaded_files)
         subject.perform(submission_id: submission_id)
       end
 
       it 'gets the detail_objects from the Submission' do
-        expect(submission).to receive(:detail_objects).at_least(:once).and_return(detail_objects)
+        expect(submission).to receive(:detail_objects).at_least(:once).and_return(submission.detail_objects)
         subject.perform(submission_id: submission_id)
       end
 
       describe 'for each detail object' do
-        let(:detail_object){ detail_objects.first }
-        before do
-          allow(subject).to receive(:attachment_file_paths)
-                          .and_return(['file1', 'file2'])
-        end
+        let(:detail_object){ submission.detail_objects.first }
 
         it 'retrieves the mail body parts' do
           expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object, headers).and_return(body_part_content)
           subject.perform(submission_id: submission_id)
         end
 
-        it 'gets the attachment_file_paths' do
-          expect(subject).to receive(:attachment_file_paths)
-                          .with(detail_object, mock_downloaded_files)
-                          .and_return(['file1', 'file2'])
-          subject.perform(submission_id: submission_id)
-        end
-
         it 'asks the EmailService to send an email' do
+          allow(subject).to receive(:attachments).and_return(processed_attachments)
+
           expect(EmailService).to receive(:send_mail).with(
             from: detail_object.from,
             to: detail_object.to,
             subject: detail_object.subject,
             body_parts: body_part_content,
-            attachments: ['file1', 'file2']
+            attachments: processed_attachments
           ).and_return(mock_send_response)
           subject.perform(submission_id: submission_id)
         end
@@ -131,42 +153,56 @@ describe ProcessSubmissionJob do
     end
   end
 
-  describe '#attachment_file_paths' do
-    context 'given a mail with attachment urls' do
-      let(:mail) { double('mail', attachments: ['url1', 'url2']) }
-      context 'and a map of urls to file paths' do
-        let(:url_file_map) { {'url1' => 'file path 1', 'url2' => 'file path 2'} }
-
-        it 'returns the corresponding file paths' do
-          expect(subject.send(:attachment_file_paths, mail, url_file_map)).to eq(
-            ['file path 1', 'file path 2']
-          )
-        end
-      end
-    end
-  end
-
   describe '#unique_attachment_urls' do
     context 'given a submission with multiple detail objects, each with attachments' do
       let(:submission_detail_1) do
         {
           'type' => 'email',
-          'attachments'=>['url1', 'url2']
+          'attachments' => [
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid1.pdf',
+              filename: 'form1'
+            },
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid2.pdf',
+              filename: 'form2'
+            }
+          ]
         }
       end
       let(:submission_detail_2) do
         {
           'type' => 'email',
-          'attachments'=>['url2', 'url3']
+          'attachments' => [
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid2.pdf',
+              filename: 'form2'
+            },
+            {
+              type: 'output',
+              mimetype: 'application/pdf',
+              url: '/api/submitter/pdf/default/guid3.pdf',
+              filename: 'form3'
+            }
+          ]
         }
       end
+
       let(:submission) do
         Submission.new(submission_details: [submission_detail_1, submission_detail_2])
       end
 
       it 'returns a single array of unique urls' do
         expect(subject.send(:unique_attachment_urls, submission)).to eq(
-          ['url1', 'url2', 'url3']
+          ['http://.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
+           'http://.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf',
+           'http://.formbuilder-services-test:3000/api/submitter/pdf/default/guid3.pdf']
         )
       end
     end
@@ -241,4 +277,94 @@ describe ProcessSubmissionJob do
     end
   end
 
+  describe '#perform' do
+    context 'with filestore attachments' do
+      let(:submission) do
+        Submission.new(
+          encrypted_user_id_and_token: 'encrypted_user_id_and_token',
+          status: 'queued',
+          submission_details: [submission_detail],
+          service_slug: 'service-slug'
+        )
+      end
+
+      let(:submission_detail) do
+        {
+          'from' => 'some.one@example.com',
+          'to' => 'destination@example.com',
+          'subject' => 'mail subject',
+          'type' => 'email',
+          'body_parts' => {
+            'text/html' => 'https://tools.ietf.org/html/rfc2324',
+            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
+          },
+          'attachments' => [
+            {
+              'type' => 'output',
+              'mimetype' => 'application/pdf',
+              'url' => '/api/submitter/pdf/default/guid1.pdf',
+              'filename' => 'form1'
+            },
+            {
+              'type' => 'filestore',
+              'mimetype' => 'image/png',
+              'url' => 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+              'filename' => 'image2.png'
+            }
+          ]
+        }
+      end
+
+      before :each do
+        allow(Submission).to receive(:find).and_return(submission)
+      end
+
+      it 'converts output urls to absolute urls' do
+        url = submission.detail_objects.dig(0).attachments.dig(0, 'url')
+        expect(url).to start_with('http')
+      end
+
+      it 'attaches filestore attachments' do
+        expect(DownloadService).to receive(:download_in_parallel)
+          .with(headers: {
+            "x-encrypted-user-id-and-token" => "encrypted_user_id_and_token"
+          }, urls: [
+            "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8",
+            "http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf"
+          ]).and_return({
+            "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8" => "/tmp/filestore.png",
+            "http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf" => "/tmp/output.pdf"
+          })
+
+        # only testing file attachments here
+        allow(subject).to receive(:retrieve_mail_body_parts).and_return([])
+
+        expected_attachments = [
+          Attachment.new({
+          path: '/tmp/output.pdf',
+          type: 'output',
+          mimetype: 'application/pdf',
+          url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
+          filename: 'form1'
+        }),
+        Attachment.new({
+          path: '/tmp/filestore.png',
+          type: 'filestore',
+          mimetype: 'image/png',
+          url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+          filename: 'image2.png'
+        })]
+
+        allow(subject).to receive(:attachments).and_return(expected_attachments)
+
+        expect(EmailService).to receive(:send_mail).with(attachments: expected_attachments,
+                                                         body_parts: [],
+                                                         from: "some.one@example.com",
+                                                         subject: "mail subject",
+                                                         to: "destination@example.com")
+
+        subject.perform(submission_id: 1)
+      end
+    end
+  end
 end
