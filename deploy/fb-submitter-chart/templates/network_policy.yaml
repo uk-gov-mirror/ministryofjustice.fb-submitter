@@ -25,7 +25,10 @@ spec:
     ports:
     - protocol: TCP
       port: 3000
-
+  - from:
+    - podSelector:
+        matchLabels:
+          app: fb-user-datastore-api-{{ .Values.environmentName }}
 ---
 # We must also allow the submitter to access any pods in the services NS
 # so that it can retrieve the mail body parts & PDFs
