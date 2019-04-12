@@ -14,6 +14,7 @@ gem 'jwt'
 gem 'resque'
 gem 'typhoeus'
 gem 'mime-types'
+gem 'notifications-ruby-client'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
