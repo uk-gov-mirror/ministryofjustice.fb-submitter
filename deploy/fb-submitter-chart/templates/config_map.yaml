@@ -4,7 +4,7 @@ metadata:
   name: fb-submitter-env-{{ .Values.environmentName }}
   namespace: formbuilder-platform-{{ .Values.environmentName }}
 data:
-  AWS_REGION: eu-west-1
+  AWS_REGION: eu-west-2
   FB_ENVIRONMENT_SLUG: '{{ .Values.environmentName }}'
   MAX_IAT_SKEW_SECONDS: "60"
   RAILS_ENV: production

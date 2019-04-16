@@ -19,7 +19,7 @@ module Adapters
     private
 
     def self.client
-      Aws::SES::Client.new
+      Aws::SES::Client.new(region: 'eu-west-1')
     end
   end
 end

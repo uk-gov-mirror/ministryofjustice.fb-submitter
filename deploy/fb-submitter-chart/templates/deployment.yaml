@@ -16,7 +16,9 @@ spec:
     spec:
       containers:
       - name: "fb-submitter-api-{{ .Values.environmentName }}"
-        image: "926803513772.dkr.ecr.eu-west-1.amazonaws.com/formbuilder/fb-submitter-api:latest-{{ .Values.platformEnv }}"
+        image: "754256621582.dkr.ecr.eu-west-2.amazonaws.com/formbuilder/fb-submitter-api:latest-{{ .Values.platformEnv }}"
+        securityContext:
+          runAsUser: 1001
         imagePullPolicy: Always
         ports:
           - containerPort: 3000
@@ -73,7 +75,7 @@ spec:
       serviceAccountName: "formbuilder-submitter-workers-{{ .Values.environmentName }}"
       containers:
       - name: "fb-submitter-worker"
-        image: "926803513772.dkr.ecr.eu-west-1.amazonaws.com/formbuilder/fb-submitter-worker:latest-{{ .Values.platformEnv }}"
+        image: "754256621582.dkr.ecr.eu-west-2.amazonaws.com/formbuilder/fb-submitter-worker:latest-{{ .Values.platformEnv }}"
         imagePullPolicy: Always
         # command:
         #   - "cd /var/www/fb-submitter && bundle exec rake resque:work"
