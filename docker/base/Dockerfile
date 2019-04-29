@@ -6,9 +6,10 @@ ENV RAILS_ROOT /var/www/fb-submitter
 RUN mkdir -p $RAILS_ROOT
 WORKDIR $RAILS_ROOT
 
-COPY Gemfile.lock Gemfile ./
+COPY . $RAILS_ROOT
 RUN gem install bundler
-RUN bundle install --jobs 20 --retry 5
+RUN bundle install --jobs 4 --retry 5 --deployment --without test development
 
-COPY . .
-ADD . $RAILS_ROOT
+RUN groupadd -r deploy && useradd -m -u 1001 -r -g deploy deploy
+RUN chown -R deploy $RAILS_ROOT
+USER 1001
