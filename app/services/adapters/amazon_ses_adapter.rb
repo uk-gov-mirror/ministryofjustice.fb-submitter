@@ -4,6 +4,7 @@ module Adapters
     # ENV['AWS_ACCESS_KEY_ID'] and ENV['AWS_SECRET_ACCESS_KEY']
     def self.send_mail( opts = {} )
       Rails.logger.debug "send_mail to #{opts[:to]}"
+      Rails.logger.debug "raw_message: #{opts[:raw_message]}"
       Rails.logger.debug "send_mail from #{opts[:from]}"
 
       client.send_raw_email({
