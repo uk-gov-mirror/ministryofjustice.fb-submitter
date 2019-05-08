@@ -5,5 +5,6 @@ Rails.application.routes.draw do
 
   namespace :save_return do
     resources :email_confirmations
+    resources :email_magic_links
   end
 end
