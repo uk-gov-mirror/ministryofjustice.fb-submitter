@@ -8,7 +8,7 @@ class SaveReturnEmailConfirmationJob < ApplicationJob
       template_id: template_id,
       personalisation: {
         confirmation_link: confirmation_link
-      }
+      }.reverse_merge(template_context)
     )
   end
 

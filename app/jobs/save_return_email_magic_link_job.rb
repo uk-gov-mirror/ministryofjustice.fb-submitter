@@ -9,7 +9,7 @@ class SaveReturnEmailMagicLinkJob < ApplicationJob
       template_id: template_id,
       personalisation: {
         magic_link: magic_link
-      }
+      }.reverse_merge(template_context)
     )
   end
 
