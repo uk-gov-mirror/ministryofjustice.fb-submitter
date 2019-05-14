@@ -25,12 +25,38 @@ describe SaveReturn::EmailConfirmationsController, :active do
     it 'sets job params correctly' do
       expect do
         post :create, body: json_hash.to_json
-      end.to have_enqueued_job(SaveReturnEmailConfirmationJob).with(email: email, confirmation_link: confirmation_link)
+      end.to have_enqueued_job(SaveReturnEmailConfirmationJob).with(email: email, confirmation_link: confirmation_link, template_context: {})
     end
 
     it 'returns 201' do
       post :create, params: { email: email, confirmation_link: confirmation_link }
       expect(response).to be_created
+    end
+
+    context 'when template_context provided' do
+      let(:json_hash) do
+        {
+          email: email,
+          confirmation_link: confirmation_link,
+          template_context: {
+            a: true,
+            b: 1,
+            c: 'foo'
+          }
+        }
+      end
+
+      it 'sets job params correctly' do
+        expect do
+          post :create, body: json_hash.to_json
+        end.to have_enqueued_job(SaveReturnEmailConfirmationJob).with(email: email,
+                                                                      confirmation_link: confirmation_link,
+                                                                      template_context: {
+                                                                        a: true,
+                                                                        b: 1,
+                                                                        c: 'foo'
+                                                                      })
+      end
     end
   end
 end

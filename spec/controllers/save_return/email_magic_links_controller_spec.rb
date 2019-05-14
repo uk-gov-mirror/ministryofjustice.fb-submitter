@@ -25,12 +25,40 @@ describe SaveReturn::EmailMagicLinksController, :active do
     it 'sets job params correctly' do
       expect do
         post :create, body: json_hash.to_json
-      end.to have_enqueued_job(SaveReturnEmailMagicLinkJob).with(email: email, magic_link: magic_link)
+      end.to have_enqueued_job(SaveReturnEmailMagicLinkJob).with(email: email,
+                                                                 magic_link: magic_link,
+                                                                 template_context: {})
     end
 
     it 'returns 201' do
       post :create, params: { email: email, magic_link: magic_link }
       expect(response).to be_created
+    end
+
+    context 'with template_context provided' do
+      let(:json_hash) do
+        {
+          email: email,
+          magic_link: magic_link,
+          template_context: {
+            a: true,
+            b: 1,
+            c: 'foo'
+          }
+        }
+      end
+
+      it 'sets job params correctly' do
+        expect do
+          post :create, body: json_hash.to_json
+        end.to have_enqueued_job(SaveReturnEmailMagicLinkJob).with(email: email,
+                                                                   magic_link: magic_link,
+                                                                   template_context: {
+                                                                    a: true,
+                                                                    b: 1,
+                                                                    c: 'foo'
+                                                                   })
+      end
     end
   end
 end
