@@ -1,15 +1,21 @@
 module SaveReturn
   class EmailMagicLinksController < ApplicationController
     def create
-      if SaveReturnEmailMagicLinkJob.perform_later(email: permitted_params[:email], magic_link: permitted_params[:magic_link])
+      if job_class.perform_later(email: params[:email],
+                                 magic_link: params[:magic_link],
+                                 template_context: template_context)
         head :created
       end
     end
 
     private
 
-    def permitted_params
-      params.permit(:email, :magic_link)
+    def template_context
+      (params[:template_context] || ActionController::Parameters.new).to_unsafe_hash
+    end
+
+    def job_class
+      SaveReturnEmailMagicLinkJob
     end
   end
 end

@@ -1,15 +1,21 @@
 module SaveReturn
   class EmailConfirmationsController < ApplicationController
     def create
-      if SaveReturnEmailConfirmationJob.perform_later(email: permitted_params[:email], confirmation_link: permitted_params[:confirmation_link])
+      if job_class.perform_later(email: params[:email],
+                                 confirmation_link: params[:confirmation_link],
+                                 template_context: template_context)
         head :created
       end
     end
 
     private
 
-    def permitted_params
-      params.permit(:email, :confirmation_link)
+    def template_context
+      (params[:template_context] || ActionController::Parameters.new).to_unsafe_hash
+    end
+
+    def job_class
+      SaveReturnEmailConfirmationJob
     end
   end
 end

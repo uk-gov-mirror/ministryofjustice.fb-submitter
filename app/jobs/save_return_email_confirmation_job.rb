@@ -2,13 +2,13 @@ require 'notifications/client'
 class SaveReturnEmailConfirmationJob < ApplicationJob
   queue_as :default
 
-  def perform(email:, confirmation_link:)
+  def perform(email:, confirmation_link:, template_context: {})
     response = client.send_email(
       email_address: email,
       template_id: template_id,
       personalisation: {
         confirmation_link: confirmation_link
-      }
+      }.reverse_merge(template_context)
     )
   end
 
