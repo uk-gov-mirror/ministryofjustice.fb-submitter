@@ -4,7 +4,8 @@ Rails.application.routes.draw do
   post '/submission', to: 'submission#create'
 
   namespace :save_return do
-    resources :email_confirmations
-    resources :email_magic_links
+    resources :email_confirmations, only: [:create]
+    resources :email_magic_links, only: [:create]
+    resources :email_progress_saved, only: [:create]
   end
 end
