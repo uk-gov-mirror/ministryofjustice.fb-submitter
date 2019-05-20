@@ -137,3 +137,8 @@ spec:
               secretKeyRef:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: notify_save_return_email_magic_link_template_id
+          - name: NOTIFY_SAVE_RETURN_EMAIL_PROGRESS_SAVED_TEMPLATE_ID
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_save_return_email_progress_saved_template_id
