@@ -15,8 +15,8 @@ describe TemplateMappingService::Email do
       let(:name) { 'foo' }
       let(:expected) { '46a72b64-9541-4000-91a7-fa8a3fa10bf9' }
 
-      it 'returns generic template' do
-        expect(described_class.template_id_for_name(name)).to eql(expected)
+      it 'raises error' do
+        expect { described_class.template_id_for_name(name) }.to raise_error(TemplateMappingService::MissingTemplate)
       end
     end
   end
@@ -37,8 +37,8 @@ describe TemplateMappingService::Sms do
       let(:name) { 'foo' }
       let(:expected) { '9153cfba-4808-4a1d-9b84-784500197651' }
 
-      it 'returns generic template' do
-        expect(described_class.template_id_for_name(name)).to eql(expected)
+      it 'raises error' do
+        expect { described_class.template_id_for_name(name) }.to raise_error(TemplateMappingService::MissingTemplate)
       end
     end
   end

@@ -1,4 +1,6 @@
 class TemplateMappingService
+  class MissingTemplate < StandardError; end
+
   class Email
     ALL = {
       'email.return.setup.email.token' => '38f6a1cd-a810-4f59-8899-2c300236c5b4',
@@ -10,7 +12,9 @@ class TemplateMappingService
     }
 
     def self.template_id_for_name(name)
-      ALL.fetch(name, ALL['email.generic'])
+      ALL.fetch(name) do
+        raise MissingTemplate.new
+      end
     end
   end
 
@@ -22,7 +26,9 @@ class TemplateMappingService
     }
 
     def self.template_id_for_name(name)
-      ALL.fetch(name, ALL['sms.generic'])
+      ALL.fetch(name) do
+        raise MissingTemplate.new
+      end
     end
   end
 end
