@@ -11,7 +11,8 @@ describe SaveReturn::EmailProgressSavedController do
       email: {
         to: 'user@example.com',
         subject: 'subject goes here',
-        body: 'form saved at https://example.com'
+        body: 'form saved at https://example.com',
+        template_name: 'name-of-template'
       }
     }
   end

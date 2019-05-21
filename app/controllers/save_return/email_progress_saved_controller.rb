@@ -6,7 +6,8 @@ module SaveReturn
     #   email: {
     #     to: 'user@example.com',
     #     subject: 'subject goes here',
-    #     body: 'body as string goes here'
+    #     body: 'body as string goes here',
+    #     template_name: 'name-of-template'
     #   }
     # }
     #
@@ -19,7 +20,7 @@ module SaveReturn
     private
 
     def email_params
-      params.require(:email).permit(:to, :subject, :body)
+      params.require(:email).permit(:to, :subject, :body, :template_name)
     end
 
     def job_class
