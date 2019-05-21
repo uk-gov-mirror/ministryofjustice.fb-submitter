@@ -9,10 +9,7 @@ class EmailJob < ApplicationJob
     response = client.send_email(
       email_address: email.to,
       template_id: email.template_id,
-      personalisation: {
-        subject: email.subject,
-        body: email.body
-      }
+      personalisation: email.personalisation
     )
   end
 

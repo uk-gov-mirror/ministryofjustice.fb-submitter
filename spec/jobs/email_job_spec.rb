@@ -27,5 +27,32 @@ describe EmailJob do
 
       subject.perform(email: email)
     end
+
+    context 'when extra personalisation' do
+      let(:email) do
+        {
+          to: to,
+          subject: email_subject,
+          body: body,
+          template_name: 'email.generic',
+          extra_personalisation: {
+            token: 'my-token'
+          }
+        }
+      end
+
+      it 'hands over data' do
+        expect(Notifications::Client).to receive(:new).and_return(mock_client)
+        expect(mock_client).to receive(:send_email).with(email_address: to,
+                                                         template_id: template_id,
+                                                         personalisation: {
+                                                           subject: email_subject,
+                                                           body: body,
+                                                           token: 'my-token'
+                                                         })
+
+        subject.perform(email: email)
+      end
+    end
   end
 end

@@ -6,7 +6,10 @@ class EmailController < ApplicationController
   #     to: 'user@example.com',
   #     subject: 'subject goes here',
   #     body: 'body as string goes here',
-  #     template_name: 'name-of-template'
+  #     template_name: 'name-of-template',
+  #     [extra_personalisation]: {
+  #       token: 'my-token'
+  #     }
   #   }
   # }
   #
@@ -21,7 +24,7 @@ class EmailController < ApplicationController
   private
 
   def email_validator
-    DataObject::Email.new(email_params)
+    Email.new(email_params)
   end
 
   def render_errors
@@ -29,7 +32,7 @@ class EmailController < ApplicationController
   end
 
   def email_params
-    params.require(:email).permit(:to, :subject, :body, :template_name)
+    params.require(:email).permit(:to, :subject, :body, :template_name, extra_personalisation: [:token])
   end
 
   def job_class
