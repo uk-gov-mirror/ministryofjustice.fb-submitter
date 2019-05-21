@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe SaveReturnEmailProgressSavedJob do
+describe EmailJob do
   describe '#perform' do
     let(:mock_client) { double('client') }
     let(:to) { 'user@example.com' }
@@ -10,10 +10,11 @@ describe SaveReturnEmailProgressSavedJob do
       {
         to: to,
         subject: email_subject,
-        body: body
+        body: body,
+        template_name: 'email.generic'
       }
     end
-    let(:template_id) { 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa' }
+    let(:template_id) { '46a72b64-9541-4000-91a7-fa8a3fa10bf9' }
 
     it 'sends email' do
       expect(Notifications::Client).to receive(:new).and_return(mock_client)

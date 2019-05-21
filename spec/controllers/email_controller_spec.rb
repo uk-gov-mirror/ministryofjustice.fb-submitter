@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-describe SaveReturn::EmailProgressSavedController do
+describe EmailController do
   before :each do
     request.env['CONTENT_TYPE'] = 'application/json'
     allow_any_instance_of(ApplicationController).to receive(:verify_token!)
