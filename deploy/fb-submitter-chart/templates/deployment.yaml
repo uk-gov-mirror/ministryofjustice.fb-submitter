@@ -142,3 +142,48 @@ spec:
               secretKeyRef:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: notify_save_return_email_progress_saved_template_id
+          - name: notify_email_return_setup_email_token
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_email_return_setup_email_token
+          - name: notify_email_return_setup_email_verified
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_email_return_setup_email_verified
+          - name: notify_email_return_setup_mobile_verified
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_email_return_setup_mobile_verified
+          - name: notify_email_return_signin_email
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_email_return_signin_email
+          - name: notify_email_return_signin_success
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_email_return_signin_success
+          - name: notify_email_generic
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_email_generic
+          - name: notify_sms_return_setup_mobile
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_sms_return_setup_mobile
+          - name: notify_sms_return_signin_mobile
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_sms_return_signin_mobile
+          - name: notify_sms_generic
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: notify_sms_generic
