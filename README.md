@@ -4,7 +4,7 @@
 API for services built &amp; deployed on Form Builder to send the user data to
 where it ultimately needs to go.
 
-# Environment Variables
+## Environment Variables
 
 The following environment variables are either needed, or read if present:
 
@@ -18,3 +18,7 @@ The following environment variables are either needed, or read if present:
 ## To deploy and run on Cloud Platforms
 
 See [deployment instructions](DEPLOY.md)
+
+## API documentation
+
+See [Swagger documentation](https://ministryofjustice.github.io/fb-submitter)

@@ -6,11 +6,8 @@ ruby '2.5.1'
 gem 'rails', '~> 5.2.2.1'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 3.11'
-
 gem 'aws-sdk-ses', '~> 1.16.0'
-
 gem 'jwt'
-
 gem 'resque'
 gem 'typhoeus'
 gem 'mime-types'
@@ -21,11 +18,15 @@ group :development, :test do
   gem 'capybara', '>= 2.15', '< 4.0'
   gem 'rspec-rails', '>= 3.5.0'
   gem 'dotenv-rails', require: 'dotenv/rails-now'
+  gem 'rswag-specs'
 end
 
 group :development do
   gem 'listen', '>= 3.0.5', '< 3.2'
   gem 'guard-rspec', require: false
+  gem 'rswag-api'
+  gem 'rswag-ui'
+  gem 'guard-shell'
 end
 
 group :test do

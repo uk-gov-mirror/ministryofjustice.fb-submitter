@@ -3,7 +3,7 @@ module Concerns
     extend ActiveSupport::Concern
 
     included do
-      before_action :verify_token!
+      before_action :verify_token!, unless: :disable_jwt?
 
       if ancestors.include?(Concerns::ErrorHandling)
         rescue_from Exceptions::TokenNotPresentError do |e|
@@ -56,6 +56,14 @@ module Concerns
 
     def get_service_token(service_slug)
       ServiceTokenService.get(service_slug)
+    end
+
+    def disable_jwt?
+      swagger || false
+    end
+
+    def swagger
+      Rails.env.development? && request.referrer.include?('api-docs')
     end
   end
 end
