@@ -70,3 +70,10 @@ guard :rspec, cmd: "bundle exec rspec",
     Dir[File.join("**/#{m[1]}.feature")][0] || "spec/acceptance"
   end
 end
+
+guard :shell do
+  watch(/spec\/*\/(.*)_spec.rb|app\/controllers\/*.rb/) do |m|
+    `echo "Generating swagger docs"`
+    `bundle exec rake rswag:specs:swaggerize`
+  end
+end
