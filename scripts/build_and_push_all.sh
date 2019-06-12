@@ -9,8 +9,14 @@ login_to_ecr_with_creds_for() {
   AWS_ACCESS_KEY_ID_ENCODED=`kubectl -n formbuilder-repos get secrets ecr-repo-fb-submitter-$TYPE -o jsonpath='{.data.access_key_id}'`
   AWS_SECRET_ACCESS_KEY_ENCODED=`kubectl -n formbuilder-repos get secrets ecr-repo-fb-submitter-$TYPE -o jsonpath='{.data.secret_access_key}'`
 
-  export AWS_ACCESS_KEY_ID=`echo $AWS_ACCESS_KEY_ID_ENCODED | base64 --decode`
-  export AWS_SECRET_ACCESS_KEY=`echo $AWS_SECRET_ACCESS_KEY_ENCODED | base64 --decode`
+  if [ `uname` == 'Darwin' ]
+  then
+    export AWS_ACCESS_KEY_ID=`echo $AWS_ACCESS_KEY_ID_ENCODED | base64 --decode`
+    export AWS_SECRET_ACCESS_KEY=`echo $AWS_SECRET_ACCESS_KEY_ENCODED | base64 --decode`
+  else
+    export AWS_ACCESS_KEY_ID=`echo $AWS_ACCESS_KEY_ID_ENCODED | base64 -d`
+    export AWS_SECRET_ACCESS_KEY=`echo $AWS_SECRET_ACCESS_KEY_ENCODED | base64 -d`
+  fi
 
   eval $(aws ecr get-login --no-include-email --region eu-west-2)
 }
