@@ -20,6 +20,10 @@ live:
 	$(eval export env_stub=live)
 	@true
 
+pentest:
+	$(eval export env_stub=pentest)
+	@true
+
 target:
 ifeq ($(TARGETDEFINED), "true")
 	$(eval export env_stub=${TARGET})
