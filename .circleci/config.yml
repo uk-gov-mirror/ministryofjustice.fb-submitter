@@ -24,7 +24,7 @@ jobs:
       - run:
           name: test
           command: 'bundle exec rspec'
-  build:
+  build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
     docker:
       - image: asmega/fb-builder:latest
@@ -47,80 +47,108 @@ jobs:
           command: 'npm install'
       - setup_remote_docker
       - run:
-          name: KUBE_CERTIFICATE_AUTHORITY to disk
-          command: 'echo -n "$KUBE_CERTIFICATE_AUTHORITY" | base64 -d > /root/circle/.kube_certificate_authority'
+          name: build and push docker images
+          command: './scripts/circleci_build.sh test'
       - run:
-          name: kubectl configure cluster
-          command: 'kubectl config set-cluster "$KUBE_CLUSTER" --certificate-authority="/root/circle/.kube_certificate_authority" --server="$KUBE_SERVER"'
+          name: deploy to test dev
+          command: './scripts/circleci_deploy.sh test dev $KUBE_TOKEN_TEST_DEV'
       - run:
-          name: kubectl configure credentials
-          command: 'kubectl config set-credentials "circleci" --token="$KUBE_TOKEN"'
+          name: deploy to test staging
+          command: './scripts/circleci_deploy.sh test staging $KUBE_TOKEN_TEST_STAGING'
       - run:
-          name: kubectl configure context
-          command: 'kubectl config set-context "circleci" --cluster="$KUBE_CLUSTER" --user="circleci" --namespace="formbuilder-repos"'
+          name: deploy to test production
+          command: './scripts/circleci_deploy.sh test production $KUBE_TOKEN_TEST_PRODUCTION'
+  build_and_deploy_to_integration:
+    working_directory: ~/circle/git/fb-submitter
+    docker:
+      - image: asmega/fb-builder:latest
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
       - run:
-          name: kubectl use circleci context
-          command: 'kubectl config use-context circleci'
+          name: checkout fb-submitter-deploy
+          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_bd1768ef385e720906dfe1d4a42e6494 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
+      - run:
+          name: persist git crypt key to disk
+          command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
+      - run:
+          name: unlock git crypt
+          command: "cd ~/circle/git/fb-submitter-deploy && git-crypt unlock /root/circle/git_crypt.key"
+      - run:
+          name: npm install
+          command: 'npm install'
+      - setup_remote_docker
       - run:
           name: build and push docker images
-          command: 'cd ~/circle/git/fb-submitter && ./scripts/build_platform_images.sh -p test'
-      # configure to deploy to test dev
+          command: './scripts/circleci_build.sh integration'
       - run:
-          name: kubectl configure credentials
-          command: 'kubectl config set-credentials "circleci_test_dev" --token="$KUBE_TOKEN_TEST_DEV"'
+          name: deploy to integration dev
+          command: './scripts/circleci_deploy.sh integration dev $KUBE_TOKEN_INTEGRATION_DEV'
       - run:
-          name: kubectl configure context
-          command: 'kubectl config set-context "circleci_test_dev" --cluster="$KUBE_CLUSTER" --user="circleci_test_dev" --namespace="formbuilder-platform-test-dev"'
+          name: deploy to integration staging
+          command: './scripts/circleci_deploy.sh integration staging $KUBE_TOKEN_INTEGRATION_STAGING'
       - run:
-          name: kubectl use circleci context
-          command: 'kubectl config use-context circleci_test_dev'
+          name: deploy to integration production
+          command: './scripts/circleci_deploy.sh integration production $KUBE_TOKEN_INTEGRATION_PRODUCTION'
+  build_and_deploy_to_live:
+    working_directory: ~/circle/git/fb-submitter
+    docker:
+      - image: asmega/fb-builder:latest
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
       - run:
-          name: apply kubernetes changes to test dev
-          command: './scripts/deploy_platform.sh -p test -d dev'
+          name: checkout fb-submitter-deploy
+          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_bd1768ef385e720906dfe1d4a42e6494 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
       - run:
-          name: delete pods in test dev
-          command: './scripts/restart_platform_pods.sh -p test -d dev -c circleci_test_dev'
-      # configure to deploy to test staging
+          name: persist git crypt key to disk
+          command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
       - run:
-          name: kubectl configure credentials
-          command: 'kubectl config set-credentials "circleci_test_staging" --token="$KUBE_TOKEN_TEST_STAGING"'
+          name: unlock git crypt
+          command: "cd ~/circle/git/fb-submitter-deploy && git-crypt unlock /root/circle/git_crypt.key"
       - run:
-          name: kubectl configure context
-          command: 'kubectl config set-context "circleci_test_staging" --cluster="$KUBE_CLUSTER" --user="circleci_test_staging" --namespace="formbuilder-platform-test-staging"'
+          name: npm install
+          command: 'npm install'
+      - setup_remote_docker
       - run:
-          name: kubectl use circleci context
-          command: 'kubectl config use-context circleci_test_staging'
+          name: build and push docker images
+          command: './scripts/circleci_build.sh live'
       - run:
-          name: apply kubernetes changes to test staging
-          command: './scripts/deploy_platform.sh -p test -d staging'
+          name: deploy to live dev
+          command: './scripts/circleci_deploy.sh live dev $KUBE_TOKEN_LIVE_DEV'
       - run:
-          name: delete pods in test staging
-          command: './scripts/restart_platform_pods.sh -p test -d staging -c circleci_test_staging'
-      # configure to deploy to test production
+          name: deploy to live staging
+          command: './scripts/circleci_deploy.sh live staging $KUBE_TOKEN_LIVE_STAGING'
       - run:
-          name: kubectl configure credentials
-          command: 'kubectl config set-credentials "circleci_test_production" --token="$KUBE_TOKEN_TEST_PRODUCTION"'
-      - run:
-          name: kubectl configure context
-          command: 'kubectl config set-context "circleci_test_production" --cluster="$KUBE_CLUSTER" --user="circleci_test_production" --namespace="formbuilder-platform-test-production"'
-      - run:
-          name: kubectl use circleci context
-          command: 'kubectl config use-context circleci_test_production'
-      - run:
-          name: apply kubernetes changes to test production
-          command: './scripts/deploy_platform.sh -p test -d production'
-      - run:
-          name: delete pods in test production
-          command: './scripts/restart_platform_pods.sh -p test -d production -c circleci_test_production'
+          name: deploy to live production
+          command: './scripts/circleci_deploy.sh live production $KUBE_TOKEN_LIVE_PRODUCTION'
 
 workflows:
   version: 2
   test_and_build:
     jobs:
       - test
-      - build:
+      - build_and_deploy_to_test:
           requires:
             - test
           filters:
             branches:
               only: master
+      - confirm_integration_deploy:
+          type: approval
+          requires:
+            - build_and_deploy_to_test
+      - build_and_deploy_to_integration:
+          requires:
+            - confirm_integration_deploy
+      - confirm_live_deploy:
+          type: approval
+          requires:
+            - build_and_deploy_to_integration
+      - build_and_deploy_to_live:
+          requires:
+            - confirm_live_deploy
