@@ -1,0 +1,154 @@
+version: 2
+jobs:
+  test:
+    working_directory: ~/circle
+    docker:
+      - image: ministryofjustice/ruby:2.5.1
+        environment:
+          RAILS_ENV: test
+          PGHOST: 127.0.0.1
+          PGUSER: root
+          DATABASE_URL: postgresql://root@localhost/fb-submitter_test
+      - image: circleci/postgres:10.6-alpine-ram
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: circle-test_test
+    steps:
+      - checkout
+      - run:
+          name: bundle install
+          command: 'bundle install --deployment --jobs=2 --retry 3 --without development'
+      - run:
+          name: setup database
+          command: 'RAILS_ENV=test bundle exec rake db:create db:schema:load'
+      - run:
+          name: test
+          command: 'bundle exec rspec'
+  build_and_deploy_to_test:
+    working_directory: ~/circle/git/fb-submitter
+    docker:
+      - image: asmega/fb-builder:latest
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
+      - run:
+          name: checkout fb-submitter-deploy
+          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_bd1768ef385e720906dfe1d4a42e6494 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
+      - run:
+          name: persist git crypt key to disk
+          command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
+      - run:
+          name: unlock git crypt
+          command: "cd ~/circle/git/fb-submitter-deploy && git-crypt unlock /root/circle/git_crypt.key"
+      - run:
+          name: npm install
+          command: 'npm install'
+      - setup_remote_docker
+      - run:
+          name: build and push docker images
+          command: './scripts/circleci_build.sh test'
+      - run:
+          name: deploy to test dev
+          command: './scripts/circleci_deploy.sh test dev $KUBE_TOKEN_TEST_DEV'
+      - run:
+          name: deploy to test staging
+          command: './scripts/circleci_deploy.sh test staging $KUBE_TOKEN_TEST_STAGING'
+      - run:
+          name: deploy to test production
+          command: './scripts/circleci_deploy.sh test production $KUBE_TOKEN_TEST_PRODUCTION'
+  build_and_deploy_to_integration:
+    working_directory: ~/circle/git/fb-submitter
+    docker:
+      - image: asmega/fb-builder:latest
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
+      - run:
+          name: checkout fb-submitter-deploy
+          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_bd1768ef385e720906dfe1d4a42e6494 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
+      - run:
+          name: persist git crypt key to disk
+          command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
+      - run:
+          name: unlock git crypt
+          command: "cd ~/circle/git/fb-submitter-deploy && git-crypt unlock /root/circle/git_crypt.key"
+      - run:
+          name: npm install
+          command: 'npm install'
+      - setup_remote_docker
+      - run:
+          name: build and push docker images
+          command: './scripts/circleci_build.sh integration'
+      - run:
+          name: deploy to integration dev
+          command: './scripts/circleci_deploy.sh integration dev $KUBE_TOKEN_INTEGRATION_DEV'
+      - run:
+          name: deploy to integration staging
+          command: './scripts/circleci_deploy.sh integration staging $KUBE_TOKEN_INTEGRATION_STAGING'
+      - run:
+          name: deploy to integration production
+          command: './scripts/circleci_deploy.sh integration production $KUBE_TOKEN_INTEGRATION_PRODUCTION'
+  build_and_deploy_to_live:
+    working_directory: ~/circle/git/fb-submitter
+    docker:
+      - image: asmega/fb-builder:latest
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
+      - run:
+          name: checkout fb-submitter-deploy
+          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_bd1768ef385e720906dfe1d4a42e6494 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
+      - run:
+          name: persist git crypt key to disk
+          command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
+      - run:
+          name: unlock git crypt
+          command: "cd ~/circle/git/fb-submitter-deploy && git-crypt unlock /root/circle/git_crypt.key"
+      - run:
+          name: npm install
+          command: 'npm install'
+      - setup_remote_docker
+      - run:
+          name: build and push docker images
+          command: './scripts/circleci_build.sh live'
+      - run:
+          name: deploy to live dev
+          command: './scripts/circleci_deploy.sh live dev $KUBE_TOKEN_LIVE_DEV'
+      - run:
+          name: deploy to live staging
+          command: './scripts/circleci_deploy.sh live staging $KUBE_TOKEN_LIVE_STAGING'
+      - run:
+          name: deploy to live production
+          command: './scripts/circleci_deploy.sh live production $KUBE_TOKEN_LIVE_PRODUCTION'
+
+workflows:
+  version: 2
+  test_and_build:
+    jobs:
+      - test
+      - build_and_deploy_to_test:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+      - confirm_integration_deploy:
+          type: approval
+          requires:
+            - build_and_deploy_to_test
+      - build_and_deploy_to_integration:
+          requires:
+            - confirm_integration_deploy
+      - confirm_live_deploy:
+          type: approval
+          requires:
+            - build_and_deploy_to_integration
+      - build_and_deploy_to_live:
+          requires:
+            - confirm_live_deploy
