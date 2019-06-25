@@ -188,7 +188,7 @@ spec:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: notify_sms_generic
           - name: SENTRY_DSN
-              valueFrom:
-                secretKeyRef:
-                  name: fb-submitter-app-secrets-{{ .Values.environmentName }}
-                  key: sentry_dsn
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: sentry_dsn
