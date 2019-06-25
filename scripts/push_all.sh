@@ -27,4 +27,5 @@ do
   eval $(aws ecr get-login --no-include-email --region eu-west-2)
   echo "Pushing ${REPO_NAME}"
   docker push ${REPO_NAME}:${TAG}
+  docker push ${REPO_NAME}:${CIRCLE_SHA1}
 done
