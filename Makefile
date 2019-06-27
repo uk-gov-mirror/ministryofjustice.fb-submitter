@@ -24,7 +24,7 @@ target:
 ifeq ($(TARGETDEFINED), "true")
 	$(eval export env_stub=${TARGET})
 	@true
-else 
+else
 	$(info Must set TARGET)
 	@false
 endif
@@ -42,12 +42,12 @@ install_build_dependencies: init
 
 # Needs ECR_REPO_NAME & ECR_REPO_URL env vars
 build: install_build_dependencies
-	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/build_all.sh
+	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} CIRCLE_SHA1=${CIRCLE_SHA1} ./scripts/build_all.sh
 
 push: init
-	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/push_all.sh
+	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} CIRCLE_SHA1=${CIRCLE_SHA1} ./scripts/push_all.sh
 
 build_and_push: install_build_dependencies
-	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} ./scripts/build_and_push_all.sh
+	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} CIRCLE_SHA1=${CIRCLE_SHA1} ./scripts/build_and_push_all.sh
 
 .PHONY := init push build login
