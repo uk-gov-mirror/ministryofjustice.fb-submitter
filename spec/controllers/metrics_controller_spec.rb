@@ -25,6 +25,11 @@ RSpec.describe MetricsController do
       expect(response).to be_successful
     end
 
+    it 'works' do
+      get :show, format: 'html'
+      expect(response).to be_successful
+    end
+
     it 'returns prometheus metrics' do
       get :show, format: 'text'
       body = response.body

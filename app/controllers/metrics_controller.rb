@@ -23,6 +23,7 @@ class MetricsController < ActionController::Base
   def show
     respond_to do |f|
       f.text
+      f.html { render template: 'metrics/show.text' }
     end
   end
 
