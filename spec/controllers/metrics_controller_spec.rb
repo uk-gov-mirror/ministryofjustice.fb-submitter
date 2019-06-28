@@ -11,8 +11,7 @@ RSpec.describe MetricsController do
         queues: 3,
         workers: 4,
         working: 5,
-        working: 6,
-        failed: 7
+        failed: 6
       }
     end
 
