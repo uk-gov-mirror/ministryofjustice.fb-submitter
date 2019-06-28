@@ -1,0 +1,5 @@
+<% prometheus_resque_gauges.each do |gauge| %>
+# TYPE <%= gauge[:name] %> gauge
+# HELP <%= gauge[:name] %> <%= gauge[:docstring] %>
+<%= gauge[:name] %> <%= Resque.info[gauge[:lookup]] %>
+<% end %>
