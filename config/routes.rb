@@ -9,4 +9,6 @@ Rails.application.routes.draw do
 
   post '/email', to: 'email#create'
   post '/sms', to: 'sms#create'
+
+  resource :metrics, only: [:show]
 end
