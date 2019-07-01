@@ -11,8 +11,7 @@ RSpec.describe MetricsController do
         queues: 3,
         workers: 4,
         working: 5,
-        working: 6,
-        failed: 7
+        failed: 6
       }
     end
 
@@ -22,6 +21,11 @@ RSpec.describe MetricsController do
 
     it 'works' do
       get :show, format: 'text'
+      expect(response).to be_successful
+    end
+
+    it 'works' do
+      get :show, format: 'html'
       expect(response).to be_successful
     end
 
