@@ -95,6 +95,13 @@ spec:
         #   - containerPort: 3000
         # non-secret env vars
         # defined in config_map.yaml
+        resources:
+          requests:
+            cpu: "300m"
+            memory: "512Mi"
+          limits:
+            cpu: "600m"
+            memory: "1024Mi"
         envFrom:
           - configMapRef:
               name: fb-submitter-env-{{ .Values.environmentName }}
