@@ -67,17 +67,6 @@ class ProcessSubmissionJob < ApplicationJob
     body_part_content
   end
 
-  def on_retryable_exception(error)
-    logger.warn "RETRYABLE EXCEPTION! @submission #{@submission.inspect}"
-    @submission.fail!(retryable: true) if @submission
-    super
-  end
-
-  def on_non_retryable_exception(error)
-    @submission.fail!(retryable: false) if @submission
-    super
-  end
-
   private
 
   # returns an array of Attachment objects
