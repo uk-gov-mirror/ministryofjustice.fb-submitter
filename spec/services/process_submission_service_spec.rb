@@ -96,12 +96,7 @@ describe ProcessSubmissionService do
       let(:submission_id) { submission.id }
 
       before do
-        allow(Submission).to receive(:find).with(submission_id).and_return(submission)
-      end
-
-      it 'loads the Submission' do
         expect(Submission).to receive(:find).with(submission_id).and_return(submission)
-        subject.perform
       end
 
       it 'updates the Submission status to :processing' do
