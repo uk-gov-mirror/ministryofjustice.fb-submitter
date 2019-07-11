@@ -3,7 +3,7 @@ jobs:
   test:
     working_directory: ~/circle
     docker:
-      - image: ministryofjustice/ruby:2.5.1
+      - image: ruby:2.6.3
         environment:
           RAILS_ENV: test
           PGHOST: 127.0.0.1
