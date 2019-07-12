@@ -27,7 +27,7 @@ jobs:
   build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
     docker:
-      - image: asmega/fb-builder:latest
+      - image: circleci/ruby:2.6.3
     steps:
       - checkout
       - add_ssh_keys:
@@ -61,7 +61,7 @@ jobs:
   build_and_deploy_to_integration:
     working_directory: ~/circle/git/fb-submitter
     docker:
-      - image: asmega/fb-builder:latest
+      - image: circleci/ruby:2.6.3
     steps:
       - checkout
       - add_ssh_keys:
@@ -95,7 +95,7 @@ jobs:
   build_and_deploy_to_live:
     working_directory: ~/circle/git/fb-submitter
     docker:
-      - image: asmega/fb-builder:latest
+      - image: circleci/ruby:2.6.3
     steps:
       - checkout
       - add_ssh_keys:
