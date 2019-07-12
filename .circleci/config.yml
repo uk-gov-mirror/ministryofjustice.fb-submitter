@@ -15,21 +15,17 @@ jobs:
           POSTGRES_DB: circle-test_test
     steps:
       - checkout
-      - run:
-          name: bundle install
-          command: 'bundle install --deployment --jobs=2 --retry 3 --without development'
-      - run:
-          name: setup database
-          command: 'RAILS_ENV=test bundle exec rake db:create db:schema:load'
+      - setup_remote_docker
       - run:
           name: test
-          command: 'bundle exec rspec'
+          command: 'make spec'
   build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
     docker:
-      - image: circleci/ruby:2.6.3
+      - image: asmega/fb-builder:latest
     steps:
       - checkout
+      - setup_remote_docker
       - add_ssh_keys:
           fingerprints:
             - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
@@ -45,7 +41,6 @@ jobs:
       - run:
           name: npm install
           command: 'npm install'
-      - setup_remote_docker
       - run:
           name: build and push docker images
           command: './scripts/circleci_build.sh test'
@@ -61,9 +56,10 @@ jobs:
   build_and_deploy_to_integration:
     working_directory: ~/circle/git/fb-submitter
     docker:
-      - image: circleci/ruby:2.6.3
+      - image: asmega/fb-builder:latest
     steps:
       - checkout
+      - setup_remote_docker
       - add_ssh_keys:
           fingerprints:
             - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
@@ -79,7 +75,6 @@ jobs:
       - run:
           name: npm install
           command: 'npm install'
-      - setup_remote_docker
       - run:
           name: build and push docker images
           command: './scripts/circleci_build.sh integration'
@@ -95,9 +90,10 @@ jobs:
   build_and_deploy_to_live:
     working_directory: ~/circle/git/fb-submitter
     docker:
-      - image: circleci/ruby:2.6.3
+      - image: asmega/fb-builder:latest
     steps:
       - checkout
+      - setup_remote_docker
       - add_ssh_keys:
           fingerprints:
             - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"

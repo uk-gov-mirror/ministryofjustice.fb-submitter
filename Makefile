@@ -1,33 +1,30 @@
-ifdef TARGET
-TARGETDEFINED="true"
-else
-TARGETDEFINED="false"
-endif
-
 dev:
-	$(eval export env_stub=dev)
-	@true
+	echo "TODO: Remove dev function call from deploy-utils"
 
 test:
-	$(eval export env_stub=test)
-	@true
+	echo "TODO: Remove test function call from deploy-utils"
 
 integration:
-	$(eval export env_stub=integration)
-	@true
+	echo "TODO: Remove integration function call from deploy-utils"
 
 live:
-	$(eval export env_stub=live)
-	@true
+	echo "TODO: Remove live function call from deploy-utils"
 
-target:
-ifeq ($(TARGETDEFINED), "true")
-	$(eval export env_stub=${TARGET})
-	@true
-else
-	$(info Must set TARGET)
-	@false
-endif
+build: stop
+	docker-compose build --build-arg BUNDLE_FLAGS=''
+
+serve: build
+	docker-compose up -d db
+	./scripts/wait_for_db.sh db postgres
+	docker-compose up -d app
+
+stop:
+	docker-compose down -v
+
+spec: build
+	docker-compose up -d db
+	./scripts/wait_for_db.sh db postgres
+	docker-compose run --rm app bundle exec rspec
 
 init:
 	$(eval export ECR_REPO_NAME_SUFFIXES=base web api)
@@ -39,15 +36,7 @@ install_build_dependencies: init
 	pip install --user awscli
 	$(eval export PATH=${PATH}:${HOME}/.local/bin/)
 
-
-# Needs ECR_REPO_NAME & ECR_REPO_URL env vars
-build: install_build_dependencies
-	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} CIRCLE_SHA1=${CIRCLE_SHA1} ./scripts/build_all.sh
-
-push: init
-	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} CIRCLE_SHA1=${CIRCLE_SHA1} ./scripts/push_all.sh
-
 build_and_push: install_build_dependencies
-	TAG="latest-${env_stub}" REPO_SCOPE=${ECR_REPO_URL_ROOT} CIRCLE_SHA1=${CIRCLE_SHA1} ./scripts/build_and_push_all.sh
+	REPO_SCOPE=${ECR_REPO_URL_ROOT} CIRCLE_SHA1=${CIRCLE_SHA1} ./scripts/build_and_push_all.sh
 
-.PHONY := init push build login
+.PHONY := init push build spec test integration live serve install_build_dependencies

@@ -1,5 +1,4 @@
 source 'https://rubygems.org'
-git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby File.read(".ruby-version").strip
 
@@ -13,12 +12,12 @@ gem 'typhoeus'
 gem 'mime-types'
 gem 'notifications-ruby-client'
 gem 'sentry-raven'
+gem 'tzinfo-data'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'capybara', '>= 2.15', '< 4.0'
-  gem 'rspec-rails', '>= 3.5.0'
-  gem 'dotenv-rails', require: 'dotenv/rails-now'
+  gem 'rspec-rails', '>= 3.8.0'
   gem 'rswag-specs'
 end
 
@@ -43,6 +42,3 @@ group :test do
   gem 'webmock'
   gem 'timecop'
 end
-
-# Windows does not include zoneinfo files, so bundle the tzinfo-data gem
-gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
