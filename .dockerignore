@@ -1,12 +1,11 @@
 deploy/
 scripts/
 tmp/
+!tmp/.keep
 node_modules/
 package.json
 package-lock.json
-coverage/
 test/
 log/*.log
 .env.*
 .git/
-spec/
