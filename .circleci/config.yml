@@ -109,7 +109,6 @@ jobs:
       - run:
           name: npm install
           command: 'npm install'
-      - setup_remote_docker
       - run:
           name: build and push docker images
           command: './scripts/circleci_build.sh live'
