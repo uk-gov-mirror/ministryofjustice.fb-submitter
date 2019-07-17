@@ -1,3 +1,5 @@
+require 'net/http'
+
 class DownloadService
   # returns Hash
   # {"https://my.domain/some/path/file.ext"=>"/the/file/path/file.ext"}
@@ -17,15 +19,30 @@ class DownloadService
     actual_dir = target_dir || Dir.mktmpdir
     results = {}
 
-    hydra = Typhoeus::Hydra.hydra
-
     urls.each do |url|
       file = file_path_for_download(url: url, target_dir: actual_dir)
-      request = construct_request(url: url, file_path: file, headers: headers)
+
+      uri = URI.parse(url)
+
+      Net::HTTP.start(uri.host, uri.port) do |http|
+        request = Net::HTTP::Get.new uri
+
+        headers.each do |k, v|
+          request.send(:[]=, k, v)
+        end
+
+        http.request(request) do |response|
+          open(file, 'wb') do |io|
+            response.read_body do |chunk|
+              io.write chunk
+            end
+          end
+        end
+      end
+
       results[url] = file
-      hydra.queue(request)
     end
-    hydra.run
+
     results
   end
 

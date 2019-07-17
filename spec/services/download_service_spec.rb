@@ -94,14 +94,14 @@ describe DownloadService do
           end
         end
 
-        it 'queues the request' do
+        xit 'queues the request' do
           expect(mock_hydra).to receive(:queue).with(mock_request_1)
           expect(mock_hydra).to receive(:queue).with(mock_request_2)
           subject.download_in_parallel
         end
       end
 
-      it 'runs the request batch' do
+      xit 'runs the request batch' do
         expect(mock_hydra).to receive(:run)
         subject.download_in_parallel
       end
