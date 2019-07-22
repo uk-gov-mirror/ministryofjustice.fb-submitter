@@ -4,7 +4,7 @@ class SubmissionController < ApplicationController
       submission_params(params).merge(status: Submission::STATUS[:queued])
     )
     @submission.save!
-    ProcessSubmissionJob.perform_later(submission_id: @submission.id)
+    ProcessSubmissionJob.perform_later(@submission.id)
     render status: :created, json: @submission
   end
 
