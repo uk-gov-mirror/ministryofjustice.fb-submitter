@@ -1,3 +1,9 @@
+DOCKER_COMPOSE = docker-compose -f docker-compose.yml
+
+ifndef CIRCLE_SHA1
+	DOCKER_COMPOSE += -f docker-compose.development.yml
+endif
+
 dev:
 	echo "TODO: Remove dev function call from deploy-utils"
 
@@ -11,21 +17,21 @@ live:
 	echo "TODO: Remove live function call from deploy-utils"
 
 build: stop
-	docker-compose build --build-arg BUNDLE_FLAGS=''
+	$(DOCKER_COMPOSE) build --build-arg BUNDLE_FLAGS=''
 
 serve: build
-	docker-compose up -d db
+	$(DOCKER_COMPOSE) up -d db
 	./scripts/wait_for_db.sh db postgres
-	docker-compose up -d app
-	docker-compose up -d worker
+	$(DOCKER_COMPOSE) up -d app
+	$(DOCKER_COMPOSE) up -d worker
 
 stop:
-	docker-compose down -v
+	$(DOCKER_COMPOSE) down -v
 
 spec: build
-	docker-compose up -d db
+	$(DOCKER_COMPOSE) up -d db
 	./scripts/wait_for_db.sh db postgres
-	docker-compose run --rm app bundle exec rspec
+	$(DOCKER_COMPOSE) run --rm app bundle exec rspec
 
 init:
 	$(eval export ECR_REPO_NAME_SUFFIXES=base web api)

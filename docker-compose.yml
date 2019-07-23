@@ -29,8 +29,6 @@ services:
       SECRET_KEY_BASE: 'xxxyyy'
     links:
       - db
-    volumes:
-      - ".:/app"
 
   worker:
     build:
