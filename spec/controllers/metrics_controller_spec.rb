@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe MetricsController do
-  describe 'GET #show' do
+  xdescribe 'GET #show' do
     render_views
 
     let(:info) do

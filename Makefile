@@ -17,6 +17,7 @@ serve: build
 	docker-compose up -d db
 	./scripts/wait_for_db.sh db postgres
 	docker-compose up -d app
+	docker-compose up -d worker
 
 stop:
 	docker-compose down -v

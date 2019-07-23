@@ -119,10 +119,6 @@ describe 'UserData API', type: :request do
           end
 
           context 'when the request is successful' do
-            before do
-              allow(ProcessSubmissionJob).to receive(:perform_later)
-            end
-
             it 'creates a submission record' do
               expect{ post_request }.to change(Submission, :count).by(1)
             end
@@ -152,9 +148,10 @@ describe 'UserData API', type: :request do
               end
             end
 
-            it 'puts a ProcessSubmissionJob on the queue for the submission id' do
+            it 'creates a Job to be processed asynchronously' do
               post_request
-              expect(ProcessSubmissionJob).to have_received(:perform_later).with(submission_id: Submission.last.id)
+              expect(Delayed::Job.all.count).to eq(1)
+              expect(Delayed::Job.first.handler).to include(Submission.first.id)
             end
 
             describe 'the response' do
