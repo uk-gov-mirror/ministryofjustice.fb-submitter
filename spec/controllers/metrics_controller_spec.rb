@@ -35,10 +35,10 @@ resque_jobs_failed 1'
       end
     end
 
-    context 'Given an HTML response' do
+    describe 'Response headers' do
       before { get :show, format: 'text' }
 
-      it 'adds the prometheus version header' do
+      it 'adds the prometheus version' do
         expect(response.headers['version']).to eq('0.0.4')
       end
     end
