@@ -1,41 +1,46 @@
 require 'rails_helper'
 
 RSpec.describe MetricsController do
-  xdescribe 'GET #show' do
+  describe 'GET #show' do
     render_views
 
-    let(:info) do
-      {
-        pending: 1,
-        processed: 2,
-        queues: 3,
-        workers: 4,
-        working: 5,
-        failed: 6
-      }
+    let(:job) { Delayed::Job.create! }
+
+    context 'given a pending job' do
+      before do
+        job.update(attempts: 0)
+        get :show, format: 'text'
+      end
+
+      it 'shows pending jobs' do
+        expected_result = '# TYPE delayed_jobs_pending gauge
+# HELP delayed_jobs_pending Number of pending jobs
+delayed_jobs_pending 1'
+        expect(response.body).to include(expected_result)
+      end
     end
 
-    before :each do
-      allow(Resque).to receive(:info).and_return(info)
+    context 'given a failed job' do
+      before do
+        job.update(attempts: 1)
+        get :show, format: 'text'
+      end
+
+      it 'shows failed jobs' do
+        expected_result = '# TYPE delayed_jobs_failed gauge
+# HELP delayed_jobs_failed Number of jobs failed
+delayed_jobs_failed 1'
+
+        expect(response.body).to include(expected_result)
+      end
     end
 
-    it 'works' do
-      get :show, format: 'text'
-      expect(response).to be_successful
-    end
+    describe 'Response headers' do
+      before { get :show, format: 'text' }
 
-    it 'works' do
-      get :show, format: 'html'
-      expect(response).to be_successful
-    end
-
-    it 'returns prometheus metrics' do
-      get :show, format: 'text'
-      body = response.body
-
-      expect(body).to include('# TYPE resque_jobs_pending gauge')
-      expect(body).to include('# HELP resque_jobs_pending Number of pending jobs')
-      expect(body).to include('resque_jobs_pending 1')
+      it 'adds the prometheus version' do
+        expect(response.headers['version']).to eq('0.0.4')
+      end
     end
   end
 end
