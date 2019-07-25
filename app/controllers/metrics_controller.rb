@@ -1,7 +1,9 @@
 class MetricsController < ActionController::Base
   def show
-    response.headers['version'] = '0.0.4'
+    response.content_type = 'text/plain; version=0.0.4'
     @stats = delayed_jobs_stats
+
+    render 'metrics/show.text'
   end
 
   private
