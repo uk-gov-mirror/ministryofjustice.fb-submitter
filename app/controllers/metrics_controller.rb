@@ -11,11 +11,11 @@ class MetricsController < ActionController::Base
     failed_job_count = Delayed::Job.where('attempts > 0').count
 
     [
-      { name: :resque_jobs_pending,
+      { name: :delayed_jobs_pending,
         docstring: 'Number of pending jobs',
         value: pending_job_count
       },
-      { name: :resque_jobs_failed,
+      { name: :delayed_jobs_failed,
         docstring: 'Number of jobs failed',
         value: failed_job_count
       }

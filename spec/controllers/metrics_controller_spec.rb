@@ -13,9 +13,9 @@ RSpec.describe MetricsController do
       end
 
       it 'shows pending jobs' do
-        expected_result = '# TYPE resque_jobs_pending gauge
-# HELP resque_jobs_pending Number of pending jobs
-resque_jobs_pending 1'
+        expected_result = '# TYPE delayed_jobs_pending gauge
+# HELP delayed_jobs_pending Number of pending jobs
+delayed_jobs_pending 1'
         expect(response.body).to include(expected_result)
       end
     end
@@ -27,9 +27,9 @@ resque_jobs_pending 1'
       end
 
       it 'shows failed jobs' do
-        expected_result = '# TYPE resque_jobs_failed gauge
-# HELP resque_jobs_failed Number of jobs failed
-resque_jobs_failed 1'
+        expected_result = '# TYPE delayed_jobs_failed gauge
+# HELP delayed_jobs_failed Number of jobs failed
+delayed_jobs_failed 1'
 
         expect(response.body).to include(expected_result)
       end
