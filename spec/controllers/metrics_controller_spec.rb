@@ -39,7 +39,7 @@ delayed_jobs_failed 1'
       before { get :show, format: 'html' }
 
       it 'adds the prometheus version' do
-        expect(response.headers['Content-Type']).to eq('text/plain; version=0.0.4; charset=utf-8')
+        expect(response.headers['Content-Type']).to eq('text/plain; version=0.0.4')
       end
     end
   end
