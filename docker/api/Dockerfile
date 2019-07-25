@@ -14,6 +14,8 @@ RUN bundle install --no-cache ${BUNDLE_FLAGS}
 
 COPY . .
 
+ADD https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem ./rds-combined-ca-bundle.pem
+
 RUN chown -R 1001:appgroup /app
 
 USER 1001
