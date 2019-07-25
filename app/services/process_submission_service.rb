@@ -6,6 +6,7 @@ class ProcessSubmissionService
   end
 
   def perform
+    raise 'fake error'
     submission.update_status(:processing)
     submission.responses = []
 
