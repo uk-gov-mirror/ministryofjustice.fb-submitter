@@ -82,6 +82,4 @@ test:
 #
 production:
   <<: *default
-  database: fb-submitter_production
-  username: fb-submitter
-  password: <%= ENV['FB-SUBMITTER_DATABASE_PASSWORD'] %>
+  url: <%= "#{ENV['DATABASE_URL']}?sslmode=verify-full&sslrootcert=#{Rails.root.join("rds-combined-ca-bundle.pem")}" %>
