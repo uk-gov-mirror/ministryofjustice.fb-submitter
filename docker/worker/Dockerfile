@@ -21,4 +21,4 @@ RUN chown -R 1001:appgroup /app
 USER 1001
 
 ARG RAILS_ENV=production
-CMD bin/delayed_job run
+CMD bundle exec rake jobs:work
