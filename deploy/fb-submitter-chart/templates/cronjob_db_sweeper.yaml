@@ -1,0 +1,52 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: fb-submitter-cron-db-sweeper-{{ .Values.environmentName }}
+  namespace: formbuilder-platform-{{ .Values.environmentName }}
+spec:
+  schedule: "0 * * * *"
+  successfulJobsHistoryLimit: 0
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: fb-submitter-api-{{ .Values.environmentName }}
+            image: "754256621582.dkr.ecr.eu-west-2.amazonaws.com/formbuilder/fb-submitter-api:{{ .Values.circleSha1 }}"
+            args:
+            - /bin/sh
+            - -c
+            - bundle exec rails runner 'DbSweeper.new.call'
+            securityContext:
+              runAsUser: 1001
+            imagePullPolicy: Always
+            envFrom:
+              - configMapRef:
+                  name: fb-submitter-env-{{ .Values.environmentName }}
+            env:
+              - name: SECRET_KEY_BASE
+                valueFrom:
+                  secretKeyRef:
+                    name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                    key: secret_key_base
+              - name: DATABASE_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: rds-instance-formbuilder-submitter-{{ .Values.environmentName }}
+                    key: url
+              - name: REDIS_AUTH_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
+                    key: auth_token
+              - name: REDIS_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
+                    key: primary_endpoint_address
+              - name: SENTRY_DSN
+                valueFrom:
+                  secretKeyRef:
+                    name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                    key: sentry_dsn
+          restartPolicy: Never
