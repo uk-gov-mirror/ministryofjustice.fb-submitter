@@ -2,7 +2,8 @@ source 'https://rubygems.org'
 
 ruby File.read(".ruby-version").strip
 
-gem 'rails', '~> 5.2.2.1'
+gem 'bootsnap', '>= 1.1.0', require: false
+gem 'rails', '~> 5.2.3'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 4.0'
 gem 'aws-sdk-ses', '~> 1.25.0'
