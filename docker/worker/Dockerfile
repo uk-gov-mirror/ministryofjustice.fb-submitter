@@ -1,6 +1,6 @@
 FROM ruby:2.6.3-alpine3.9
 
-RUN apk add build-base postgresql-contrib postgresql-dev bash libcurl
+RUN apk add build-base postgresql-contrib postgresql-dev bash libcurl postgresql-client
 
 RUN addgroup -g 1001 -S appgroup && \
   adduser -u 1001 -S appuser -G appgroup
