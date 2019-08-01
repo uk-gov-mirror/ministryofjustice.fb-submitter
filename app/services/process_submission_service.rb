@@ -6,10 +6,24 @@ class ProcessSubmissionService
   end
 
   def perform
+    p '-----------------------'
+    p '- - - - - - - - - - - -'
+    p '|   Starting Perform  |'
+    p '- - - - - - - - - - - -'
     submission.update_status(:processing)
     submission.responses = []
-
+    p ''
+    p ''
+    p 'submission.detail_objects.to_a'
+    p submission.detail_objects.to_a
+    p ''
+    p ''
+    p 'Each:'
     submission.detail_objects.to_a.each do |mail|
+      p ''
+      p mail
+      p ''
+
       if number_of_attachments(mail) <= 1
         response = EmailService.send_mail(
           from:         mail.from,
