@@ -31,10 +31,10 @@ class SmsController < ApplicationController
   end
 
   def sms_params
-    params.require(:sms).permit(:to,
-                                :body,
-                                :template_name,
-                                extra_personalisation: [:code])
+    params.permit(:to,
+                  :body,
+                  :template_name,
+                  extra_personalisation: [:code])
   end
 
   def job_class

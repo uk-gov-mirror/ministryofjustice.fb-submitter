@@ -13,19 +13,14 @@ RSpec.describe 'sms' do
         type: :object,
         properties: {
           service_slug: { type: :string, required: true, example: 'my-form' },
-          sms: {
+          to: { type: :string, required: true, example: 'user@example.com' },
+          body: { type: :string, required: true, example: 'body goes here' },
+          template_name: { type: :string, required: true, example: 'sms.generic' },
+          extra_personalisation: {
             type: :object,
-            properties: {
-              to: { type: :string, required: true, example: 'user@example.com' },
-              body: { type: :string, required: true, example: 'body goes here' },
-              template_name: { type: :string, required: true, example: 'sms.generic' },
-              extra_personalisation: {
-                type: :object,
-                required: false,
-                example: '{ "token": "token-goes-here" }'
-              },
-            }
-          }
+            required: false,
+            example: '{ "token": "token-goes-here" }'
+          },
         }
       }
 
@@ -33,11 +28,9 @@ RSpec.describe 'sms' do
         let(:json) do
           {
             service_slug: 'service-slug',
-            sms: {
-              to: 'user@example.com',
-              body: 'body goes here',
-              template_name: 'sms.generic'
-            }
+            to: 'user@example.com',
+            body: 'body goes here',
+            template_name: 'sms.generic'
           }
         end
 

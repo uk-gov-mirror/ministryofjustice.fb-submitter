@@ -8,11 +8,9 @@ describe SmsController do
 
   let(:json_hash) do
     {
-      sms: {
-        to: '07123456789',
-        body: 'form saved at https://example.com',
-        template_name: 'sms.generic'
-      }
+      to: '07123456789',
+      body: 'form saved at https://example.com',
+      template_name: 'sms.generic'
     }
   end
 
@@ -36,13 +34,11 @@ describe SmsController do
     context 'when extra personalisation' do
       let(:json_hash) do
         {
-          sms: {
-            to: '07123456789',
-            body: 'form saved at https://example.com',
-            template_name: 'sms.generic',
-            extra_personalisation: {
-              code: '12345'
-            }
+          to: '07123456789',
+          body: 'form saved at https://example.com',
+          template_name: 'sms.generic',
+          extra_personalisation: {
+            code: '12345'
           }
         }
       end
@@ -57,11 +53,9 @@ describe SmsController do
     context 'when no template found for template_name' do
       let(:json_hash) do
         {
-          sms: {
-            to: '07123456789',
-            body: 'form saved at https://example.com',
-            template_name: 'foo'
-          }
+          to: '07123456789',
+          body: 'form saved at https://example.com',
+          template_name: 'foo'
         }
       end
 
