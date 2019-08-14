@@ -6,9 +6,6 @@ class SmsController < ApplicationController
   #     to: '07123456789',
   #     body: 'body as string goes here',
   #     template_name: 'name-of-template',
-  #     [extra_personalisation]: {
-  #       token: 'my-token'
-  #     }
   #   }
   # }
   #
@@ -33,8 +30,7 @@ class SmsController < ApplicationController
   def sms_params
     params.permit(:to,
                   :body,
-                  :template_name,
-                  extra_personalisation: [:code])
+                  :template_name)
   end
 
   def job_class

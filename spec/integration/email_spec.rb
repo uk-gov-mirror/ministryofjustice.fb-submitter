@@ -20,11 +20,6 @@ RSpec.describe 'email' do
               subject: { type: :string, required: true, example: 'subject goes here' },
               body: { type: :string, required: true, example: 'body goes here' },
               template_name: { type: :string, required: true, example: 'email.generic' },
-              extra_personalisation: {
-                type: :object,
-                required: false,
-                example: '{ "token": "token-goes-here" }'
-              },
             }
           }
         }

@@ -47,11 +47,6 @@
                       "type": "string",
                       "required": true,
                       "example": "email.generic"
-                    },
-                    "extra_personalisation": {
-                      "type": "object",
-                      "required": false,
-                      "example": "{ \"token\": \"token-goes-here\" }"
                     }
                   }
                 }
@@ -89,30 +84,20 @@
                   "required": true,
                   "example": "my-form"
                 },
-                "sms": {
-                  "type": "object",
-                  "properties": {
-                    "to": {
-                      "type": "string",
-                      "required": true,
-                      "example": "user@example.com"
-                    },
-                    "body": {
-                      "type": "string",
-                      "required": true,
-                      "example": "body goes here"
-                    },
-                    "template_name": {
-                      "type": "string",
-                      "required": true,
-                      "example": "sms.generic"
-                    },
-                    "extra_personalisation": {
-                      "type": "object",
-                      "required": false,
-                      "example": "{ \"token\": \"token-goes-here\" }"
-                    }
-                  }
+                "to": {
+                  "type": "string",
+                  "required": true,
+                  "example": "user@example.com"
+                },
+                "body": {
+                  "type": "string",
+                  "required": true,
+                  "example": "body goes here"
+                },
+                "template_name": {
+                  "type": "string",
+                  "required": true,
+                  "example": "sms.generic"
                 }
               }
             }

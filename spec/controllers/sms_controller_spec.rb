@@ -31,25 +31,6 @@ describe SmsController do
       expect(response.body).to eql('{}')
     end
 
-    context 'when extra personalisation' do
-      let(:json_hash) do
-        {
-          to: '07123456789',
-          body: 'form saved at https://example.com',
-          template_name: 'sms.generic',
-          extra_personalisation: {
-            code: '12345'
-          }
-        }
-      end
-
-      it 'adds data to job' do
-        post :create, body: json_hash.to_json
-
-        expect(ActiveJob::Base.queue_adapter.enqueued_jobs.last[:args][0]['sms']['extra_personalisation']['code']).to eql('12345')
-      end
-    end
-
     context 'when no template found for template_name' do
       let(:json_hash) do
         {

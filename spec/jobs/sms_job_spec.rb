@@ -24,30 +24,5 @@ describe SmsJob do
 
       subject.perform(sms: sms)
     end
-
-    context 'when extra personalisation' do
-      let(:sms) do
-        {
-          to: to,
-          body: body,
-          template_name: 'sms.generic',
-          extra_personalisation: {
-            token: 'my-token'
-          }
-        }
-      end
-
-      it 'hands over data' do
-        expect(Notifications::Client).to receive(:new).and_return(mock_client)
-        expect(mock_client).to receive(:send_sms).with(phone_number: to,
-                                                       template_id: template_id,
-                                                       personalisation: {
-                                                         body: body,
-                                                         token: 'my-token'
-                                                       })
-
-        subject.perform(sms: sms)
-      end
-    end
   end
 end

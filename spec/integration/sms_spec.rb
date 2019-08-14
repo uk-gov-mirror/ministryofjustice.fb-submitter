@@ -16,11 +16,6 @@ RSpec.describe 'sms' do
           to: { type: :string, required: true, example: 'user@example.com' },
           body: { type: :string, required: true, example: 'body goes here' },
           template_name: { type: :string, required: true, example: 'sms.generic' },
-          extra_personalisation: {
-            type: :object,
-            required: false,
-            example: '{ "token": "token-goes-here" }'
-          },
         }
       }
 

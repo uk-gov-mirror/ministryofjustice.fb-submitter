@@ -7,9 +7,6 @@ class EmailController < ApplicationController
   #     subject: 'subject goes here',
   #     body: 'body as string goes here',
   #     template_name: 'name-of-template',
-  #     [extra_personalisation]: {
-  #       token: 'my-token'
-  #     }
   #   }
   # }
   #
@@ -32,7 +29,7 @@ class EmailController < ApplicationController
   end
 
   def email_params
-    params.require(:email).permit(:to, :subject, :body, :template_name, extra_personalisation: [:token])
+    params.require(:email).permit(:to, :subject, :body, :template_name)
   end
 
   def job_class

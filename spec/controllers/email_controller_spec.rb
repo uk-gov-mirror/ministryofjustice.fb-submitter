@@ -34,28 +34,6 @@ describe EmailController do
       expect(response.body).to eql('{}')
     end
 
-    context 'when extra personalisation' do
-      let(:json_hash) do
-        {
-          email: {
-            to: 'user@example.com',
-            subject: 'subject goes here',
-            body: 'form saved at https://example.com',
-            template_name: 'email.return.setup.email.verified',
-            extra_personalisation: {
-              token: 'my-token'
-            }
-          }
-        }
-      end
-
-      it 'adds data to job' do
-        post :create, body: json_hash.to_json
-
-        expect(ActiveJob::Base.queue_adapter.enqueued_jobs.last[:args][0]['email']['extra_personalisation']['token']).to eql('my-token')
-      end
-    end
-
     context 'when no template found for template_name' do
       let(:json_hash) do
         {
