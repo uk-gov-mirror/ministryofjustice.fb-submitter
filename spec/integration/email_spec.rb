@@ -13,7 +13,7 @@ RSpec.describe 'email' do
         type: :object,
         properties: {
           service_slug: { type: :string, required: true, example: 'my-form' },
-          email: {
+          message: {
             type: :object,
             properties: {
               to: { type: :string, required: true, example: 'user@example.com' },
@@ -34,7 +34,7 @@ RSpec.describe 'email' do
         let(:json) do
           {
             service_slug: 'service-slug',
-            email: {
+            message: {
               to: 'user@example.com',
               subject: 'subject goes here',
               body: 'body goes here',

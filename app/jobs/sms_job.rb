@@ -3,8 +3,8 @@ require 'notifications/client'
 class SmsJob < ApplicationJob
   queue_as :default
 
-  def perform(sms:)
-    sms = Sms.new(sms)
+  def perform(message:)
+    sms = Sms.new(message)
 
     response = client.send_sms(
       phone_number: sms.to,

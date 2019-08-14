@@ -3,8 +3,8 @@ require 'notifications/client'
 class EmailJob < ApplicationJob
   queue_as :default
 
-  def perform(email:)
-    email = Email.new(email)
+  def perform(message:)
+    email = Email.new(message)
 
     response = client.send_email(
       email_address: email.to,
