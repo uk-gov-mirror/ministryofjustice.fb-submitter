@@ -8,7 +8,7 @@ describe EmailController do
 
   let(:json_hash) do
     {
-      email: {
+      message: {
         to: 'user@example.com',
         subject: 'subject goes here',
         body: 'form saved at https://example.com',
@@ -37,7 +37,7 @@ describe EmailController do
     context 'when extra personalisation' do
       let(:json_hash) do
         {
-          email: {
+          message: {
             to: 'user@example.com',
             subject: 'subject goes here',
             body: 'form saved at https://example.com',
@@ -52,14 +52,14 @@ describe EmailController do
       it 'adds data to job' do
         post :create, body: json_hash.to_json
 
-        expect(ActiveJob::Base.queue_adapter.enqueued_jobs.last[:args][0]['email']['extra_personalisation']['token']).to eql('my-token')
+        expect(ActiveJob::Base.queue_adapter.enqueued_jobs.last[:args][0]['message']['extra_personalisation']['token']).to eql('my-token')
       end
     end
 
     context 'when no template found for template_name' do
       let(:json_hash) do
         {
-          email: {
+          message: {
             to: 'user@example.com',
             subject: 'subject goes here',
             body: 'form saved at https://example.com',

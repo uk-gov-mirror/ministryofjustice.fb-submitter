@@ -13,7 +13,7 @@ RSpec.describe 'sms' do
         type: :object,
         properties: {
           service_slug: { type: :string, required: true, example: 'my-form' },
-          sms: {
+          message: {
             type: :object,
             properties: {
               to: { type: :string, required: true, example: 'user@example.com' },
@@ -33,7 +33,7 @@ RSpec.describe 'sms' do
         let(:json) do
           {
             service_slug: 'service-slug',
-            sms: {
+            message: {
               to: 'user@example.com',
               body: 'body goes here',
               template_name: 'sms.generic'

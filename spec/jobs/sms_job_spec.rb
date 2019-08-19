@@ -5,7 +5,7 @@ describe SmsJob do
     let(:mock_client) { double('client') }
     let(:to) { '07123456789' }
     let(:body) { 'Your code is 12345' }
-    let(:sms) do
+    let(:message) do
       {
         to: to,
         body: body,
@@ -22,11 +22,11 @@ describe SmsJob do
                                                        body: body,
                                                      })
 
-      subject.perform(sms: sms)
+      subject.perform(message: message)
     end
 
     context 'when extra personalisation' do
-      let(:sms) do
+      let(:message) do
         {
           to: to,
           body: body,
@@ -46,7 +46,7 @@ describe SmsJob do
                                                          token: 'my-token'
                                                        })
 
-        subject.perform(sms: sms)
+        subject.perform(message: message)
       end
     end
   end

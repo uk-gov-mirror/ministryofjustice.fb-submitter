@@ -6,7 +6,7 @@ describe EmailJob do
     let(:to) { 'user@example.com' }
     let(:email_subject) { 'subject goes here' }
     let(:body) { 'saved form at https://example.com' }
-    let(:email) do
+    let(:message) do
       {
         to: to,
         subject: email_subject,
@@ -25,11 +25,11 @@ describe EmailJob do
                                                          body: body,
                                                        })
 
-      subject.perform(email: email)
+      subject.perform(message: message)
     end
 
     context 'when extra personalisation' do
-      let(:email) do
+      let(:message) do
         {
           to: to,
           subject: email_subject,
@@ -51,7 +51,7 @@ describe EmailJob do
                                                            token: 'my-token'
                                                          })
 
-        subject.perform(email: email)
+        subject.perform(message: message)
       end
     end
   end
