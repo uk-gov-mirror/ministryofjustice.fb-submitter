@@ -4,6 +4,7 @@ class Sms
   attr_accessor :to, :body, :template_name, :extra_personalisation
 
   validates :template_name, inclusion: { in: TemplateMappingService::Sms::ALL }
+  validates :to, format: { with: /\A\+{0,1}\d{9,16}\z/ }
 
   def extra_personalisation
     @extra_personalisation || {}
