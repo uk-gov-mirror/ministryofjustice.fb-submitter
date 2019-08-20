@@ -34,7 +34,7 @@ RSpec.describe 'sms' do
           {
             service_slug: 'service-slug',
             message: {
-              to: 'user@example.com',
+              to: '07123456789',
               body: 'body goes here',
               template_name: 'sms.generic'
             }
