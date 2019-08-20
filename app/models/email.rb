@@ -4,6 +4,7 @@ class Email
   attr_accessor :to, :subject, :body, :template_name, :extra_personalisation
 
   validates :template_name, inclusion: { in: TemplateMappingService::Email::ALL }
+  validates :to, format: { with: /.+@.+\..+/ }
 
   def extra_personalisation
     @extra_personalisation || {}
