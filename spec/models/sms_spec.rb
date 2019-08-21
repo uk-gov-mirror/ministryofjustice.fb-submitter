@@ -42,6 +42,15 @@ RSpec.describe Sms do
 
           subject.to = "447123456789"
           expect(subject).to be_valid
+
+          subject.to = "+44 0712 3456789"
+          expect(subject).to be_valid
+
+          subject.to = "01632 960 001"
+          expect(subject).to be_valid
+
+          subject.to = "07700 900 982"
+          expect(subject).to be_valid
         end
       end
     end
