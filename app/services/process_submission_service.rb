@@ -9,29 +9,9 @@ class ProcessSubmissionService
     submission.update_status(:processing)
     submission.responses = []
 
-    submission.detail_objects.to_a.each do |mail|
-      if number_of_attachments(mail) <= 1
-        response = EmailService.send_mail(
-          from:         mail.from,
-          to:           mail.to,
-          subject:      mail.subject,
-          body_parts:   retrieve_mail_body_parts(mail),
-          attachments:  attachments(mail)
-        )
-
-        submission.responses << response.to_h
-      else
-        attachments(mail).each_with_index do |a,n|
-          response = EmailService.send_mail(
-            from:         mail.from,
-            to:           mail.to,
-            subject:      "#{mail.subject} {#{submission_id}} [#{n+1}/#{number_of_attachments(mail)}]",
-            body_parts:   retrieve_mail_body_parts(mail),
-            attachments:  [a]
-          )
-
-          submission.responses << response.to_h
-        end
+    submission.detail_objects.to_a.each do |submission_detail|
+      if submission_detail.instance_of? EmailSubmissionDetail
+        send_email(submission_detail)
       end
     end
 
@@ -42,6 +22,32 @@ class ProcessSubmissionService
   end
 
   private
+
+  def send_email(mail)
+    if number_of_attachments(mail) <= 1
+      response = EmailService.send_mail(
+          from: mail.from,
+          to: mail.to,
+          subject: mail.subject,
+          body_parts: retrieve_mail_body_parts(mail),
+          attachments: attachments(mail)
+      )
+
+      submission.responses << response.to_h
+    else
+      attachments(mail).each_with_index do |a, n|
+        response = EmailService.send_mail(
+            from: mail.from,
+            to: mail.to,
+            subject: "#{mail.subject} {#{submission_id}} [#{n + 1}/#{number_of_attachments(mail)}]",
+            body_parts: retrieve_mail_body_parts(mail),
+            attachments: [a]
+        )
+
+        submission.responses << response.to_h
+      end
+    end
+  end
 
   def number_of_attachments(mail)
     attachments(mail).size

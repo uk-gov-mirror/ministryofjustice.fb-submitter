@@ -92,6 +92,39 @@ describe ProcessSubmissionService do
       allow(subject).to receive(:retrieve_mail_body_parts).and_return(body_part_content)
     end
 
+    context 'given a mix of email and json submissions' do
+
+      let(:email_submission) do
+        {
+            'type' => 'email',
+            'attachments' => []
+        }
+      end
+
+      let(:json_submission) do
+        {
+            'type' => 'json',
+            'attachments' => []
+        }
+      end
+
+      let(:submission) do
+        Submission.create!(
+            submission_details: [
+              email_submission,
+              email_submission,
+              json_submission,
+              json_submission
+          ], status: 'queued'
+        )
+      end
+
+      it 'dispatches email submissions to the email class' do
+        expect(EmailService).to receive(:send_mail).twice
+        subject.perform
+      end
+    end
+
     context 'given a valid submission_id' do
       let(:submission_id) { submission.id }
 
