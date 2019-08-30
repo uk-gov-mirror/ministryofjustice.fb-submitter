@@ -28,10 +28,10 @@ jobs:
       - setup_remote_docker
       - add_ssh_keys:
           fingerprints:
-            - "bd:17:68:ef:38:5e:72:09:06:df:e1:d4:a4:2e:64:94"
+            - "5d:c8:80:1b:1a:82:af:e0:30:26:d1:62:37:7e:c9:c1"
       - run:
           name: checkout fb-submitter-deploy
-          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_bd1768ef385e720906dfe1d4a42e6494 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
+          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_5dc8801b1a82afe03026d162377ec9c1 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
       - run:
           name: persist git crypt key to disk
           command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
