@@ -10,7 +10,7 @@ RSpec.describe SubmissionController, type: :controller do
     post :create, body: { something: 1 }.to_json
 
     expect(Submission.all.count).to eq(1)
-  endF
+  end
 
   it 'starts a delayed job' do
     post :create, body: { something: 1 }.to_json
