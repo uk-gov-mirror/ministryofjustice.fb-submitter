@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe ProcessSubmissionService do
@@ -14,7 +16,7 @@ describe ProcessSubmissionService do
     described_class.new(submission_id: submission.id)
   end
 
-  let(:mock_downloaded_files) { {'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2'} }
+  let(:mock_downloaded_files) { { 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2' } }
   let(:downloaded_body_parts) { mock_downloaded_files }
   let(:body_part_content) do
     {
@@ -23,7 +25,7 @@ describe ProcessSubmissionService do
     }
   end
   let(:token) { 'some token' }
-  let(:headers) { {'x-encrypted-user-id-and-token' => token} }
+  let(:headers) { { 'x-encrypted-user-id-and-token' => token } }
 
   describe '#perform' do
     let(:submission_detail) do
@@ -55,13 +57,13 @@ describe ProcessSubmissionService do
 
     let(:processed_attachments) do
       [
-        Attachment.new({
+        Attachment.new(
           path: '/path/to/file1',
           type: 'output',
           mimetype: 'application/pdf',
           url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
           filename: 'form1'
-        })
+        )
       ]
     end
 
@@ -82,7 +84,7 @@ describe ProcessSubmissionService do
       ['http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf']
     end
 
-    let(:mock_send_response){ {'key' => 'send response'} }
+    let(:mock_send_response) { { 'key' => 'send response' } }
 
     before do
       allow(EmailService).to receive(:send_mail).and_return(mock_send_response)
@@ -93,40 +95,39 @@ describe ProcessSubmissionService do
     end
 
     context 'given a mix of email and json submissions' do
-
-      let(:runner_callback_url) {'https://example.com/runner_frontend_callback' }
-      let(:json_destination_url) {'https://example.com/json_destination_placeholder' }
+      let(:runner_callback_url) { 'https://example.com/runner_frontend_callback' }
+      let(:json_destination_url) { 'https://example.com/json_destination_placeholder' }
 
       let(:email_submission) do
         {
-            'type' => 'email',
-            'attachments' => []
+          'type' => 'email',
+          'attachments' => []
         }
       end
 
       let(:json_submission) do
         {
-            'type' => 'json',
-            'url':  runner_callback_url,
-            'attachments' => []
+          'type' => 'json',
+          'url': runner_callback_url,
+          'attachments' => []
         }
       end
 
       let(:submission) do
         Submission.create!(
-            submission_details: [
-              email_submission,
-              email_submission,
-              json_submission,
-              json_submission
+          submission_details: [
+            email_submission,
+            email_submission,
+            json_submission,
+            json_submission
           ], status: 'queued'
         )
       end
 
       let(:headers) do
         {
-            'Expect'=>'',
-            'User-Agent'=>'Typhoeus - https://github.com/typhoeus/typhoeus'
+          'Expect' => '',
+          'User-Agent' => 'Typhoeus - https://github.com/typhoeus/typhoeus'
         }
       end
 
@@ -166,8 +167,8 @@ describe ProcessSubmissionService do
 
       it 'downloads the resolved unique_attachment_urls in parallel' do
         expect(DownloadService).to receive(:download_in_parallel)
-                                .with(urls: urls, headers: headers)
-                                .and_return(mock_downloaded_files)
+          .with(urls: urls, headers: headers)
+          .and_return(mock_downloaded_files)
         subject.perform
       end
 
@@ -177,7 +178,7 @@ describe ProcessSubmissionService do
       end
 
       describe 'for each detail object' do
-        let(:detail_object){ submission.detail_objects.first }
+        let(:detail_object) { submission.detail_objects.first }
 
         it 'retrieves the mail body parts' do
           expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object).and_return(body_part_content)
@@ -225,7 +226,7 @@ describe ProcessSubmissionService do
             'text/html' => 'https://tools.ietf.org/html/rfc2324',
             'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
           },
-          'attachments' => [ ]
+          'attachments' => []
         }
       end
 
@@ -377,17 +378,17 @@ describe ProcessSubmissionService do
   end
 
   describe '#download_body_parts' do
-    let(:mail) { double('mail', body_parts: {'text/plain' => 'url1', 'text/html' => 'url2'}) }
+    let(:mail) { double('mail', body_parts: { 'text/plain' => 'url1', 'text/html' => 'url2' }) }
     before do
       allow(DownloadService).to receive(:download_in_parallel).with(
-        urls: ['url1', 'url2'],
+        urls: %w[url1 url2],
         headers: headers
       ).and_return('download result')
     end
 
     it 'asks the DownloadService to download the resolved body part urls in parallel' do
       expect(DownloadService).to receive(:download_in_parallel).with(
-        urls: ['url1', 'url2'],
+        urls: %w[url1 url2],
         headers: headers
       )
       subject.send(:download_body_parts, mail)
@@ -400,12 +401,12 @@ describe ProcessSubmissionService do
 
   describe '#read_downloaded_body_parts' do
     context 'given a mail with body parts' do
-      let(:mail) { double('mail', body_parts: {'text/plain' => 'url1', 'text/html' => 'url2'}) }
+      let(:mail) { double('mail', body_parts: { 'text/plain' => 'url1', 'text/html' => 'url2' }) }
 
       context 'and a map of urls to file paths' do
-        let(:file_map) { {'url1' => 'file1', 'url2' => 'file2'} }
-        let(:mock_file_1) { double('File1', read: 'file 1 content')}
-        let(:mock_file_2) { double('File2', read: 'file 2 content')}
+        let(:file_map) { { 'url1' => 'file1', 'url2' => 'file2' } }
+        let(:mock_file_1) { double('File1', read: 'file 1 content') }
+        let(:mock_file_2) { double('File2', read: 'file 2 content') }
         before do
           allow(File).to receive(:open).with('file1').and_yield(mock_file_1)
           allow(File).to receive(:open).with('file2').and_yield(mock_file_2)
@@ -477,37 +478,37 @@ describe ProcessSubmissionService do
       it 'attaches filestore attachments' do
         expect(DownloadService).to receive(:download_in_parallel)
           .with(headers: {
-            "x-encrypted-user-id-and-token" => "encrypted_user_id_and_token"
-          }, urls: [
-            "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8",
-            "http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf"
-          ]).and_return({
-            "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8" => "/tmp/filestore.png",
-            "http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf" => "/tmp/output.pdf"
-          })
+                  'x-encrypted-user-id-and-token' => 'encrypted_user_id_and_token'
+                }, urls: [
+                  'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+                  'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf'
+                ]).and_return(
+                  'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8' => '/tmp/filestore.png',
+                  'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/tmp/output.pdf'
+                )
 
         # only testing file attachments here
         allow(subject).to receive(:retrieve_mail_body_parts).and_return([])
 
         expected_attachments = [
-          Attachment.new({
-          path: '/tmp/output.pdf',
-          type: 'output',
-          mimetype: 'application/pdf',
-          url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
-          filename: 'form1'
-        }),
-        Attachment.new({
-          path: '/tmp/filestore.png',
-          type: 'filestore',
-          mimetype: 'image/png',
-          url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
-          filename: 'image2.png'
-        })]
+          Attachment.new(
+            path: '/tmp/output.pdf',
+            type: 'output',
+            mimetype: 'application/pdf',
+            url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
+            filename: 'form1'
+          ),
+          Attachment.new(
+            path: '/tmp/filestore.png',
+            type: 'filestore',
+            mimetype: 'image/png',
+            url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+            filename: 'image2.png'
+          )
+        ]
 
-
-        subject.send(:attachments, submission.detail_objects[0]).each_with_index do |a,i|
-          [:type, :filename, :url, :mimetype, :path].each do |k|
+        subject.send(:attachments, submission.detail_objects[0]).each_with_index do |a, i|
+          %i[type filename url mimetype path].each do |k|
             expect(a.send(k)).to eql(expected_attachments[i].send(k))
           end
         end
@@ -516,15 +517,15 @@ describe ProcessSubmissionService do
 
         expect(EmailService).to receive(:send_mail).with(attachments: [expected_attachments[0]],
                                                          body_parts: [],
-                                                         from: "some.one@example.com",
-                                                         subject: "mail subject {id-of-submission} [1/2]",
-                                                         to: "destination@example.com")
+                                                         from: 'some.one@example.com',
+                                                         subject: 'mail subject {id-of-submission} [1/2]',
+                                                         to: 'destination@example.com')
 
         expect(EmailService).to receive(:send_mail).with(attachments: [expected_attachments[1]],
                                                          body_parts: [],
-                                                         from: "some.one@example.com",
-                                                         subject: "mail subject {id-of-submission} [2/2]",
-                                                         to: "destination@example.com")
+                                                         from: 'some.one@example.com',
+                                                         subject: 'mail subject {id-of-submission} [2/2]',
+                                                         to: 'destination@example.com')
 
         subject.perform
       end

@@ -34,7 +34,7 @@ describe JsonWebhookService do
     subject.execute
   end
 
-  let(:frontend_responce) do
+  let(:frontend_response) do
     { id: SecureRandom.uuid }
   end
 

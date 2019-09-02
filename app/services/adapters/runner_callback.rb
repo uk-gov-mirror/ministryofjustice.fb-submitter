@@ -1,7 +1,7 @@
 module Adapters
   class RunnerCallback
 
-    class FrontendRequestError < StandardError
+    class ClientRequestError < StandardError
     end
 
     def initialize(url:)
@@ -14,13 +14,12 @@ module Adapters
           method: :get,
       ).run
       unless response.success?
-        raise FrontendRequestError, "request for  #{url} returned response status of: #{response.code}"
+        raise ClientRequestError, "request for #{url} returned response status of: #{response.code}"
       end
       response.body
     end
 
     private
-
     attr_reader :url
   end
 end

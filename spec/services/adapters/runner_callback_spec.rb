@@ -27,6 +27,6 @@ describe Adapters::RunnerCallback do
 
     expect do
       subject.fetch_full_submission
-    end.to raise_error(Adapters::RunnerCallback::FrontendRequestError)
+    end.to raise_error(Adapters::RunnerCallback::ClientRequestError)
   end
 end

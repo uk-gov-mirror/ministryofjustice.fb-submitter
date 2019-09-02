@@ -7,6 +7,8 @@ class ProcessSubmissionService
     @submission_id = submission_id
   end
 
+  JSON_DESTINATION_PLACEHOLDER = 'https://example.com/json_destination_placeholder'.freeze
+
   def perform
     submission.update_status(:processing)
     submission.responses = []
@@ -17,7 +19,7 @@ class ProcessSubmissionService
       if submission_detail.fetch(:type) == 'json'
         JsonWebhookService.new(
             runner_callback_adapter: Adapters::RunnerCallback.new(url: submission_detail.fetch(:url)),
-            webhook_destination_adapter: Adapters::WebhookDestination.new(url: 'https://example.com/json_destination_placeholder')
+            webhook_destination_adapter: Adapters::WebhookDestination.new(url: JSON_DESTINATION_PLACEHOLDER)
         ).execute
       end
     end
@@ -93,7 +95,7 @@ class ProcessSubmissionService
     # we need to send the body parts as strings
     body_part_content = {}
     mail.body_parts.each do |type, url|
-      body_part_content[type] = File.open(body_part_map[url], &:read)
+      body_part_content[type] = File.open(body_part_map[url]){|f| f.read}
     end
     body_part_content
   end
