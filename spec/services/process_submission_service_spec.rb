@@ -94,6 +94,9 @@ describe ProcessSubmissionService do
 
     context 'given a mix of email and json submissions' do
 
+      let(:runner_callback_url) {'https://example.com/runner_frontend_callback' }
+      let(:json_destination_url) {'https://example.com/json_destination_placeholder' }
+
       let(:email_submission) do
         {
             'type' => 'email',
@@ -104,6 +107,7 @@ describe ProcessSubmissionService do
       let(:json_submission) do
         {
             'type' => 'json',
+            'url':  runner_callback_url,
             'attachments' => []
         }
       end
@@ -119,9 +123,27 @@ describe ProcessSubmissionService do
         )
       end
 
+      let(:headers) do
+        {
+            'Expect'=>'',
+            'User-Agent'=>'Typhoeus - https://github.com/typhoeus/typhoeus'
+        }
+      end
+
+      before do
+        stub_request(:get, runner_callback_url).with(headers: headers).to_return(status: 200)
+        stub_request(:post, json_destination_url).with(headers: headers).to_return(status: 200)
+      end
+
       it 'dispatches email submissions to the email class' do
         expect(EmailService).to receive(:send_mail).twice
         subject.perform
+      end
+
+      it 'dispatches json submissions to the webhook class' do
+        subject.perform
+        expect(WebMock).to have_requested(:get, runner_callback_url).twice
+        expect(WebMock).to have_requested(:post, json_destination_url).twice
       end
     end
 

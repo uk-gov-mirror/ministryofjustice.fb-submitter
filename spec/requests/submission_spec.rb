@@ -158,25 +158,6 @@ describe 'UserData API', type: :request do
               expect(Delayed::Job.first.handler).to include('ProcessSubmissionService')
             end
 
-            context "when 'json' type webhook is submitted" do
-              let(:submission_details) do
-                [
-                  {
-                    type: 'json',
-                    url: 'destination@example.com',
-                    key: 'foo'
-                  }
-                ]
-              end
-
-              it 'creates a json webhook Job to be processed asynchronously' do
-                post_request
-                expect(Delayed::Job.all.count).to eq(1)
-                expect(Delayed::Job.first.handler).to include(Submission.first.id)
-                expect(Delayed::Job.first.handler).to eq('JsonWebhookJob')
-              end
-            end
-
             describe 'the response' do
               before do
                 post_request

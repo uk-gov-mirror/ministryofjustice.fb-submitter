@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProcessSubmissionService
   attr_reader :submission_id
 
@@ -8,6 +10,17 @@ class ProcessSubmissionService
   def perform
     submission.update_status(:processing)
     submission.responses = []
+
+    submission.submission_details.each do |submission_detail|
+      submission_detail = submission_detail.symbolize_keys
+
+      if submission_detail.fetch(:type) == 'json'
+        JsonWebhookService.new(
+          runner_callback_adaptor: Adapters::RunnerCallback.new(url: submission_detail.fetch(:url)),
+          webhook_destination_adaptor: Adapters::WebhookDestination.new(url: 'https://example.com/json_destination_placeholder')
+        ).execute
+      end
+    end
 
     submission.detail_objects.to_a.each do |submission_detail|
       if submission_detail.instance_of? EmailSubmissionDetail
@@ -26,22 +39,22 @@ class ProcessSubmissionService
   def send_email(mail)
     if number_of_attachments(mail) <= 1
       response = EmailService.send_mail(
-          from: mail.from,
-          to: mail.to,
-          subject: mail.subject,
-          body_parts: retrieve_mail_body_parts(mail),
-          attachments: attachments(mail)
+        from: mail.from,
+        to: mail.to,
+        subject: mail.subject,
+        body_parts: retrieve_mail_body_parts(mail),
+        attachments: attachments(mail)
       )
 
       submission.responses << response.to_h
     else
       attachments(mail).each_with_index do |a, n|
         response = EmailService.send_mail(
-            from: mail.from,
-            to: mail.to,
-            subject: "#{mail.subject} {#{submission_id}} [#{n + 1}/#{number_of_attachments(mail)}]",
-            body_parts: retrieve_mail_body_parts(mail),
-            attachments: [a]
+          from: mail.from,
+          to: mail.to,
+          subject: "#{mail.subject} {#{submission_id}} [#{n + 1}/#{number_of_attachments(mail)}]",
+          body_parts: retrieve_mail_body_parts(mail),
+          attachments: [a]
         )
 
         submission.responses << response.to_h
@@ -80,7 +93,7 @@ class ProcessSubmissionService
     # we need to send the body parts as strings
     body_part_content = {}
     mail.body_parts.each do |type, url|
-      body_part_content[type] = File.open(body_part_map[url]){|f| f.read}
+      body_part_content[type] = File.open(body_part_map[url], &:read)
     end
     body_part_content
   end
@@ -99,7 +112,7 @@ class ProcessSubmissionService
       object['path'] = url_file_map[object['url']]
       object
     end
-    array.map{|o| Attachment.new(o.symbolize_keys)}
+    array.map { |o| Attachment.new(o.symbolize_keys) }
   end
 
   def url_file_map
