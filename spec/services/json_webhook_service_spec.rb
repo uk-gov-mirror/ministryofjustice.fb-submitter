@@ -39,10 +39,10 @@ describe JsonWebhookService do
   end
 
   it 'sends the webhook destination return to the destination' do
-    expect(runner_callback_adapter).to receive(:fetch_full_submission).and_return(frontend_responce)
+    expect(runner_callback_adapter).to receive(:fetch_full_submission).and_return(frontend_response)
 
     expect(webhook_destination_adapter).to receive(:send_webhook)
-      .with(body: frontend_responce)
+      .with(body: frontend_response)
       .once
 
     subject.execute
