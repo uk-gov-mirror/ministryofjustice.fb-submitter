@@ -20,6 +20,7 @@ module Adapters
     end
 
     private
+
     attr_reader :url
   end
 end

@@ -10,5 +10,6 @@ class JsonWebhookService
   end
 
   private
+
   attr_reader :runner_callback_adapter, :webhook_destination_adapter
 end
