@@ -7,19 +7,18 @@ class ProcessSubmissionService
     @submission_id = submission_id
   end
 
-  JSON_DESTINATION_PLACEHOLDER = 'https://example.com/json_destination_placeholder'.freeze
-
   def perform
     submission.update_status(:processing)
     submission.responses = []
 
+    token = submission.encrypted_user_id_and_token
     submission.submission_details.each do |submission_detail|
       submission_detail = submission_detail.symbolize_keys
 
       if submission_detail.fetch(:type) == 'json'
         JsonWebhookService.new(
-            runner_callback_adapter: Adapters::RunnerCallback.new(url: submission_detail.fetch(:url)),
-            webhook_destination_adapter: Adapters::WebhookDestination.new(url: JSON_DESTINATION_PLACEHOLDER)
+          runner_callback_adapter: Adapters::RunnerCallback.new(url: submission_detail.fetch(:data_url), token: token),
+          webhook_destination_adapter: Adapters::WebhookDestination.new(url: submission_detail.fetch(:url))
         ).execute
       end
     end
