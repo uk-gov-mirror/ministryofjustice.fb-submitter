@@ -16,8 +16,8 @@ class ProcessSubmissionService
 
       if submission_detail.fetch(:type) == 'json'
         JsonWebhookService.new(
-          runner_callback_adaptor: Adapters::RunnerCallback.new(url: submission_detail.fetch(:url)),
-          webhook_destination_adaptor: Adapters::WebhookDestination.new(url: 'https://example.com/json_destination_placeholder')
+            runner_callback_adapter: Adapters::RunnerCallback.new(url: submission_detail.fetch(:url)),
+            webhook_destination_adapter: Adapters::WebhookDestination.new(url: 'https://example.com/json_destination_placeholder')
         ).execute
       end
     end

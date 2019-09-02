@@ -1,16 +1,16 @@
 require 'rails_helper'
 
 describe JsonWebhookService do
-  let(:runner_callback_adaptor) do
+  let(:runner_callback_adapter) do
     instance_double(Adapters::RunnerCallback)
   end
 
-  let(:webhook_destination_adaptor) do
+  let(:webhook_destination_adapter) do
     instance_double(Adapters::WebhookDestination)
   end
 
   subject do
-    described_class.new(runner_callback_adaptor: runner_callback_adaptor, webhook_destination_adaptor: webhook_destination_adaptor)
+    described_class.new(runner_callback_adapter: runner_callback_adapter, webhook_destination_adapter: webhook_destination_adapter)
   end
 
 
@@ -19,16 +19,16 @@ describe JsonWebhookService do
   end
 
   it 'gets full submission from the frontend service' do
-    allow(webhook_destination_adaptor).to receive(:send_webhook)
+    allow(webhook_destination_adapter).to receive(:send_webhook)
 
-    expect(runner_callback_adaptor).to receive(:fetch_full_submission)
+    expect(runner_callback_adapter).to receive(:fetch_full_submission)
     subject.execute
   end
 
   it 'posts to the given endpoint' do
-    allow(runner_callback_adaptor).to receive(:fetch_full_submission)
+    allow(runner_callback_adapter).to receive(:fetch_full_submission)
 
-    expect(webhook_destination_adaptor)
+    expect(webhook_destination_adapter)
       .to receive(:send_webhook)
       .once
     subject.execute
@@ -39,9 +39,9 @@ describe JsonWebhookService do
   end
 
   it 'sends the webhook destination return to the destination' do
-    expect(runner_callback_adaptor).to receive(:fetch_full_submission).and_return(frontend_responce)
+    expect(runner_callback_adapter).to receive(:fetch_full_submission).and_return(frontend_responce)
 
-    expect(webhook_destination_adaptor).to receive(:send_webhook)
+    expect(webhook_destination_adapter).to receive(:send_webhook)
       .with(body: frontend_responce)
       .once
 

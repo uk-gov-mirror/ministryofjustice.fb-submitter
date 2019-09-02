@@ -1,15 +1,14 @@
 class JsonWebhookService
-
-  def initialize(runner_callback_adaptor:, webhook_destination_adaptor:)
-    @runner_callback_adaptor = runner_callback_adaptor
-    @webhook_destination_adaptor = webhook_destination_adaptor
+  def initialize(runner_callback_adapter:, webhook_destination_adapter:)
+    @runner_callback_adapter = runner_callback_adapter
+    @webhook_destination_adapter = webhook_destination_adapter
   end
 
   def execute()
-    res = runner_callback_adaptor.fetch_full_submission
-    webhook_destination_adaptor.send_webhook(body: res)
+    res = runner_callback_adapter.fetch_full_submission
+    webhook_destination_adapter.send_webhook(body: res)
   end
 
   private
-  attr_reader :runner_callback_adaptor, :webhook_destination_adaptor
+  attr_reader :runner_callback_adapter, :webhook_destination_adapter
 end

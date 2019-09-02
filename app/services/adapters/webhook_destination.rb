@@ -13,7 +13,6 @@ module Adapters
           url,
           method: :post,
           body: body
-          # headers: { Accept: "text/html" }
       ).run
       unless response.success?
         raise DestinationRequestError, "request for  #{url} returned response status of: #{response.code}"
@@ -21,6 +20,7 @@ module Adapters
     end
 
     private
+
     attr_reader :url
   end
 end

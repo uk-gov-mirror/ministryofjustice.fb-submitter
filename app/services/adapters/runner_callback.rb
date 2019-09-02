@@ -12,8 +12,6 @@ module Adapters
       response = Typhoeus::Request.new(
           url,
           method: :get,
-          # body: "this is a request body",
-          # headers: { Accept: "text/html" }
       ).run
       unless response.success?
         raise FrontendRequestError, "request for  #{url} returned response status of: #{response.code}"
@@ -22,6 +20,7 @@ module Adapters
     end
 
     private
+
     attr_reader :url
   end
 end
