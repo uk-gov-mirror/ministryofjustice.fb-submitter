@@ -18,7 +18,7 @@ module Adapters
       unless response.success?
         raise FrontendRequestError, "request for  #{url} returned response status of: #{response.code}"
       end
-      JSON.parse(response.body).symbolize_keys
+      response.body
     end
 
     private
