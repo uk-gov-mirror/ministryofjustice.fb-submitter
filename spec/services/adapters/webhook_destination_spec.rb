@@ -28,6 +28,6 @@ describe Adapters::WebhookDestination do
 
     expect{
       subject.send_webhook(body: payload)
-    }.to raise_error(Adapters::WebhookDestination::DestinationRequestError)
+    }.to raise_error(Adapters::WebhookDestination::ClientRequestError)
   end
 end
