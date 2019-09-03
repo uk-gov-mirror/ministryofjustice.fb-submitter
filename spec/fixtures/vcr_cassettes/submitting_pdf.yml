@@ -1,0 +1,285 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://some-slug.formbuilder-services-test:3000/api/runner/pdf/default/guid1.pdf
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Typhoeus - https://github.com/typhoeus/typhoeus
+      X-Encrypted-User-Id-And-Token:
+      - bla bla
+      Expect:
+      - ''
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 03 Sep 2019 14:49:30 GMT
+      Server:
+      - Apache/2.2.22 (Debian)
+      Last-Modified:
+      - Mon, 17 Jun 2019 03:35:57 GMT
+      Etag:
+      - '"3d2a52-7b21-58b7cb1b3715e"'
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '31521'
+      Strict-Transport-Security:
+      - max-age=3600
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      Content-Type:
+      - application/pdf
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 03 Sep 2019 14:49:27 GMT
+- request:
+    method: get
+    uri: https://tools.ietf.org/html/rfc2324
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Typhoeus - https://github.com/typhoeus/typhoeus
+      X-Encrypted-User-Id-And-Token:
+      - bla bla
+      Expect:
+      - ''
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 03 Sep 2019 14:49:30 GMT
+      Server:
+      - Apache/2.2.22 (Debian)
+      Last-Modified:
+      - Mon, 17 Jun 2019 03:35:57 GMT
+      Etag:
+      - '"3d2a52-7b21-58b7cb1b3715e"'
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '31521'
+      Strict-Transport-Security:
+      - max-age=3600
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      Content-Type:
+      - application/pdf
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 03 Sep 2019 14:49:28 GMT
+- request:
+    method: get
+    uri: https://tools.ietf.org/rfc/rfc2324.txt
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Typhoeus - https://github.com/typhoeus/typhoeus
+      X-Encrypted-User-Id-And-Token:
+      - bla bla
+      Expect:
+      - ''
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 03 Sep 2019 14:49:31 GMT
+      Server:
+      - Apache/2.2.22 (Debian)
+      Last-Modified:
+      - Mon, 17 Jun 2019 03:35:57 GMT
+      Etag:
+      - '"3d2a52-7b21-58b7cb1b3715e"'
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '31521'
+      Strict-Transport-Security:
+      - max-age=3600
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      Content-Type:
+      - application/pdf
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 03 Sep 2019 14:49:28 GMT
+- request:
+    method: get
+    uri: http://some-slug.formbuilder-services-test:3000/api/runner/pdf/default/guid1.pdf
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Typhoeus - https://github.com/typhoeus/typhoeus
+      X-Encrypted-User-Id-And-Token:
+      - bla bla
+      Expect:
+      - ''
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 03 Sep 2019 14:49:32 GMT
+      Server:
+      - Apache/2.2.22 (Debian)
+      Last-Modified:
+      - Mon, 17 Jun 2019 03:35:57 GMT
+      Etag:
+      - '"3d2a52-7b21-58b7cb1b3715e"'
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '31521'
+      Strict-Transport-Security:
+      - max-age=3600
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      Content-Type:
+      - application/pdf
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 03 Sep 2019 14:49:29 GMT
+- request:
+    method: get
+    uri: http://some-slug.formbuilder-services-test:3000/api/runner/pdf/default/guid1.pdf
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Typhoeus - https://github.com/typhoeus/typhoeus
+      X-Encrypted-User-Id-And-Token:
+      - bla bla
+      Expect:
+      - ''
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 03 Sep 2019 14:49:32 GMT
+      Server:
+      - Apache/2.2.22 (Debian)
+      Last-Modified:
+      - Mon, 17 Jun 2019 03:35:57 GMT
+      Etag:
+      - '"3d2a52-7b21-58b7cb1b3715e"'
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '31521'
+      Strict-Transport-Security:
+      - max-age=3600
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      Content-Type:
+      - application/pdf
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 03 Sep 2019 14:49:29 GMT
+- request:
+    method: get
+    uri: http://some-slug.formbuilder-services-test:3000/api/runner/pdf/default/guid1.pdf
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Typhoeus - https://github.com/typhoeus/typhoeus
+      X-Encrypted-User-Id-And-Token:
+      - bla bla
+      Expect:
+      - ''
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Tue, 03 Sep 2019 14:49:32 GMT
+      Server:
+      - Apache/2.2.22 (Debian)
+      Last-Modified:
+      - Mon, 17 Jun 2019 03:35:57 GMT
+      Etag:
+      - '"3d2a52-7b21-58b7cb1b3715e"'
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '31521'
+      Strict-Transport-Security:
+      - max-age=3600
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      X-Clacks-Overhead:
+      - GNU Terry Pratchett
+      Content-Type:
+      - application/pdf
+    body:
+      encoding: UTF-8
+      string: ''
+    http_version: 
+  recorded_at: Tue, 03 Sep 2019 14:49:29 GMT
+recorded_with: VCR 5.0.0
