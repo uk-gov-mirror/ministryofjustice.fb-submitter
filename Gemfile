@@ -32,6 +32,7 @@ group :development do
 end
 
 group :test do
+  gem 'vcr'
   gem 'database_cleaner'
   gem 'factory_bot_rails', '~> 5.0'
   gem 'faker'
