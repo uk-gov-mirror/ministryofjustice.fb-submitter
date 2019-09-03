@@ -10,8 +10,12 @@ describe Adapters::RunnerCallback do
     "http://www.example.com/#{SecureRandom.uuid}"
   end
 
+  let(:expected_headers) do
+    { 'x-encrypted-user-id-and-token' => 'some-token' }
+  end
+
   subject do
-    described_class.new(url: expected_url)
+    described_class.new(url: expected_url, token: 'some-token')
   end
 
   it 'returns the submission json when given a url' do
@@ -19,7 +23,7 @@ describe Adapters::RunnerCallback do
 
     expect(subject.fetch_full_submission).to eq(response)
 
-    expect(WebMock).to have_requested(:get, expected_url).once
+    expect(WebMock).to have_requested(:get, expected_url).with(headers: expected_headers).once
   end
 
   it 'throws exception if not 200 response' do

@@ -4,15 +4,14 @@ module Adapters
     class ClientRequestError < StandardError
     end
 
-    def initialize(url:)
+    def initialize(url:, token:)
       @url = url
+      @token = token
     end
 
     def fetch_full_submission
-      response = Typhoeus::Request.new(
-          url,
-          method: :get,
-      ).run
+      response = Typhoeus.get(url, headers: headers)
+
       unless response.success?
         raise ClientRequestError, "request for #{url} returned response status of: #{response.code}"
       end
@@ -21,6 +20,10 @@ module Adapters
 
     private
 
-    attr_reader :url
+    def headers
+      { 'x-encrypted-user-id-and-token' => token }
+    end
+
+    attr_reader :url, :token
   end
 end

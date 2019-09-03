@@ -108,7 +108,8 @@ describe ProcessSubmissionService do
       let(:json_submission) do
         {
           'type' => 'json',
-          'url': runner_callback_url,
+          'url': json_destination_url,
+          'data_url': runner_callback_url,
           'attachments' => []
         }
       end
