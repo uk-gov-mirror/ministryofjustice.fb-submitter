@@ -108,7 +108,7 @@ SimpleCov.start do
   add_filter '/spec/'
 end
 
-SimpleCov.minimum_coverage 92
+SimpleCov.minimum_coverage 93
 SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::HTMLFormatter,
   SimpleCov::Formatter::Console

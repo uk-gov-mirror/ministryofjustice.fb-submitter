@@ -1,0 +1,47 @@
+require 'rails_helper'
+require 'webmock/rspec'
+require 'jwe'
+
+describe Adapters::JweWebhookDestination do
+  let(:payload) do
+    { id: SecureRandom.uuid }
+  end
+
+  let(:key) { '056a757e37f69950' }
+
+  let(:expected_url) do
+    "http://www.example.com/#{SecureRandom.uuid}"
+  end
+
+  subject do
+    described_class.new(url: expected_url, key: key)
+  end
+
+  it 'makes a post to the given url' do
+    stub_request(:post, expected_url).to_return(status: 200)
+
+    subject.send_webhook(body: payload)
+
+    expect(WebMock).to have_requested(:post, expected_url).once
+  end
+
+  it 'sends JWE encrypted payload' do
+    response = double('response', :success? => true)
+
+    allow(Typhoeus::Request).to receive(:new) do |url, hash|
+      expect(url).to eql(expected_url)
+      expect(hash[:method]).to eql(:post)
+      expect(JSON.parse(JWE.decrypt(hash[:body], key)).symbolize_keys).to eql(payload)
+    end.and_return(double('request', :run => response))
+
+    subject.send_webhook(body: payload)
+  end
+
+  it 'throws exception if not 200 response' do
+    stub_request(:post, expected_url).to_return(status: 500)
+
+    expect{
+      subject.send_webhook(body: payload)
+    }.to raise_error(Adapters::JweWebhookDestination::ClientRequestError)
+  end
+end
