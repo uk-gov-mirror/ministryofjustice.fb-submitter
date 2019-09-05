@@ -5,11 +5,14 @@ class JsonWebhookService
   end
 
   def execute()
-    res = runner_callback_adapter.fetch_full_submission
-    webhook_destination_adapter.send_webhook(body: res)
+    webhook_destination_adapter.send_webhook(body: response)
   end
 
   private
 
   attr_reader :runner_callback_adapter, :webhook_destination_adapter
+
+  def response
+    @response ||= runner_callback_adapter.fetch_full_submission
+  end
 end
