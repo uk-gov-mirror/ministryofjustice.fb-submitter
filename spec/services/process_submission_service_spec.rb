@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails_helper'
+require 'webmock/rspec'
 
 describe ProcessSubmissionService do
   let(:submission) do
@@ -110,6 +111,7 @@ describe ProcessSubmissionService do
           'type' => 'json',
           'url': json_destination_url,
           'data_url': runner_callback_url,
+          'encryption_key': SecureRandom.hex(8),
           'attachments' => []
         }
       end
@@ -133,7 +135,7 @@ describe ProcessSubmissionService do
       end
 
       before do
-        stub_request(:get, runner_callback_url).with(headers: headers).to_return(status: 200)
+        stub_request(:get, runner_callback_url).with(headers: headers).to_return(status: 200, body: '{"foo": "bar"')
         stub_request(:post, json_destination_url).with(headers: headers).to_return(status: 200)
       end
 

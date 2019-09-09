@@ -2,6 +2,12 @@ require 'rails_helper'
 
 describe TemplateMappingService::Email do
   describe '#template_id_for_name' do
+    before :each do
+      stub_const("TemplateMappingService::Email::ALL", {
+        'email.return.setup.email.token' => '38f6a1cd-a810-4f59-8899-2c300236c5b4'
+      })
+    end
+
     context 'when template maps' do
       let(:name) { 'email.return.setup.email.token' }
       let(:expected) { '38f6a1cd-a810-4f59-8899-2c300236c5b4' }
@@ -24,6 +30,12 @@ end
 
 describe TemplateMappingService::Sms do
   describe '#template_id_for_name' do
+    before :each do
+      stub_const("TemplateMappingService::Sms::ALL", {
+        'sms.return.setup.mobile' => '54dcaad7-4967-431d-8606-72b0b80b5c6a'
+      })
+    end
+
     context 'when template maps' do
       let(:name) { 'sms.return.setup.mobile' }
       let(:expected) { '54dcaad7-4967-431d-8606-72b0b80b5c6a' }

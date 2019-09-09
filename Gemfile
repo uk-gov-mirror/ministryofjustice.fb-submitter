@@ -15,6 +15,7 @@ gem 'mime-types'
 gem 'notifications-ruby-client'
 gem 'sentry-raven'
 gem 'tzinfo-data'
+gem 'jwe', '~> 0.4.0'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
