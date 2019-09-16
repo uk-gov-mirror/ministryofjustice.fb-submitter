@@ -21,7 +21,7 @@ class ProcessSubmissionService
         JsonWebhookService.new(
           runner_callback_adapter: Adapters::RunnerCallback.new(url: submission_detail.fetch(:data_url), token: token),
           webhook_destination_adapter: Adapters::JweWebhookDestination.new(url: submission_detail.fetch(:url), key: encryption_key)
-        ).execute
+        ).execute(service_slug: submission.service_slug)
       end
     end
 
