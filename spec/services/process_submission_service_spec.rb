@@ -101,8 +101,28 @@ describe ProcessSubmissionService do
 
       let(:email_submission) do
         {
+          'from' => 'some.one@example.com',
+          'to' => 'destination@example.com',
+          'subject' => 'mail subject',
           'type' => 'email',
-          'attachments' => []
+          'body_parts' => {
+            'text/html' => 'https://tools.ietf.org/html/rfc2324',
+            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
+          },
+          'attachments' => [
+            {
+              'type' => 'output',
+              'mimetype' => 'application/pdf',
+              'url' => '/api/submitter/pdf/default/guid1.pdf',
+              'filename' => 'form1'
+            },
+            {
+              'type' => 'output',
+              'mimetype' => 'application/pdf',
+              'url' => '/api/submitter/pdf/default/guid2.pdf',
+              'filename' => 'form2'
+            }
+          ]
         }
       end
 
@@ -122,6 +142,7 @@ describe ProcessSubmissionService do
             email_submission,
             email_submission,
             json_submission,
+            json_submission,
             json_submission
           ], status: 'queued'
         )
@@ -139,15 +160,15 @@ describe ProcessSubmissionService do
         stub_request(:post, json_destination_url).with(headers: headers).to_return(status: 200)
       end
 
-      it 'dispatches email submissions to the email class' do
-        expect(EmailService).to receive(:send_mail).twice
+      it 'dispatches 1 email for each submission email attachment' do
+        expect(EmailService).to receive(:send_mail).exactly(4).times
         subject.perform
       end
 
       it 'dispatches json submissions to the webhook class' do
         subject.perform
-        expect(WebMock).to have_requested(:get, runner_callback_url).twice
-        expect(WebMock).to have_requested(:post, json_destination_url).twice
+        expect(WebMock).to have_requested(:get, runner_callback_url).times(3)
+        expect(WebMock).to have_requested(:post, json_destination_url).times(3)
       end
     end
 
@@ -176,17 +197,12 @@ describe ProcessSubmissionService do
       end
 
       it 'gets the detail_objects from the Submission' do
-        expect(submission).to receive(:detail_objects).at_least(:once).and_return(submission.detail_objects)
+        expect(submission).to receive(:detail_objects).at_least(:once).and_call_original
         subject.perform
       end
 
       describe 'for each detail object' do
         let(:detail_object) { submission.detail_objects.first }
-
-        it 'retrieves the mail body parts' do
-          expect(subject).to receive(:retrieve_mail_body_parts).with(detail_object).and_return(body_part_content)
-          subject.perform
-        end
 
         it 'asks the EmailService to send an email' do
           allow(subject).to receive(:attachments).and_return(processed_attachments)
