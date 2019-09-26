@@ -6,12 +6,13 @@ class JsonWebhookService
   end
 
   def execute(service_slug:)
-    webhook_destination_adapter.send_webhook(
-      body: build_payload(
-        service_slug: service_slug,
-        attachments:  webhook_attachment_fetcher.execute
-      )
+    payload = build_payload(
+      service_slug: service_slug,
+      attachments:  webhook_attachment_fetcher.execute
     )
+
+    p "PAYLOAD TO WEBHOOK #{payload}"
+    webhook_destination_adapter.send_webhook(body: payload)
   end
 
   private

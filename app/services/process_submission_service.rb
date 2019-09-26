@@ -18,8 +18,6 @@ class ProcessSubmissionService
       if submission_detail.fetch(:type) == 'json'
         encryption_key = submission_detail.fetch(:encryption_key)
 
-        p '---SUBMISSION DETAILS---'
-        p submission_detail
         JsonWebhookService.new(
           runner_callback_adapter: Adapters::RunnerCallback.new(url: submission_detail.fetch(:data_url), token: token),
           webhook_attachment_fetcher: WebhookAttachmentService.new(
