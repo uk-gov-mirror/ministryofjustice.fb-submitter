@@ -137,7 +137,7 @@ workflows:
       #     type: approval
       #     requires:
       #       - build_and_deploy_to_test
-      - build_and_deploy_to_integration:
+      - build_and_deploy_to_integration
           # requires:
           #   - confirm_integration_deploy
       - confirm_live_deploy:
