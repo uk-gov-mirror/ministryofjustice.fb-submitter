@@ -1,11 +1,10 @@
 class AttachmentParserService
-
-  def initialize(attachments_array:)
-      @attachments_array = attachments_array
+  def initialize(attachments:)
+    @attachments = attachments
   end
 
   def execute
-    attachments_array.map do |attachment|
+    attachments.map do |attachment|
       Attachment.new(
         url: attachment.fetch(:url),
         mimetype: attachment.fetch(:mimetype),
@@ -18,5 +17,5 @@ class AttachmentParserService
 
   private
 
-  attr_reader :attachments_array
+  attr_reader :attachments
 end

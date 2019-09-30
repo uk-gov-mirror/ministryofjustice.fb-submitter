@@ -2,15 +2,15 @@ require 'rails_helper'
 
 describe AttachmentParserService do
   context 'when given no input' do
-    subject(:service) { described_class.new(attachments_array: []) }
+    subject(:service) { described_class.new(attachments: []) }
 
-    it 'returns a empty arry' do
+    it 'returns a empty array' do
       expect(service.execute).to eq([])
     end
   end
 
   context 'when given a single attachment' do
-    subject(:service) { described_class.new(attachments_array: input) }
+    subject(:service) { described_class.new(attachments: input) }
 
     let(:input) do
       [
