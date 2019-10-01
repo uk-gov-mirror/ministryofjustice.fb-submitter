@@ -53,9 +53,7 @@ class DownloadService
     end
     request.on_complete do |response|
       open_file.close
-      if response.code != 200
-        raise "Request failed (#{response.code}: #{response.return_code} #{request.url})"
-      end
+      raise "Request failed (#{response.code}: #{response.return_code} #{request.url})" if response.code != 200
       # Note that response.body is "", cause it's been cleared as we go
     end
     request

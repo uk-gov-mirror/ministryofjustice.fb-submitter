@@ -10,6 +10,9 @@ AllCops:
     - db/schema.rb
     - Guardfile
 
+Style/IfUnlessModifier:
+  Enabled: false
+
 Style/Documentation:
   Enabled: false
 
@@ -22,8 +25,14 @@ Style/SymbolArray:
 Metrics/LineLength:
   Enabled: false
 
+Style/Next:
+  Enabled: false
+
 Metrics/BlockLength:
   ExcludedMethods: ['describe', 'context', 'let']
+
+Layout/IndentFirstArrayElement:
+  EnforcedStyle: consistent
 
 Metrics/MethodLength:
   Enabled: true

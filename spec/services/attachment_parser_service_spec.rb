@@ -23,15 +23,12 @@ describe AttachmentParserService do
       ]
     end
 
-    it 'returns a list of attachment objects' do
+    it 'returns 1 object in array' do
       expect(service.execute.count).to eq(1)
-      expect(service.execute.first).to have_attributes(class: Attachment,
-        type: 'output',
-        mimetype: 'applcation/pdf',
-        filename: 'foo.pdf',
-        url: 'https://example.com',
-        path: nil,
-      )
+    end
+
+    it 'returns a list of attachment objects' do
+      expect(service.execute.first).to have_attributes(class: Attachment, type: 'output', mimetype: 'applcation/pdf', filename: 'foo.pdf', url: 'https://example.com', path: nil)
     end
   end
 end

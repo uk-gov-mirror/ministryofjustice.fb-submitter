@@ -4,6 +4,10 @@ require 'rails_helper'
 require 'webmock/rspec'
 
 describe ProcessSubmissionService do
+  subject do
+    described_class.new(submission_id: submission.id)
+  end
+
   let(:submission) do
     Submission.create!(
       encrypted_user_id_and_token: token,
@@ -11,10 +15,6 @@ describe ProcessSubmissionService do
       submission_details: [],
       service_slug: 'service-slug'
     )
-  end
-
-  subject do
-    described_class.new(submission_id: submission.id)
   end
 
   let(:mock_downloaded_files) { { 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2' } }
@@ -167,7 +167,12 @@ describe ProcessSubmissionService do
       let(:submission_id) { submission.id }
 
       before do
-        expect(Submission).to receive(:find).with(submission_id).and_return(submission)
+        allow(Submission).to receive(:find).with(submission_id).and_return(submission)
+      end
+
+      it 'calls Submission find ' do
+        expect(Submission).to receive(:find).with(submission_id).once
+        subject.perform
       end
 
       it 'updates the Submission status to :processing' do
@@ -356,27 +361,33 @@ describe ProcessSubmissionService do
   end
 
   describe '#retrieve_mail_body_parts' do
-    let(:mail) { double('mail') }
+    let(:mail) { instance_double(EmailSubmissionDetail) }
+
     before do
       allow(subject).to receive(:download_body_parts).with(mail).and_return(mock_downloaded_files)
       allow(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
     end
+
     it 'downloads the body parts' do
       expect(subject).to receive(:download_body_parts).with(mail).and_return(mock_downloaded_files)
       subject.send(:retrieve_mail_body_parts, mail)
     end
+
     it 'reads the downloaded body parts' do
       expect(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
       subject.send(:retrieve_mail_body_parts, mail)
     end
+
     it 'returns the map of content type to content' do
       expect(subject.send(:retrieve_mail_body_parts, mail)).to eq(body_part_content)
     end
   end
 
   describe '#download_body_parts' do
-    let(:mail) { double('mail', body_parts: { 'text/plain' => 'url1', 'text/html' => 'url2' }) }
+    let(:mail) { instance_double(EmailSubmissionDetail) }
+
     before do
+      allow(mail).to receive(:body_parts).and_return('text/plain' => 'url1', 'text/html' => 'url2')
       allow(DownloadService).to receive(:download_in_parallel).with(
         urls: %w[url1 url2],
         headers: headers
@@ -398,13 +409,21 @@ describe ProcessSubmissionService do
 
   describe '#read_downloaded_body_parts' do
     context 'given a mail with body parts' do
-      let(:mail) { double('mail', body_parts: { 'text/plain' => 'url1', 'text/html' => 'url2' }) }
+      let(:mail) { instance_double(EmailSubmissionDetail) }
+
+      before do
+        allow(mail).to receive(:body_parts).and_return('text/plain' => 'url1', 'text/html' => 'url2')
+      end
 
       context 'and a map of urls to file paths' do
         let(:file_map) { { 'url1' => 'file1', 'url2' => 'file2' } }
-        let(:mock_file_1) { double('File1', read: 'file 1 content') }
-        let(:mock_file_2) { double('File2', read: 'file 2 content') }
+        let(:mock_file_1) { instance_double(File) }
+        let(:mock_file_2) { instance_double(File) }
+
         before do
+          allow(mock_file_1).to receive(:read).and_return('file 1 content')
+          allow(mock_file_2).to receive(:read).and_return('file 2 content')
+
           allow(File).to receive(:open).with('file1').and_yield(mock_file_1)
           allow(File).to receive(:open).with('file2').and_yield(mock_file_2)
         end
@@ -462,7 +481,7 @@ describe ProcessSubmissionService do
         }
       end
 
-      before :each do
+      before do
         allow(Submission).to receive(:find).and_return(submission)
         allow(submission).to receive(:id).and_return('id-of-submission')
       end

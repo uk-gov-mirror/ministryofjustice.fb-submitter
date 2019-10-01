@@ -30,9 +30,7 @@ class ProcessSubmissionService
     end
 
     submission.detail_objects.to_a.each do |submission_detail|
-      if submission_detail.instance_of? EmailSubmissionDetail
-        send_email(submission_detail)
-      end
+      send_email(submission_detail) if submission_detail.instance_of? EmailSubmissionDetail
     end
 
     # explicit save! first, to save the responses
@@ -100,7 +98,7 @@ class ProcessSubmissionService
     # we need to send the body parts as strings
     body_part_content = {}
     mail.body_parts.each do |type, url|
-      body_part_content[type] = File.open(body_part_map[url]){|f| f.read}
+      body_part_content[type] = File.open(body_part_map[url]) { |f| f.read }
     end
     body_part_content
   end

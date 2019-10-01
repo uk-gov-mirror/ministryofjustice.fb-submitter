@@ -1,25 +1,25 @@
 require 'rails_helper'
 
 RSpec.describe RawMessage do
-  before :each do
-    allow_any_instance_of(File).to receive(:read).and_return('hello world')
+  before do
+    allow(File).to receive(:read).and_return('hello world')
   end
 
   describe 'attachment extension from mime type' do
+    subject do
+      described_class.new(
+        body_parts: { 'text/html' => '' },
+        attachments: [attachment]
+      )
+    end
+
     let(:attachment) do
       Attachment.new(
         type: nil,
         filename: 'some-file-name.jpg',
         url: nil,
         mimetype: 'application/pdf',
-        path: file_fixture('hello_world.txt'),
-      )
-    end
-
-    subject do
-      described_class.new(
-        body_parts: { 'text/html' => '' },
-        attachments: [attachment]
+        path: file_fixture('hello_world.txt')
       )
     end
 
@@ -34,7 +34,7 @@ RSpec.describe RawMessage do
           filename: 'some-file-name',
           url: nil,
           mimetype: 'application/pdf',
-          path: file_fixture('hello_world.txt'),
+          path: file_fixture('hello_world.txt')
         )
       end
 

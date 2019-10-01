@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe SmsController do
-  before :each do
+  before do
     request.env['CONTENT_TYPE'] = 'application/json'
     allow_any_instance_of(ApplicationController).to receive(:verify_token!)
   end
@@ -65,9 +65,13 @@ describe SmsController do
         }
       end
 
-      it 'returns 400 with error message' do
+      it 'returns 400' do
         post :create, body: json_hash.to_json
         expect(response).to be_bad_request
+      end
+
+      it 'returns an error message' do
+        post :create, body: json_hash.to_json
         expect(JSON.parse(response.body)['name']).to eql('bad-request.invalid-parameters')
       end
     end

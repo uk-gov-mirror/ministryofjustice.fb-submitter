@@ -1,13 +1,13 @@
 RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
   let(:body) { response.body }
-  let(:parsed_body) {
+  let(:parsed_body) do
     JSON.parse(response.body.to_s)
-  }
-  let(:headers) {
+  end
+  let(:headers) do
     {
       'content-type' => 'application/json'
     }
-  }
+  end
   let(:service_token) { 'ServiceToken' }
   before do
     allow_any_instance_of(ApplicationController).to receive(:get_service_token).and_return(service_token)
@@ -16,14 +16,14 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
 
   context 'with no x-access-token header' do
     it 'has status 401' do
-      expect(response).to have_http_status(401)
+      expect(response).to have_http_status(:unauthorized)
     end
 
     describe 'the body' do
-      let(:body){ response.body }
+      let(:body) { response.body }
 
       it 'is valid JSON' do
-        expect { parsed_body }.to_not raise_error
+        expect { parsed_body }.not_to raise_error
       end
 
       describe 'the errors key' do
@@ -48,13 +48,13 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
 
     context 'which is valid' do
       let(:iat) { Time.current.to_i }
-      let(:token) {
+      let(:token) do
         JWT.encode payload.merge(iat: iat), service_token, algorithm
-      }
+      end
 
       it 'does not respond with an unauthorized or forbidden status' do
-        expect(response).to_not have_http_status(401)
-        expect(response).to_not have_http_status(403)
+        expect(response).not_to have_http_status(:unauthorized)
+        expect(response).not_to have_http_status(:forbidden)
       end
     end
 
@@ -63,17 +63,17 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
 
       context 'as the timestamp is older than MAX_IAT_SKEW_SECONDS' do
         let(:iat) { Time.current.to_i - (ENV['MAX_IAT_SKEW_SECONDS'].to_i + 1) }
-        let(:token) {
+        let(:token) do
           JWT.encode payload.merge(iat: iat), service_token, algorithm
-        }
+        end
 
         it 'has status 403' do
-          expect(response).to have_http_status(403)
+          expect(response).to have_http_status(:forbidden)
         end
 
         describe 'the body' do
           it 'is valid JSON' do
-            expect { parsed_body }.to_not raise_error
+            expect { parsed_body }.not_to raise_error
           end
 
           describe 'the errors key' do
@@ -88,16 +88,17 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
 
       context 'as the timestamp is > MAX_IAT_SKEW_SECONDS seconds in the future' do
         let(:iat) { Time.current.to_i + (ENV['MAX_IAT_SKEW_SECONDS'].to_i + 1) }
-        let(:token) {
+        let(:token) do
           JWT.encode payload, service_token, algorithm
-        }
+        end
+
         it 'has status 403' do
           expect(response.status).to eq(403)
         end
 
         describe 'the body' do
           it 'is valid JSON' do
-            expect { parsed_body }.to_not raise_error
+            expect { parsed_body }.not_to raise_error
           end
 
           describe 'the errors key' do
@@ -111,5 +112,4 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
       end
     end
   end
-
 end

@@ -16,7 +16,7 @@ module Concerns
         render_json_error :internal_server_error, :internal_server_error, args
       end
 
-      rescue_from ActiveRecord::RecordNotFound do |e|
+      rescue_from ActiveRecord::RecordNotFound do |_e|
         render_json_error :not_found, :record_not_found
       end
     end
@@ -24,9 +24,7 @@ module Concerns
     private
 
     def render_json_error(status, error_code, extra = {})
-      if status.is_a? Symbol
-        status = (Rack::Utils::SYMBOL_TO_STATUS_CODE[status] || 500)
-      end
+      status = (Rack::Utils::SYMBOL_TO_STATUS_CODE[status] || 500) if status.is_a? Symbol
 
       error = {
         title: I18n.t(:title, scope: [:error_messages, error_code]),

@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe SubmissionController, type: :controller do
-  before :each do
+  before do
     request.env['CONTENT_TYPE'] = 'application/json'
     allow_any_instance_of(ApplicationController).to receive(:verify_token!)
   end
@@ -12,10 +12,13 @@ RSpec.describe SubmissionController, type: :controller do
     expect(Submission.all.count).to eq(1)
   end
 
-  it 'starts a delayed job' do
+  it 'creates a delayed job' do
     post :create, body: { something: 1 }.to_json
-
-    expect(response).to have_http_status(201)
     expect(Delayed::Job.all.count).to eq(1)
+  end
+
+  it 'marks delayed job as created' do
+    post :create, body: { something: 1 }.to_json
+    expect(response).to have_http_status(:created)
   end
 end
