@@ -22,7 +22,7 @@ RUN bundle install --no-cache ${BUNDLE_ARGS}
 
 COPY --chown=appuser:appgroup . .
 
-USER UID
+USER ${UID}
 
 ARG RAILS_ENV=production
 CMD bin/delayed_job run
