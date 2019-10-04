@@ -9,19 +9,18 @@ RUN addgroup -g ${UID} -S appgroup && \
 
 WORKDIR /app
 
-COPY Gemfile* .ruby-version ./
-
-ARG BUNDLE_FLAGS
-RUN gem install bundler
-RUN bundle install --no-cache ${BUNDLE_FLAGS}
-
-COPY . .
+RUN chown appuser:appgroup /app
 
 ADD https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem ./rds-combined-ca-bundle.pem
 
-RUN chown -R ${UID}:appgroup /app
+COPY --chown=appuser:appgroup Gemfile Gemfile.lock .ruby-version ./
 
-USER UID
+RUN gem install bundler
+
+ARG BUNDLE_ARGS='--without test development'
+RUN bundle install --no-cache ${BUNDLE_ARGS}
+
+COPY --chown=appuser:appgroup . .
 
 ENV APP_PORT 3000
 EXPOSE $APP_PORT
