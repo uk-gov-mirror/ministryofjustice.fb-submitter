@@ -9,7 +9,7 @@ class SubmissionController < ApplicationController
       ProcessSubmissionService.new(submission_id: @submission.id)
     )
 
-    render status: :created, json: @submission
+    render status: :created
   end
 
   def show

@@ -188,11 +188,6 @@ describe 'UserData API', type: :request do
                 post_request
                 expect(created_record.encrypted_user_id_and_token).to eq(encrypted_user_id_and_token)
               end
-
-              xit 'has the given submission_details' do
-                post_request
-                expect(created_record.submission_details.to_json).to eq(params[:submission_details].to_json)
-              end
             end
 
             # rubocop:disable RSpec/MessageSpies
@@ -209,16 +204,6 @@ describe 'UserData API', type: :request do
 
               it 'has status 201' do
                 expect(response).to have_http_status(:created)
-              end
-
-              describe 'the body' do
-                it 'is a valid JSON packet' do
-                  expect { JSON.parse(body) }.not_to raise_error
-                end
-
-                xit 'is the new Submission record, serialised to JSON' do # TODO: fix return processd submiton or just don't return if needed
-                  expect(body).to eq(Submission.last.to_json)
-                end
               end
             end
           end
