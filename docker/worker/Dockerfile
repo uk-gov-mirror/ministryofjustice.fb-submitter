@@ -1,25 +1,28 @@
 FROM ruby:2.6.4-alpine3.9
 
+ARG UID=1001
+
 RUN apk add build-base postgresql-contrib postgresql-dev bash libcurl
 
-RUN addgroup -g 1001 -S appgroup && \
-  adduser -u 1001 -S appuser -G appgroup
+RUN addgroup -g ${UID} -S appgroup && \
+  adduser -u ${UID} -S appuser -G appgroup
 
 WORKDIR /app
 
-COPY Gemfile* .ruby-version ./
+RUN chown appuser:appgroup /app
 
-ARG BUNDLE_FLAGS
+ADD --chown=appuser:appgroup https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem ./rds-combined-ca-bundle.pem
+
+COPY --chown=appuser:appgroup Gemfile Gemfile.lock .ruby-version ./
+
 RUN gem install bundler
-RUN bundle install --no-cache ${BUNDLE_FLAGS}
 
-COPY . .
+ARG BUNDLE_ARGS='--without test development'
+RUN bundle install --no-cache ${BUNDLE_ARGS}
 
-ADD https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem ./rds-combined-ca-bundle.pem
+COPY --chown=appuser:appgroup . .
 
-RUN chown -R 1001:appgroup /app
-
-USER 1001
+USER ${UID}
 
 ARG RAILS_ENV=production
 CMD bin/delayed_job run
