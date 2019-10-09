@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'webmock/rspec'
 
 describe 'UserData API', type: :request do
   let(:headers) do
@@ -64,6 +65,28 @@ describe 'UserData API', type: :request do
   end
 
   describe 'a POST request' do
+    before do
+      Delayed::Worker.delay_jobs = false
+
+      stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-aaa59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e1187aaa').to_return(status: 200, body: '', headers: {})
+      stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8').to_return(status: 200, body: '', headers: {})
+
+      stub_request(:get, 'http://my-service.formbuilder-services-test:3000/some/plain.txt').to_return(status: 200, body: '', headers: {})
+      stub_request(:get, 'http://my-service.formbuilder-services-test:3000/some/html').to_return(status: 200, body: '', headers: {})
+
+      stub_request(:get, 'http://my-service.formbuilder-services-test:3000/api/submitter/pdf/default/7a9a5124-0ab2-43f1-b345-0685fced5705.pdf').to_return(status: 200, body: '', headers: {})
+
+      allow(Aws::SES::Client).to receive(:new).with(region: 'eu-west-1').and_return(stub_aws)
+    end
+
+    after do
+      Delayed::Worker.delay_jobs = true
+    end
+
+    let(:stub_aws) do
+      Aws::SES::Client.new(region: 'eu-west-1', stub_responses: true)
+    end
+
     describe 'to /submission' do
       let(:url) { '/submission' }
       let(:post_request) do
@@ -122,6 +145,28 @@ describe 'UserData API', type: :request do
           end
 
           context 'when the request is successful' do
+            it 'downloads email attachments' do
+              post_request
+              expect(WebMock).to have_requested(:get, %r{fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/}).times(2)
+            end
+
+            it 'downloads pdf attachment answers' do
+              post_request
+              expect(WebMock).to have_requested(:get, 'http://my-service.formbuilder-services-test:3000/api/submitter/pdf/default/7a9a5124-0ab2-43f1-b345-0685fced5705.pdf').times(1)
+            end
+
+            it 'downloads email body parts' do
+              post_request
+              # TODO: this may be requested more than needede
+              expect(WebMock).to have_requested(:get, 'http://my-service.formbuilder-services-test:3000/some/plain.txt').times(3)
+              expect(WebMock).to have_requested(:get, 'http://my-service.formbuilder-services-test:3000/some/html').times(3)
+            end
+
+            it 'sends 3 emails' do
+              post_request
+              expect(stub_aws.api_requests.size).to eq(3)
+            end
+
             it 'creates a submission record' do
               expect { post_request }.to change(Submission, :count).by(1)
             end
@@ -129,9 +174,9 @@ describe 'UserData API', type: :request do
             describe 'the created Submission record' do
               let(:created_record) { Submission.last }
 
-              it 'has status "queued"' do
+              it 'processed requests are marked as completed' do
                 post_request
-                expect(created_record.status).to eq('queued')
+                expect(created_record.status).to eq('completed')
               end
 
               it 'has the given service_slug' do
@@ -143,20 +188,14 @@ describe 'UserData API', type: :request do
                 post_request
                 expect(created_record.encrypted_user_id_and_token).to eq(encrypted_user_id_and_token)
               end
-
-              it 'has the given submission_details' do
-                post_request
-                # NOTE: .to_json is the easiest way to stringify an arbitrary hash/array structure
-                expect(created_record.submission_details.to_json).to eq(params[:submission_details].to_json)
-              end
             end
 
+            # rubocop:disable RSpec/MessageSpies
             it 'creates a Job to be processed asynchronously' do
+              expect(Delayed::Job).to receive(:enqueue)
               post_request
-              expect(Delayed::Job.all.count).to eq(1)
-              expect(Delayed::Job.first.handler).to include(Submission.first.id)
-              expect(Delayed::Job.first.handler).to include('ProcessSubmissionService')
             end
+            # rubocop:enable RSpec/MessageSpies
 
             describe 'the response' do
               before do
@@ -165,16 +204,6 @@ describe 'UserData API', type: :request do
 
               it 'has status 201' do
                 expect(response).to have_http_status(:created)
-              end
-
-              describe 'the body' do
-                it 'is a valid JSON packet' do
-                  expect { JSON.parse(body) }.not_to raise_error
-                end
-
-                it 'is the new Submission record, serialised to JSON' do
-                  expect(body).to eq(Submission.last.to_json)
-                end
               end
             end
           end
