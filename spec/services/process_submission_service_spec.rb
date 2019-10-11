@@ -546,5 +546,63 @@ describe ProcessSubmissionService do
         subject.perform
       end
     end
+
+    context 'when generating a PDF' do
+      before do
+        stub_request(:post, 'http://pdf-generator.com/')
+          .with(
+            body: submission_details.fetch(:submission) .to_json,
+            headers: {
+              'Expect' => '',
+              'User-Agent' => 'Typhoeus - https://github.com/typhoeus/typhoeus',
+              'X-Access-Token' => 'encrypted_user_id_and_token'
+            }
+          )
+          .to_return(status: 200, body: '', headers: {})
+      end
+
+      let(:submission) do
+        Submission.create!(
+          encrypted_user_id_and_token: 'encrypted_user_id_and_token',
+          status: 'queued',
+          submission_details: [submission_details],
+          service_slug: 'service-slug'
+        )
+      end
+
+      let(:submission_details) do
+        {
+          type: 'pdf',
+          submission: {
+            submission_id: '1786c427-246e-4bb7-90b9-a2e6cfae003f',
+            pdf_heading: 'Best form on the web',
+            pdf_subheading: '(Optional) Some section heading',
+            sections: [
+              {
+                heading: 'Whats your name',
+                summary_heading: 'WIP',
+                questions: []
+              }, {
+                heading: '',
+                summary_heading: '',
+                questions: [
+                  {
+                    label: 'First name',
+                    answer: 'Bob'
+                  }, {
+                    label: 'Last name',
+                    answer: 'Smith'
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      end
+
+      it 'requests for a PDF to be generated' do
+        subject.perform
+      end
+    end
   end
 end

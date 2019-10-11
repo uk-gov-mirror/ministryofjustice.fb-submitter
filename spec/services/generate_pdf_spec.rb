@@ -4,12 +4,13 @@ describe GeneratePdf do
   subject(:pdf_service) { described_class.new(pdf_generator_gateway: gateway) }
 
   let(:gateway) { instance_double('Adapters::PdfGenerator', generate_pdf: 'some pdf contents') }
-  let(:payload) { { some: 'payload' } }
+  let(:pdf_data) { { some: 'payload' } }
+  let(:payload) { { submission: pdf_data } }
 
   context 'when requesting a pdf with a submission' do
     it 'calls generate_pdf on the gateway' do
       pdf_service.execute(payload)
-      expect(gateway).to have_received(:generate_pdf).with(submission: payload)
+      expect(gateway).to have_received(:generate_pdf).with(submission: pdf_data)
     end
 
     it 'returns the result of the API call' do

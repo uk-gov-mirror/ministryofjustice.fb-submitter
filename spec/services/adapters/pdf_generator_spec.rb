@@ -22,7 +22,7 @@ describe Adapters::PdfGenerator do
   end
 
   let(:expected_headers) do
-    { 'x-encrypted-user-id-and-token' => 'some-token' }
+    { 'x-access-token' => 'some-token' }
   end
 
   before do
