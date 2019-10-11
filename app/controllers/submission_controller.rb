@@ -5,6 +5,9 @@ class SubmissionController < ApplicationController
     )
     @submission.save!
 
+    p '-------------------'
+    p params
+    p '-------------------'
     Delayed::Job.enqueue(
       ProcessSubmissionService.new(submission_id: @submission.id)
     )
