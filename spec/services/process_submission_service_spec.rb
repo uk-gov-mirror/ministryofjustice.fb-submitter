@@ -185,12 +185,10 @@ describe ProcessSubmissionService do
         stub_request(:post, json_destination_url).with(headers: headers).to_return(status: 200)
         stub_request(:post, 'http://pdf-generator.com/v1/pdfs')
           .with(body: pdf_submission.fetch(:submission).to_json, headers: headers).to_return(status: 200)
-
-        stub_request(:get, 'http://fake_service_token_cache_root_url/service/service-slug').to_return(status: 200, body: { token: service_slug_secret }.to_json)
       end
 
       it 'dispatches 1 email for each submission email attachment' do
-        expect(EmailService).to receive(:send_mail).exactly(5).times
+        expect(EmailService).to receive(:send_mail).exactly(4).times
         subject.perform
       end
 
@@ -581,6 +579,53 @@ describe ProcessSubmissionService do
                                                          subject: 'mail subject {id-of-submission} [2/2]',
                                                          to: 'destination@example.com')
 
+        subject.perform
+      end
+    end
+
+    context 'with PDF payload' do
+      before do
+        Submission.create!(
+          encrypted_user_id_and_token: 'encrypted_user_id_and_token',
+          status: 'queued',
+          submission_details: [
+            {
+              'from' => 'some.one@example.com',
+              'to' => 'destination@example.com',
+              'subject' => 'mail subject',
+              'type' => 'email',
+              'body_parts' => {
+                'text/html' => 'https://tools.ietf.org/html/rfc2324',
+                'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
+              },
+              'attachments' => [
+                {
+                  'type' => 'output',
+                  'mimetype' => 'application/pdf',
+                  'url' => '/api/submitter/pdf/default/guid1.pdf',
+                  'filename' => 'form1',
+                  'pdf_data' => {
+                    'some_pdf' => 'data'
+                  }
+                }
+              ]
+            }
+          ],
+          service_slug: 'service-slug'
+        )
+
+        stub_request(:get, 'http://fake_service_token_cache_root_url/service/service-slug').to_return(status: 200, body: { token: '123' }.to_json)
+        stub_request(:post, 'http://pdf-generator.com/v1/pdfs').with(body: '{"some_pdf":"data"}')
+        stub_request(:get, 'https://tools.ietf.org/html/rfc2324').to_return(status: 200)
+        stub_request(:get, 'https://tools.ietf.org/rfc/rfc2324.txt').to_return(status: 200)
+
+        allow(EmailService).to receive(:send_mail).and_return(some: 'mock response')
+      end
+
+      let(:submission) { Submission.last }
+
+      it 'sends an email with the newly generated pdf contents' do
+        expect(EmailService).to receive(:send_mail)
         subject.perform
       end
     end

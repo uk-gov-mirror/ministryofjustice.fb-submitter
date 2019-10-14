@@ -8,7 +8,7 @@ class SaveTempPdf
     tmp_pdf = tmp_file_gateway.new([file_name, '.pdf'])
     pdf_contents = generate_pdf_content_service.execute
 
-    tmp_pdf.write(pdf_contents)
+    tmp_pdf.write(pdf_contents.force_encoding('UTF-8'))
     tmp_pdf.rewind
 
     tmp_pdf.path

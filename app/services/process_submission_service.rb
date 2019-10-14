@@ -34,10 +34,6 @@ class ProcessSubmissionService
       send_email(submission_detail) if submission_detail.instance_of? EmailSubmissionDetail
     end
 
-    pdf_details(submission.submission_details).each do |pdf_detail|
-      send_confirmation_email(pdf_detail, submission_id)
-    end
-
     # explicit save! first, to save the responses
     submission.save!
 
@@ -119,10 +115,16 @@ class ProcessSubmissionService
   # returns an array of Attachment objects
   def attachments(mail)
     array = mail.attachments.map do |object|
-      object['path'] = url_file_map[object['url']]
+      if object['pdf_data']
+        object['path'] = generate_pdf({submission: object['pdf_data']}, @submission_id)
+      else
+        object['path'] = url_file_map[object['url']]
+      end
+
       object
     end
-    array.map { |o| Attachment.new(o.symbolize_keys) }
+
+    array.compact.map { |o| Attachment.new(o.symbolize_keys) }
   end
 
   def url_file_map
@@ -132,29 +134,14 @@ class ProcessSubmissionService
     )
   end
 
-  def pdf_details(submission_details)
-    submission_details.filter { |detail| detail.fetch('type') == 'pdf' }
-  end
-
-  def send_confirmation_email(pdf_detail, submission_id)
-    confirmation_email_service = SendConfirmationEmail.new(
-      email_service: EmailService,
-      save_temp_pdf_service: SaveTempPdf.new(
-        generate_pdf_content_service: GeneratePdfContent.new(
-          pdf_api_gateway: pdf_gateway(submission.service_slug),
-          payload: pdf_detail.with_indifferent_access
-        ),
-        tmp_file_gateway: Tempfile
-      )
-    )
-
-    stub_email = 'emile.swarts@digital.justice.gov.uk'
-    confirmation_email_service.execute(
-      from: 'test@test.com',
-      to: stub_email,
-      subject: 'test subject',
-      submission_id: submission_id
-    )
+  def generate_pdf(pdf_detail, submission_id)
+    SaveTempPdf.new(
+      generate_pdf_content_service: GeneratePdfContent.new(
+        pdf_api_gateway: pdf_gateway(submission.service_slug),
+        payload: pdf_detail.with_indifferent_access
+      ),
+      tmp_file_gateway: Tempfile
+    ).execute(file_name: submission_id)
   end
 
   def pdf_gateway(service_slug)
