@@ -1,5 +1,5 @@
 module Adapters
-  class PdfGenerator
+  class PdfApi
     class ClientRequestError < StandardError
     end
     def initialize(root_url:, token:)

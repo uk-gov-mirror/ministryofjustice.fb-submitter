@@ -190,7 +190,7 @@ describe ProcessSubmissionService do
       end
 
       it 'dispatches 1 email for each submission email attachment' do
-        expect(EmailService).to receive(:send_mail).exactly(4).times
+        expect(EmailService).to receive(:send_mail).exactly(5).times
         subject.perform
       end
 

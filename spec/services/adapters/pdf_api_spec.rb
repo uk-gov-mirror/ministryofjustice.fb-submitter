@@ -1,7 +1,7 @@
 require 'rails_helper'
 require 'webmock/rspec'
 
-describe Adapters::PdfGenerator do
+describe Adapters::PdfApi do
   subject(:adapter) do
     described_class.new(root_url: root_url, token: 'some-token')
   end
@@ -50,7 +50,7 @@ describe Adapters::PdfGenerator do
     it 'throws an exception' do
       expect do
         adapter.generate_pdf(submission: {})
-      end.to raise_error(Adapters::PdfGenerator::ClientRequestError)
+      end.to raise_error(Adapters::PdfApi::ClientRequestError)
     end
   end
 end
