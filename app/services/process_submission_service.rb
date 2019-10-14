@@ -34,7 +34,9 @@ class ProcessSubmissionService
       send_email(submission_detail) if submission_detail.instance_of? EmailSubmissionDetail
     end
 
-    generate_pdf(submission)
+    pdf_details(submission.submission_details).each do |pdf_detail|
+      send_confirmation_email(pdf_detail, submission_id)
+    end
 
     # explicit save! first, to save the responses
     submission.save!
@@ -134,19 +136,36 @@ class ProcessSubmissionService
     submission_details.filter { |detail| detail.fetch('type') == 'pdf' }
   end
 
-  def generate_pdf(submission)
-    pdf_details(submission.submission_details).each do |pdf_detail|
-      GeneratePdf.new(pdf_generator_gateway: pdf_gateway(submission.service_slug)).execute(pdf_detail.with_indifferent_access)
-    end
+  def send_confirmation_email(pdf_detail, submission_id)
+    confirmation_email_service = SendConfirmationEmail.new(
+      email_service: EmailService,
+      save_temp_pdf_service: SaveTempPdf.new(
+        generate_pdf_content_service: GeneratePdfContent.new(
+          pdf_api_gateway: pdf_gateway(submission.service_slug),
+          payload: pdf_detail.with_indifferent_access
+        ),
+        tmp_file_gateway: Tempfile
+      )
+    )
+
+    stub_email = 'emile.swarts@digital.justice.gov.uk'
+    confirmation_email_service.execute(
+      from: 'test@test.com',
+      to: stub_email,
+      subject: 'test subject',
+      submission_id: submission_id
+    )
   end
 
   def pdf_gateway(service_slug)
     token = JwtAuthService.new(
-      service_token_cache: Adapters::ServiceTokenCacheClient.new(root_url: ENV.fetch('SERVICE_TOKEN_CACHE_ROOT_URL')),
+      service_token_cache: Adapters::ServiceTokenCacheClient.new(
+        root_url: ENV.fetch('SERVICE_TOKEN_CACHE_ROOT_URL')
+      ),
       service_slug: service_slug
     ).execute
 
-    Adapters::PdfGenerator.new(root_url: ENV.fetch('PDF_GENERATOR_ROOT_URL'), token: token)
+    Adapters::PdfApi.new(root_url: ENV.fetch('PDF_GENERATOR_ROOT_URL'), token: token)
   end
 end
 # rubocop:enable all
