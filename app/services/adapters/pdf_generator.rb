@@ -8,7 +8,7 @@ module Adapters
     end
 
     def generate_pdf(submission:)
-      response = Typhoeus.post(url, body: submission, headers: headers)
+      response = Typhoeus.post(url, body: submission.to_json, headers: headers)
 
       raise ClientRequestError, "request for #{url} returned response status of: #{response.code}" unless response.success?
 
@@ -18,7 +18,7 @@ module Adapters
     private
 
     def headers
-      { 'x-encrypted-user-id-and-token' => token }
+      { 'x-access-token' => token }
     end
 
     attr_reader :url, :token

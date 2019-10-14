@@ -4,7 +4,9 @@ class GeneratePdf
   end
 
   def execute(payload)
-    pdf_generator_gateway.generate_pdf(submission: payload)
+    pdf_generator_gateway.generate_pdf(
+      submission: payload.fetch(:submission)
+    )
   end
 
   private

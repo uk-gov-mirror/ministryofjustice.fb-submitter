@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable all
 class ProcessSubmissionService
   attr_reader :submission_id
 
@@ -32,6 +33,8 @@ class ProcessSubmissionService
     submission.detail_objects.to_a.each do |submission_detail|
       send_email(submission_detail) if submission_detail.instance_of? EmailSubmissionDetail
     end
+
+    generate_pdf(submission, token)
 
     # explicit save! first, to save the responses
     submission.save!
@@ -126,4 +129,20 @@ class ProcessSubmissionService
       headers: headers
     )
   end
+
+  def pdf_details(submission_details)
+    submission_details.filter { |detail| detail.fetch('type') == 'pdf' }
+  end
+
+  def generate_pdf(submission, token)
+    pdf_gateway = Adapters::PdfGenerator.new(
+      url: ENV.fetch('PDF_GENERATOR_ROOT_URL'),
+      token: token
+    )
+
+    pdf_details(submission.submission_details).each do |pdf_detail|
+      GeneratePdf.new(pdf_generator_gateway: pdf_gateway).execute(pdf_detail.with_indifferent_access)
+    end
+  end
 end
+# rubocop:enable all
