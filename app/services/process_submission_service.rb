@@ -109,23 +109,22 @@ class ProcessSubmissionService # rubocop:disable Metrics/ClassLength
     { 'x-encrypted-user-id-and-token' => submission.encrypted_user_id_and_token }
   end
 
-  # returns an array of Attachment objects
   def attachments(mail)
-    array = mail.attachments.map do |object|
-      if object['pdf_data']
-        object['path'] = generate_pdf({ submission: object['pdf_data'] }, @submission_id)
+    attachments = mail.attachments.map(&:with_indifferent_access)
+    attachment_objects = AttachmentParserService.new(attachments: attachments).execute
+
+    attachments.each_with_index do |value, index|
+      if value[:pdf_data]
+        attachment_objects[index].file = generate_pdf({ submission: value[:pdf_data] }, @submission_id)
       else
-        object['path'] = url_file_map[object['url']]
+        attachment_objects[index].path = download_attachments[attachment_objects[index].url]
       end
-
-      object
     end
-
-    array.compact.map { |o| Attachment.new(o.symbolize_keys) }
+    attachment_objects
   end
 
-  def url_file_map
-    @url_file_map ||= DownloadService.download_in_parallel(
+  def download_attachments
+    @download_attachments ||= DownloadService.download_in_parallel(
       urls: unique_attachment_urls,
       headers: headers
     )
