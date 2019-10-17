@@ -74,7 +74,7 @@ class ProcessSubmissionService # rubocop:disable Metrics/ClassLength
   def unique_attachment_urls
     attachments = submission.detail_objects.map(&:attachments).flatten
     urls = attachments.map { |e| e['url'] }
-    urls.sort.uniq
+    urls.compact.sort.uniq
   end
 
   def retrieve_mail_body_parts(mail)

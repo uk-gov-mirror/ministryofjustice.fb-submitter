@@ -16,7 +16,9 @@ class EmailSubmissionDetail
   end
 
   def make_urls_absolute!
-    attachments.each { |h| h['url'] = url_resolver.ensure_absolute_url(h['url']) if h['type'] == 'output' }
+    attachments.each do |attachment|
+      attachment['url'] = url_resolver.ensure_absolute_url(attachment['url']) if attachment['type'] == 'output' && !attachment['url'].nil?
+    end
 
     @body_parts.each do |content_type, url|
       @body_parts[content_type] = url_resolver.ensure_absolute_url(url)

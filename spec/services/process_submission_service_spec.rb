@@ -479,155 +479,50 @@ describe ProcessSubmissionService do
     end
   end
 
-  describe '#perform' do
-    context 'with filestore attachments' do
-      let(:submission) do
-        Submission.new(
-          encrypted_user_id_and_token: 'encrypted_user_id_and_token',
-          status: 'queued',
-          submission_details: [submission_detail],
-          service_slug: 'service-slug'
-        )
-      end
-
-      let(:submission_detail) do
-        {
-          'from' => 'some.one@example.com',
-          'to' => 'destination@example.com',
-          'subject' => 'mail subject',
-          'type' => 'email',
-          'body_parts' => {
-            'text/html' => 'https://tools.ietf.org/html/rfc2324',
-            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-          },
-          'attachments' => [
-            {
-              'type' => 'output',
-              'mimetype' => 'application/pdf',
-              'url' => '/api/submitter/pdf/default/guid1.pdf',
-              'filename' => 'form1'
+  context 'with PDF payload' do
+    before do
+      Submission.create!(
+        encrypted_user_id_and_token: 'encrypted_user_id_and_token',
+        status: 'queued',
+        submission_details: [
+          {
+            'from' => 'some.one@example.com',
+            'to' => 'destination@example.com',
+            'subject' => 'mail subject',
+            'type' => 'email',
+            'body_parts' => {
+              'text/html' => 'https://tools.ietf.org/html/rfc2324',
+              'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
             },
-            {
-              'type' => 'filestore',
-              'mimetype' => 'image/png',
-              'url' => 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
-              'filename' => 'image2.png'
-            }
-          ]
-        }
-      end
+            'attachments' => [
+              {
+                'type' => 'output',
+                'mimetype' => 'application/pdf',
+                'url' => '/api/submitter/pdf/default/guid1.pdf',
+                'filename' => 'form1',
+                'pdf_data' => {
+                  'some_pdf' => 'data'
+                }
+              }
+            ]
+          }
+        ],
+        service_slug: 'service-slug'
+      )
 
-      before do
-        allow(Submission).to receive(:find).and_return(submission)
-        allow(submission).to receive(:id).and_return('id-of-submission')
-      end
+      stub_request(:get, 'http://fake_service_token_cache_root_url/service/service-slug').to_return(status: 200, body: { token: '123' }.to_json)
+      stub_request(:post, 'http://pdf-generator.com/v1/pdfs').with(body: '{"some_pdf":"data"}')
+      stub_request(:get, 'https://tools.ietf.org/html/rfc2324').to_return(status: 200)
+      stub_request(:get, 'https://tools.ietf.org/rfc/rfc2324.txt').to_return(status: 200)
 
-      it 'converts output urls to absolute urls' do
-        url = submission.detail_objects.dig(0).attachments.dig(0, 'url')
-        expect(url).to start_with('http')
-      end
-
-      it 'attaches filestore attachments' do
-        expect(DownloadService).to receive(:download_in_parallel)
-          .with(headers: {
-                  'x-encrypted-user-id-and-token' => 'encrypted_user_id_and_token'
-                }, urls: [
-                  'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
-                  'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf'
-                ]).and_return(
-                  'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8' => '/tmp/filestore.png',
-                  'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/tmp/output.pdf'
-                )
-
-        # only testing file attachments here
-        allow(subject).to receive(:retrieve_mail_body_parts).and_return([])
-
-        expected_attachments = [
-          Attachment.new(
-            path: '/tmp/output.pdf',
-            type: 'output',
-            mimetype: 'application/pdf',
-            url: 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf',
-            filename: 'form1'
-          ),
-          Attachment.new(
-            path: '/tmp/filestore.png',
-            type: 'filestore',
-            mimetype: 'image/png',
-            url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev//service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
-            filename: 'image2.png'
-          )
-        ]
-
-        subject.send(:attachments, submission.detail_objects[0]).each_with_index do |a, i|
-          %i[type filename url mimetype path].each do |k|
-            expect(a.send(k)).to eql(expected_attachments[i].send(k))
-          end
-        end
-
-        allow(subject).to receive(:attachments).and_return(expected_attachments)
-
-        expect(EmailService).to receive(:send_mail).with(attachments: [expected_attachments[0]],
-                                                         body_parts: [],
-                                                         from: 'some.one@example.com',
-                                                         subject: 'mail subject {id-of-submission} [1/2]',
-                                                         to: 'destination@example.com')
-
-        expect(EmailService).to receive(:send_mail).with(attachments: [expected_attachments[1]],
-                                                         body_parts: [],
-                                                         from: 'some.one@example.com',
-                                                         subject: 'mail subject {id-of-submission} [2/2]',
-                                                         to: 'destination@example.com')
-
-        subject.perform
-      end
+      allow(EmailService).to receive(:send_mail).and_return(some: 'mock response')
     end
 
-    context 'with PDF payload' do
-      before do
-        Submission.create!(
-          encrypted_user_id_and_token: 'encrypted_user_id_and_token',
-          status: 'queued',
-          submission_details: [
-            {
-              'from' => 'some.one@example.com',
-              'to' => 'destination@example.com',
-              'subject' => 'mail subject',
-              'type' => 'email',
-              'body_parts' => {
-                'text/html' => 'https://tools.ietf.org/html/rfc2324',
-                'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-              },
-              'attachments' => [
-                {
-                  'type' => 'output',
-                  'mimetype' => 'application/pdf',
-                  'url' => '/api/submitter/pdf/default/guid1.pdf',
-                  'filename' => 'form1',
-                  'pdf_data' => {
-                    'some_pdf' => 'data'
-                  }
-                }
-              ]
-            }
-          ],
-          service_slug: 'service-slug'
-        )
+    let(:submission) { Submission.last }
 
-        stub_request(:get, 'http://fake_service_token_cache_root_url/service/service-slug').to_return(status: 200, body: { token: '123' }.to_json)
-        stub_request(:post, 'http://pdf-generator.com/v1/pdfs').with(body: '{"some_pdf":"data"}')
-        stub_request(:get, 'https://tools.ietf.org/html/rfc2324').to_return(status: 200)
-        stub_request(:get, 'https://tools.ietf.org/rfc/rfc2324.txt').to_return(status: 200)
-
-        allow(EmailService).to receive(:send_mail).and_return(some: 'mock response')
-      end
-
-      let(:submission) { Submission.last }
-
-      it 'sends an email with the newly generated pdf contents' do
-        expect(EmailService).to receive(:send_mail)
-        subject.perform
-      end
+    it 'sends an email with the newly generated pdf contents' do
+      expect(EmailService).to receive(:send_mail)
+      subject.perform
     end
   end
 end
