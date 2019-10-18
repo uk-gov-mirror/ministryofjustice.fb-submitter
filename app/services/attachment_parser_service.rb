@@ -6,7 +6,7 @@ class AttachmentParserService
   def execute
     attachments.map do |attachment|
       Attachment.new(
-        url: attachment.fetch(:url),
+        url: attachment.fetch(:url, nil),
         mimetype: attachment.fetch(:mimetype),
         filename: attachment.fetch(:filename),
         type: attachment.fetch(:type),

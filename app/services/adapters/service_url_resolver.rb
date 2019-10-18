@@ -7,10 +7,6 @@ module Adapters
       @environment_slug = params[:environment_slug] || ENV['FB_ENVIRONMENT_SLUG']
     end
 
-    def ensure_absolute_urls(urls = [])
-      urls.map { |u| ensure_absolute_url(u) }
-    end
-
     def ensure_absolute_url(url)
       uri = URI.parse(url)
       uri = resolve_uri_to_service(uri) unless uri.absolute?
