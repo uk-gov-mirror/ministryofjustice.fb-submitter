@@ -23,7 +23,7 @@ module Adapters
     private
 
     def internal_host(service_slug, environment_slug)
-      "#{service_slug}.formbuilder-services-#{environment_slug}"
+      ENV['RUNNER_CALLBACK_URL_OVERRIDE'] || "#{service_slug}.formbuilder-services-#{environment_slug}"
     end
   end
 end
