@@ -31,6 +31,17 @@ describe Adapters::ServiceUrlResolver do
       it 'returns the resolved URL' do
         expect(subject.ensure_absolute_url(url)).to eq('http://my-service.formbuilder-services-dev:3000/a/relative/url')
       end
+
+      context 'when the RUNNER_CALLBACK_URL_OVERRIDE is set' do
+        before do
+          allow(ENV).to receive(:[])
+          allow(ENV).to receive(:[]).with('RUNNER_CALLBACK_URL_OVERRIDE').and_return('some-runner-callback')
+        end
+
+        it 'uses the RUNNER_CALLBACK_URL_OVERRIDE' do
+          expect(subject.ensure_absolute_url(url)).to eq('http://some-runner-callback:3000/a/relative/url')
+        end
+      end
     end
   end
 end
