@@ -5,6 +5,16 @@ describe EmailService do
     it 'is Adapters::AmazonSESAdapter' do
       expect(described_class.adapter).to eq(Adapters::AmazonSESAdapter)
     end
+
+    context 'when overriding the email endpoint' do
+      before do
+        allow(ENV).to receive(:[]).with('EMAIL_ENDPOINT_OVERRIDE').and_return('http://some-custom-email-api.com')
+      end
+
+      it 'uses the mock email adapter' do
+        expect(described_class.adapter).to eq(Adapters::MockAmazonSESAdapter)
+      end
+    end
   end
 
   describe '.sanitised_params' do
