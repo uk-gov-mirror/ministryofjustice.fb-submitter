@@ -1,14 +1,61 @@
 FactoryBot.define do
   factory :submission do
     status { Submission::STATUS[:queued] }
-    service_slug { 'my-service' }
-    encrypted_user_id_and_token { 'foo' }
-    submission_details do
-      {
-        submissionId: SecureRandom.uuid,
-        name: 'Mr Test'
-      }
+    service_slug { 'service-slug' }
+    encrypted_user_id_and_token { 'some token' }
+
+    trait :json do
+      submission_details do
+        [
+          {
+            type: 'json',
+            url: 'https://my-custom-endpoint/ap/v1/foo',
+            encryption_key: 'jdwjdwjwdhwhdh73',
+            data_url: 'this-url-should-no-longer-be-called-or-used',
+            submissionId: SecureRandom.uuid,
+            user_answers: {
+              first_name: 'bob',
+              last_name: 'madly',
+              submissionDate: 1_571_756_381_535,
+              submissionId: SecureRandom.uuid
+            },
+            attachments: []
+          }
+        ]
+      end
     end
+
+    trait :email do
+      submission_details do
+        [
+          {
+            'from' => 'some.one@example.com',
+            'to' => 'destination@example.com',
+            'subject' => 'mail subject',
+            'type' => 'email',
+            'body_parts' => {
+              'text/html' => 'https://tools.ietf.org/html/rfc2324',
+              'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
+            },
+            'attachments' => [
+              {
+                'type' => 'output',
+                'mimetype' => 'application/pdf',
+                'url' => '/api/submitter/pdf/default/guid1.pdf',
+                'filename' => 'form1'
+              },
+              {
+                'type' => 'output',
+                'mimetype' => 'application/pdf',
+                'url' => '/api/submitter/pdf/default/guid2.pdf',
+                'filename' => 'form2'
+              }
+            ]
+          }
+        ]
+      end
+    end
+
     responses { {} }
 
     created_at { Time.current }
