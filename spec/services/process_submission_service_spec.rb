@@ -12,30 +12,28 @@ describe ProcessSubmissionService do
     create(:submission, :json)
   end
 
-  let(:mock_downloaded_files) { { 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2' } }
-  let(:downloaded_body_parts) { mock_downloaded_files }
-  let(:body_part_content) do
+  let(:mock_downloaded_files) do
     {
-      'text/plain' => 'some plain text',
-      'text/html' => '<html>some html</html>'
+      'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8' => '/path/to/file1',
+      'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dwdwdw' => '/path/to/file2'
     }
   end
+
   let(:token) { 'some token' }
   let(:headers) { { 'x-encrypted-user-id-and-token' => token } }
 
   let(:attachments) do
     [
       {
-        'type' => 'output',
-        'mimetype' => 'application/pdf',
-        'url' => '/api/submitter/pdf/default/guid1.pdf',
-        'filename' => 'form1'
-      },
-      {
-        'type' => 'output',
-        'mimetype' => 'application/pdf',
-        'url' => '/api/submitter/pdf/default/guid2.pdf',
-        'filename' => 'form2'
+        type: 'filestore',
+        mimetype: 'image/png',
+        url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8',
+        filename: 'doge'
+      }, {
+        type: 'filestore',
+        mimetype: 'image/png',
+        url: 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dwdwdw',
+        filename: 'doge1'
       }
     ]
   end
@@ -48,7 +46,6 @@ describe ProcessSubmissionService do
         'subject' => 'mail subject',
         'type' => 'email',
         'body_parts' => {
-          'text/html' => 'https://tools.ietf.org/html/rfc2324',
           'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
         },
         'attachments' => attachments
@@ -114,7 +111,6 @@ describe ProcessSubmissionService do
       allow(DownloadService).to receive(:download_in_parallel).and_return(
         mock_downloaded_files
       )
-      allow(subject).to receive(:retrieve_mail_body_parts).and_return(body_part_content)
     end
 
     context 'with a mix of email, pdf and json submissions' do
@@ -122,14 +118,11 @@ describe ProcessSubmissionService do
 
       let(:email_submission) do
         {
+          'type' => 'email',
           'from' => 'some.one@example.com',
           'to' => 'destination@example.com',
           'subject' => 'mail subject',
-          'type' => 'email',
-          'body_parts' => {
-            'text/html' => 'https://tools.ietf.org/html/rfc2324',
-            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-          },
+          'email_body' => 'some plain text',
           'attachments' => attachments
         }
       end
@@ -235,7 +228,9 @@ describe ProcessSubmissionService do
             from: detail_object.from,
             to: detail_object.to,
             subject: detail_object.subject,
-            body_parts: body_part_content,
+            body_parts: {
+              'text/plain' => 'some plain text'
+            },
             attachments: processed_attachments
           ).and_return(mock_send_response)
           subject.perform
@@ -265,10 +260,7 @@ describe ProcessSubmissionService do
           'to' => 'destination@example.com',
           'subject' => 'mail subject',
           'type' => 'email',
-          'body_parts' => {
-            'text/html' => 'https://tools.ietf.org/html/rfc2324',
-            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-          },
+          'email_body' => 'some plain text',
           'attachments' => []
         }
       end
@@ -301,10 +293,7 @@ describe ProcessSubmissionService do
           'to' => 'destination@example.com',
           'subject' => 'mail subject',
           'type' => 'email',
-          'body_parts' => {
-            'text/html' => 'https://tools.ietf.org/html/rfc2324',
-            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-          },
+          'email_body' => 'some plain text',
           'attachments' => attachments
         }
       end
@@ -322,6 +311,7 @@ describe ProcessSubmissionService do
       let(:submission_detail_1) do
         {
           'type' => 'email',
+          'email_body' => 'some plain text',
           'attachments' => [
             {
               type: 'output',
@@ -341,6 +331,7 @@ describe ProcessSubmissionService do
       let(:submission_detail_2) do
         {
           'type' => 'email',
+          'email_body' => 'some plain text',
           'attachments' => [
             {
               type: 'output',
@@ -372,89 +363,6 @@ describe ProcessSubmissionService do
     end
   end
 
-  describe '#retrieve_mail_body_parts' do
-    let(:mail) { instance_double(EmailSubmissionDetail) }
-
-    before do
-      allow(subject).to receive(:download_body_parts).with(mail).and_return(mock_downloaded_files)
-      allow(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
-    end
-
-    it 'downloads the body parts' do
-      expect(subject).to receive(:download_body_parts).with(mail).and_return(mock_downloaded_files)
-      subject.send(:retrieve_mail_body_parts, mail)
-    end
-
-    it 'reads the downloaded body parts' do
-      expect(subject).to receive(:read_downloaded_body_parts).with(mail, mock_downloaded_files).and_return(body_part_content)
-      subject.send(:retrieve_mail_body_parts, mail)
-    end
-
-    it 'returns the map of content type to content' do
-      expect(subject.send(:retrieve_mail_body_parts, mail)).to eq(body_part_content)
-    end
-  end
-
-  describe '#download_body_parts' do
-    let(:mail) { instance_double(EmailSubmissionDetail) }
-
-    before do
-      allow(mail).to receive(:body_parts).and_return('text/plain' => 'url1', 'text/html' => 'url2')
-      allow(DownloadService).to receive(:download_in_parallel).with(
-        urls: %w[url1 url2],
-        headers: headers
-      ).and_return('download result')
-    end
-
-    it 'asks the DownloadService to download the resolved body part urls in parallel' do
-      expect(DownloadService).to receive(:download_in_parallel).with(
-        urls: %w[url1 url2],
-        headers: headers
-      )
-      subject.send(:download_body_parts, mail)
-    end
-
-    it 'returns the result of the download call' do
-      expect(subject.send(:download_body_parts, mail)).to eq('download result')
-    end
-  end
-
-  describe '#read_downloaded_body_parts' do
-    context 'when a mail with body parts' do
-      let(:mail) { instance_double(EmailSubmissionDetail) }
-
-      before do
-        allow(mail).to receive(:body_parts).and_return('text/plain' => 'url1', 'text/html' => 'url2')
-      end
-
-      context 'with a map of urls to file paths' do
-        let(:file_map) { { 'url1' => 'file1', 'url2' => 'file2' } }
-        let(:mock_file_1) { instance_double(File) }
-        let(:mock_file_2) { instance_double(File) }
-
-        before do
-          allow(mock_file_1).to receive(:read).and_return('file 1 content')
-          allow(mock_file_2).to receive(:read).and_return('file 2 content')
-
-          allow(File).to receive(:open).with('file1').and_yield(mock_file_1)
-          allow(File).to receive(:open).with('file2').and_yield(mock_file_2)
-        end
-
-        it 'reads each file' do
-          expect(File).to receive(:open).with('file1').and_yield(mock_file_1)
-          expect(File).to receive(:open).with('file2').and_yield(mock_file_2)
-          subject.send(:read_downloaded_body_parts, mail, file_map)
-        end
-
-        it 'returns a map of content types to file content' do
-          expect(subject.send(:read_downloaded_body_parts, mail, file_map)).to eq(
-            'text/plain' => 'file 1 content', 'text/html' => 'file 2 content'
-          )
-        end
-      end
-    end
-  end
-
   context 'with PDF payload' do
     before do
       Submission.create!(
@@ -466,10 +374,7 @@ describe ProcessSubmissionService do
             'to' => 'destination@example.com',
             'subject' => 'mail subject',
             'type' => 'email',
-            'body_parts' => {
-              'text/html' => 'https://tools.ietf.org/html/rfc2324',
-              'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-            },
+            'email_body' => 'some plain text',
             'attachments' => [
               {
                 'type' => 'output',
@@ -488,8 +393,6 @@ describe ProcessSubmissionService do
 
       stub_request(:get, 'http://fake_service_token_cache_root_url/service/service-slug').to_return(status: 200, body: { token: '123' }.to_json)
       stub_request(:post, 'http://pdf-generator.com/v1/pdfs').with(body: '{"some_pdf":"data"}')
-      stub_request(:get, 'https://tools.ietf.org/html/rfc2324').to_return(status: 200)
-      stub_request(:get, 'https://tools.ietf.org/rfc/rfc2324.txt').to_return(status: 200)
 
       allow(EmailService).to receive(:send_mail).and_return(some: 'mock response')
     end

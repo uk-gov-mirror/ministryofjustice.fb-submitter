@@ -71,11 +71,6 @@ describe 'UserData API', type: :request do
       stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-aaa59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e1187aaa').to_return(status: 200, body: '', headers: {})
       stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8').to_return(status: 200, body: '', headers: {})
 
-      stub_request(:get, 'http://my-service.formbuilder-services-test:3000/some/plain.txt').to_return(status: 200, body: '', headers: {})
-      stub_request(:get, 'http://my-service.formbuilder-services-test:3000/some/html').to_return(status: 200, body: '', headers: {})
-
-      stub_request(:get, 'http://my-service.formbuilder-services-test:3000/api/submitter/pdf/default/7a9a5124-0ab2-43f1-b345-0685fced5705.pdf').to_return(status: 200, body: '', headers: {})
-
       allow(Aws::SES::Client).to receive(:new).with(region: 'eu-west-1').and_return(stub_aws)
 
       # PDF Generator stubs
@@ -115,21 +110,11 @@ describe 'UserData API', type: :request do
                 type: 'email',
                 from: 'from@example.com',
                 to: 'destination@example.com',
-                body_parts: {
-                  'text/html' => '/some/html',
-                  'text/plain' => '/some/plain.txt'
-                },
+                email_body: 'this is the body of the email',
                 attachments: [
-                  { # this is a deprecated version of pdf attachments
+                  {
                     type: 'output',
                     mimetype: 'application/pdf',
-                    url: '/api/submitter/pdf/default/7a9a5124-0ab2-43f1-b345-0685fced5705.pdf',
-                    filename: 'form'
-                  },
-                  { # this is the new version of pdf attachments
-                    type: 'output',
-                    mimetype: 'application/pdf',
-                    url: '/api/submitter/pdf/default/7a9a5124-0ab2-43f1-b345-0685fced5705.pdf',
                     filename: 'form',
                     pdf_data: {
                       question_1: 'answer 1',
@@ -172,21 +157,9 @@ describe 'UserData API', type: :request do
               expect(WebMock).to have_requested(:get, %r{fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/}).times(2)
             end
 
-            it 'downloads pdf attachment answers' do
-              post_request
-              expect(WebMock).to have_requested(:get, 'http://my-service.formbuilder-services-test:3000/api/submitter/pdf/default/7a9a5124-0ab2-43f1-b345-0685fced5705.pdf').times(1)
-            end
-
-            it 'downloads email body parts' do
-              post_request
-              # TODO: this may be requested more than needed
-              expect(WebMock).to have_requested(:get, 'http://my-service.formbuilder-services-test:3000/some/plain.txt').times(4)
-              expect(WebMock).to have_requested(:get, 'http://my-service.formbuilder-services-test:3000/some/html').times(4)
-            end
-
             it 'sends 4 emails' do
               post_request
-              expect(stub_aws.api_requests.size).to eq(4)
+              expect(stub_aws.api_requests.size).to eq(3)
             end
 
             it 'email contains downloaded attachment' do

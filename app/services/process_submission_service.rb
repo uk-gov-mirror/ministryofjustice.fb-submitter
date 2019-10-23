@@ -38,13 +38,21 @@ class ProcessSubmissionService # rubocop:disable Metrics/ClassLength
 
   private
 
+  def email_body_parts(email)
+    {
+      'text/plain' => email.email_body
+    }
+  end
+
   def send_email(mail)
+    email_body = email_body_parts(mail)
+
     if number_of_attachments(mail) <= 1
       response = EmailService.send_mail(
         from: mail.from,
         to: mail.to,
         subject: mail.subject,
-        body_parts: retrieve_mail_body_parts(mail),
+        body_parts: email_body,
         attachments: attachments(mail)
       )
 
@@ -55,7 +63,7 @@ class ProcessSubmissionService # rubocop:disable Metrics/ClassLength
           from: mail.from,
           to: mail.to,
           subject: "#{mail.subject} {#{submission_id}} [#{n + 1}/#{number_of_attachments(mail)}]",
-          body_parts: retrieve_mail_body_parts(mail),
+          body_parts: email_body,
           attachments: [a]
         )
 
@@ -74,30 +82,6 @@ class ProcessSubmissionService # rubocop:disable Metrics/ClassLength
     attachments = submission.detail_objects.map(&:attachments).flatten
     urls = attachments.map { |e| e['url'] }
     urls.compact.sort.uniq
-  end
-
-  def retrieve_mail_body_parts(mail)
-    body_part_map = download_body_parts(mail)
-    read_downloaded_body_parts(mail, body_part_map)
-  end
-
-  # returns Hash
-  # { type: url }
-  # { 'text' => http://example.com/foo.text }
-  def download_body_parts(mail)
-    DownloadService.download_in_parallel(
-      urls: mail.body_parts.values,
-      headers: headers
-    )
-  end
-
-  def read_downloaded_body_parts(mail, body_part_map)
-    # we need to send the body parts as strings
-    body_part_content = {}
-    mail.body_parts.each do |type, url|
-      body_part_content[type] = File.open(body_part_map[url]) { |f| f.read }
-    end
-    body_part_content
   end
 
   def submission

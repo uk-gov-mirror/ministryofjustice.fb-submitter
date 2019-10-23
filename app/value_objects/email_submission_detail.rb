@@ -1,13 +1,13 @@
 class EmailSubmissionDetail
   include ActiveModel
 
-  attr_accessor :from, :to, :subject, :body_parts, :attachments, :submission
+  attr_accessor :from, :to, :subject, :attachments, :submission, :email_body
 
   def initialize(params = {})
     symbol_params = params.symbolize_keys!
     @submission   = symbol_params[:submission]
     @attachments  = symbol_params[:attachments]
-    @body_parts   = symbol_params[:body_parts] || []
+    @email_body   = symbol_params[:email_body]
     @from         = symbol_params[:from]
     @subject      = symbol_params[:subject]
     @to           = symbol_params[:to]
@@ -18,10 +18,6 @@ class EmailSubmissionDetail
   def make_urls_absolute!
     attachments.each do |attachment|
       attachment['url'] = url_resolver.ensure_absolute_url(attachment['url']) if attachment['type'] == 'output' && !attachment['url'].nil?
-    end
-
-    @body_parts.each do |content_type, url|
-      @body_parts[content_type] = url_resolver.ensure_absolute_url(url)
     end
   end
 

@@ -22,12 +22,6 @@ class RawMessage
       Content-type: Multipart/Alternative; boundary="AltPart"
 
       --AltPart
-      Content-type: text/html; charset=utf-8
-      Content-Transfer-Encoding: quoted-printable
-
-      #{[@body_parts['text/html']].pack('M')}
-
-      --AltPart
       Content-type: text/plain; charset=utf-8
       Content-Transfer-Encoding: quoted-printable
 
@@ -48,7 +42,6 @@ class RawMessage
       Content-Transfer-Encoding: base64
 
       #{Base64.encode64(File.open(attachment.path, 'rb', &:read))}
-
     RAW_ATTACHMENT
   end
 end
