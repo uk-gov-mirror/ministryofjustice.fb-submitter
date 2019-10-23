@@ -12,6 +12,10 @@ class EmailService
   end
 
   def self.adapter
+    if ENV['EMAIL_ENDPOINT_OVERRIDE'].present?
+      return Adapters::MockAmazonSESAdapter
+    end
+
     Adapters::AmazonSESAdapter
   end
 end
