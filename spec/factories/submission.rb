@@ -33,10 +33,7 @@ FactoryBot.define do
             'to' => 'destination@example.com',
             'subject' => 'mail subject',
             'type' => 'email',
-            'body_parts' => {
-              'text/html' => 'https://tools.ietf.org/html/rfc2324',
-              'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-            },
+            'email_body' => 'some plain text',
             'attachments' => [
               {
                 'type' => 'output',
