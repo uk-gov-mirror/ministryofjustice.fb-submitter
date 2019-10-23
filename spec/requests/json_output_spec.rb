@@ -62,7 +62,7 @@ describe 'Submits JSON given a JSON submission type', type: :request do
       attachments: expected_attachments
     }.to_json
   end
-  let(:runner_callback_url) { 'https://formbuilder.com/runner_frontend_callback' }
+
   let(:json_destination_url) { 'https://example.com/json_destination_placeholder' }
   let(:attachment_url) { 'https://some-url/1' }
 
@@ -73,8 +73,9 @@ describe 'Submits JSON given a JSON submission type', type: :request do
       {
         'type' => 'json',
         'url': json_destination_url,
-        'data_url': runner_callback_url,
+        'data_url': 'deprecated field',
         'encryption_key': encryption_key,
+        'user_answers': submission_answers,
         'attachments': [
           {
             'type' => 'output',
@@ -104,9 +105,6 @@ describe 'Submits JSON given a JSON submission type', type: :request do
   before do
     Delayed::Worker.delay_jobs = false
     allow_any_instance_of(ApplicationController).to receive(:verify_token!)
-
-    stub_request(:get, 'https://formbuilder.com/runner_frontend_callback')
-      .to_return(status: 200, body: submission_answers.to_json)
 
     stub_request(:post, json_destination_url).to_return(status: 200, body: '')
 

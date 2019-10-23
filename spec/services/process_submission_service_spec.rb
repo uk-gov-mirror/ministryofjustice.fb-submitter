@@ -9,12 +9,7 @@ describe ProcessSubmissionService do
   end
 
   let(:submission) do
-    Submission.create!(
-      encrypted_user_id_and_token: token,
-      status: 'queued',
-      submission_details: [],
-      service_slug: 'service-slug'
-    )
+    create(:submission, :json)
   end
 
   let(:mock_downloaded_files) { { 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid1.pdf' => '/path/to/file1', 'http://service-slug.formbuilder-services-test:3000/api/submitter/pdf/default/guid2.pdf' => '/path/to/file2' } }
@@ -102,14 +97,7 @@ describe ProcessSubmissionService do
       ]
     end
 
-    let(:submission) do
-      Submission.create!(
-        encrypted_user_id_and_token: token,
-        status: 'queued',
-        submission_details: [submission_detail],
-        service_slug: 'service-slug'
-      )
-    end
+    let(:submission) { create(:submission, :email) }
 
     let(:detail_objects) do
       [EmailSubmissionDetail.new(submission_detail)]
@@ -130,7 +118,6 @@ describe ProcessSubmissionService do
     end
 
     context 'with a mix of email, pdf and json submissions' do
-      let(:runner_callback_url) { 'https://example.com/runner_frontend_callback' }
       let(:json_destination_url) { 'https://example.com/json_destination_placeholder' }
 
       let(:email_submission) do
@@ -151,24 +138,31 @@ describe ProcessSubmissionService do
         {
           'type' => 'json',
           'url': json_destination_url,
-          'data_url': runner_callback_url,
+          'data_url': 'deprecated field',
           'encryption_key': SecureRandom.hex(8),
+          user_answers: user_answers,
           'attachments' => []
         }
       end
 
+      let(:user_answers) do
+        {
+          first_name: 'bob',
+          last_name: 'madly',
+          submissionDate: 1_571_756_381_535,
+          submissionId: '5de849f3-bff4-4f10-b245-23b1435f1c70'
+        }
+      end
+
       let(:submission) do
-        Submission.create!(
-          submission_details: [
-            email_submission,
-            email_submission,
-            json_submission,
-            json_submission,
-            json_submission,
-            pdf_submission
-          ], status: 'queued',
-          service_slug: 'service-slug'
-        )
+        create(:submission, submission_details: [
+          email_submission,
+          email_submission,
+          json_submission,
+          json_submission,
+          json_submission,
+          pdf_submission
+        ])
       end
 
       let(:headers) do
@@ -181,7 +175,6 @@ describe ProcessSubmissionService do
       let(:service_slug_secret) { SecureRandom.alphanumeric(10) }
 
       before do
-        stub_request(:get, runner_callback_url).with(headers: headers).to_return(status: 200, body: '{"foo": "bar"}')
         stub_request(:post, json_destination_url).with(headers: headers).to_return(status: 200)
         stub_request(:post, 'http://pdf-generator.com/v1/pdfs')
           .with(body: pdf_submission.fetch(:submission).to_json, headers: headers).to_return(status: 200)
@@ -194,7 +187,6 @@ describe ProcessSubmissionService do
 
       it 'dispatches json submissions to the webhook class' do
         subject.perform
-        expect(WebMock).to have_requested(:get, runner_callback_url).times(3)
         expect(WebMock).to have_requested(:post, json_destination_url).times(3)
       end
     end
@@ -281,6 +273,12 @@ describe ProcessSubmissionService do
         }
       end
 
+      let(:submission) do
+        create(:submission, submission_details: [
+          submission_detail
+        ])
+      end
+
       it 'sends one email' do
         expect(EmailService).to receive(:send_mail).once
 
@@ -288,30 +286,9 @@ describe ProcessSubmissionService do
       end
     end
 
-    context 'when there is 1 attachment' do
-      let(:submission_detail) do
-        {
-          'from' => 'some.one@example.com',
-          'to' => 'destination@example.com',
-          'subject' => 'mail subject',
-          'type' => 'email',
-          'body_parts' => {
-            'text/html' => 'https://tools.ietf.org/html/rfc2324',
-            'text/plain' => 'https://tools.ietf.org/rfc/rfc2324.txt'
-          },
-          'attachments' => [
-            {
-              'type' => 'output',
-              'mimetype' => 'application/pdf',
-              'url' => '/api/submitter/pdf/default/guid1.pdf',
-              'filename' => 'form1'
-            }
-          ]
-        }
-      end
-
-      it 'sends one email' do
-        expect(EmailService).to receive(:send_mail).once
+    context 'when there are 2 attachments' do
+      it 'sends two emails' do
+        expect(EmailService).to receive(:send_mail).twice
 
         subject.perform
       end
@@ -382,8 +359,7 @@ describe ProcessSubmissionService do
       end
 
       let(:submission) do
-        Submission.create!(submission_details: [submission_detail_1, submission_detail_2],
-                           status: 'queued', service_slug: 'test-service-slug')
+        create(:submission, submission_details: [submission_detail_1, submission_detail_2], service_slug: 'test-service-slug')
       end
 
       it 'returns a single array of unique urls' do

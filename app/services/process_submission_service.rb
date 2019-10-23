@@ -17,13 +17,12 @@ class ProcessSubmissionService # rubocop:disable Metrics/ClassLength
         encryption_key = submission_detail.fetch(:encryption_key)
 
         JsonWebhookService.new(
-          runner_callback_adapter: Adapters::RunnerCallback.new(url: submission_detail.fetch(:data_url), token: token),
           webhook_attachment_fetcher: WebhookAttachmentService.new(
             attachment_parser: AttachmentParserService.new(attachments: submission_detail.fetch(:attachments)),
             user_file_store_gateway: Adapters::UserFileStore.new(key: token)
           ),
           webhook_destination_adapter: Adapters::JweWebhookDestination.new(url: submission_detail.fetch(:url), key: encryption_key)
-        ).execute(service_slug: submission.service_slug)
+        ).execute(user_answers: submission_detail.fetch(:user_answers), service_slug: submission.service_slug)
       end
     end
 
