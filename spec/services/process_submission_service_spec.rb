@@ -49,36 +49,6 @@ describe ProcessSubmissionService do
       }
     end
 
-    let(:pdf_submission) do
-      {
-        type: 'pdf',
-        submission: {
-          submission_id: '1786c427-246e-4bb7-90b9-a2e6cfae003f',
-          pdf_heading: 'Best form on the web',
-          pdf_subheading: '(Optional) Some section heading',
-          sections: [
-            {
-              heading: 'Whats your name',
-              summary_heading: 'WIP',
-              questions: []
-            }, {
-              heading: '',
-              summary_heading: '',
-              questions: [
-                {
-                  label: 'First name',
-                  answer: 'Bob'
-                }, {
-                  label: 'Last name',
-                  answer: 'Smith'
-                }
-              ]
-            }
-          ]
-        }
-      }
-    end
-
     let(:processed_attachments) do
       [
         Attachment.new(
@@ -150,8 +120,7 @@ describe ProcessSubmissionService do
           email_submission,
           json_submission,
           json_submission,
-          json_submission,
-          pdf_submission
+          json_submission
         ])
       end
 
@@ -166,8 +135,6 @@ describe ProcessSubmissionService do
 
       before do
         stub_request(:post, json_destination_url).with(headers: headers).to_return(status: 200)
-        stub_request(:post, 'http://pdf-generator.com/v1/pdfs')
-          .with(body: pdf_submission.fetch(:submission).to_json, headers: headers).to_return(status: 200)
       end
 
       it 'dispatches 1 email for each submission email attachment' do
@@ -362,31 +329,28 @@ describe ProcessSubmissionService do
 
   context 'with PDF payload' do
     before do
-      Submission.create!(
-        encrypted_user_id_and_token: 'encrypted_user_id_and_token',
-        status: 'queued',
-        submission_details: [
-          {
-            'from' => 'some.one@example.com',
-            'to' => 'destination@example.com',
-            'subject' => 'mail subject',
-            'type' => 'email',
-            'email_body' => 'some plain text',
-            'attachments' => [
-              {
-                'type' => 'output',
-                'mimetype' => 'application/pdf',
-                'url' => '/api/submitter/pdf/default/guid1.pdf',
-                'filename' => 'form1',
-                'pdf_data' => {
-                  'some_pdf' => 'data'
-                }
-              }
-            ]
-          }
-        ],
-        service_slug: 'service-slug'
-      )
+      create(:submission,
+             encrypted_user_id_and_token: 'encrypted_user_id_and_token',
+             submission_details: [
+               {
+                 'from' => 'some.one@example.com',
+                 'to' => 'destination@example.com',
+                 'subject' => 'mail subject',
+                 'type' => 'email',
+                 'email_body' => 'some plain text',
+                 'attachments' => [
+                   {
+                     'type' => 'output',
+                     'mimetype' => 'application/pdf',
+                     'url' => '/api/submitter/pdf/default/guid1.pdf',
+                     'filename' => 'form1',
+                     'pdf_data' => {
+                       'some_pdf' => 'data'
+                     }
+                   }
+                 ]
+               }
+             ])
 
       stub_request(:get, 'http://fake_service_token_cache_root_url/service/service-slug').to_return(status: 200, body: { token: '123' }.to_json)
       stub_request(:post, 'http://pdf-generator.com/v1/pdfs').with(body: '{"some_pdf":"data"}')
