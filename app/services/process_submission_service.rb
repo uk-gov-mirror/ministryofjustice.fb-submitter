@@ -89,15 +89,14 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
 
     attachments.each_with_index do |value, index|
       if action.fetch('include_pdf')
-        pdf = generate_pdf({ submission: value[:pdf_data] }, @submission_id)
-        pdf = Attachment.new(type:, filename:, url:, mimetype:, path:)
-        attachment_objects[index].file =
+        attachment_object = Attachment.new(type: value.fetch('type'), filename: 'form', path:, mimetype: 'application/pdf')
+        attachment_object.file = generate_pdf({ submission: value[:pdf_data] }, @submission_id)
+        attachment_objects << attachment_object
       else
         response = download_attachments(attachments)
         attachment_objects[index].path = download_attachments[attachment_objects[index].url]
       end
     end
-    pp attachment_objects
     attachment_objects
   end
 
