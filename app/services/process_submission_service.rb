@@ -24,13 +24,11 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
             key: action.fetch(:encryption_key)
           )
         ).execute(submission: payload_service.submission, service_slug: submission.service_slug)
+      when 'email'
+        send_email(action, payload_service)
       else
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
       end
-    end
-
-    submission.detail_objects.to_a.each do |submission_detail|
-      send_email(submission_detail) if submission_detail.instance_of? EmailSubmissionDetail
     end
 
     # explicit save! first, to save the responses
@@ -46,26 +44,25 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
     }
   end
 
-  def send_email(mail)
-    email_body = email_body_parts(mail)
-
-    if number_of_attachments(mail) <= 1
+  def send_email(action, payload_service)
+    if number_of_attachments(payload_service) <= 1
+      attachment = payload_service.attachments.first
       response = EmailService.send_mail(
-        from: mail.from,
-        to: mail.to,
-        subject: mail.subject,
-        body_parts: email_body,
+        from: action.from,
+        to: action.to,
+        subject: action.subject,
+        body_parts: action.email_body,
         attachments: attachments(mail)
       )
 
       submission.responses << response.to_h
     else
-      attachments(mail).each_with_index do |a, n|
+      attachments(payload_service.attachments, action).each_with_index do |a, n|
         response = EmailService.send_mail(
-          from: mail.from,
-          to: mail.to,
-          subject: "#{mail.subject} {#{submission_id}} [#{n + 1}/#{number_of_attachments(mail)}]",
-          body_parts: email_body,
+          from: action.from,
+          to: action.to,
+          subject: "#{action.subject} {#{submission_id}} [#{n + 1}/#{number_of_attachments(payload_service)}]",
+          body_parts: action.email_body,
           attachments: [a]
         )
 
@@ -75,16 +72,8 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
   end
   # rubocop:enable Metrics/MethodLength
 
-  def number_of_attachments(mail)
-    attachments(mail).size
-  end
-
-  # returns array of urls
-  # this is done over all files so we download all needed files at once
-  def unique_attachment_urls
-    attachments = submission.detail_objects.map(&:attachments).flatten
-    urls = attachments.map { |e| e['url'] }
-    urls.compact.sort.uniq
+  def number_of_attachments(payload_service)
+    payload_service.attachments.length
   end
 
   def submission
@@ -95,25 +84,29 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
     { 'x-encrypted-user-id-and-token' => submission.encrypted_user_id_and_token }
   end
 
-  def attachments(mail)
-    attachments = mail.attachments.map(&:with_indifferent_access)
-    attachment_objects = AttachmentParserService.new(attachments: attachments).execute
+  def attachments(attachments, action)
+    attachment_objects = []
 
     attachments.each_with_index do |value, index|
-      if value[:pdf_data]
-        attachment_objects[index].file = generate_pdf({ submission: value[:pdf_data] }, @submission_id)
+      if action.fetch('include_pdf')
+        pdf = generate_pdf({ submission: value[:pdf_data] }, @submission_id)
+        pdf = Attachment.new(type:, filename:, url:, mimetype:, path:)
+        attachment_objects[index].file =
       else
+        response = download_attachments(attachments)
         attachment_objects[index].path = download_attachments[attachment_objects[index].url]
       end
     end
+    pp attachment_objects
     attachment_objects
   end
 
-  def download_attachments
-    @download_attachments ||= DownloadService.download_in_parallel(
-      urls: unique_attachment_urls,
-      headers: headers
-    )
+  def download_attachments(attachments)
+    @download_attachments ||= DownloadService.new(
+      attachments: attachments,
+      token: submission.encrypted_user_id_and_token,
+      target_dir: nil
+    ).download_in_parallel
   end
 
   def generate_pdf(pdf_detail, submission_id)
