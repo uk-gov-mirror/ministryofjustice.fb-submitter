@@ -2,9 +2,18 @@ require 'rails_helper'
 
 describe DownloadService do
   let(:url) { 'https://my.domain/some/path/file.ext' }
-  let(:headers) { { 'x-encrypted-user-id-and-token' => 'sometoken' } }
-  let(:args) { { url: url, target_dir: '/my/target/dir', headers: headers } }
+  let(:token) { 'sometoken' }
+  let(:headers) { { 'x-encrypted-user-id-and-token' => token } }
   let(:mock_hydra) { instance_double(Typhoeus::Hydra) }
+  let(:attachments) do
+    [
+      "url" => url,
+      'mimetype' => 'application/pdf',
+      'filename' => 'evidence_one.pdf',
+      'type' => 'filestore'
+    ]
+  end
+  let(:target_dir) { '/my/target/dir' }
 
   before do
     allow(Typhoeus::Hydra).to receive(:hydra).and_return(mock_hydra)
@@ -14,7 +23,7 @@ describe DownloadService do
 
   describe '#download_in_parallel' do
     subject do
-      described_class.new(urls: [url])
+      described_class.new(attachments: attachments, target_dir: target_dir, token: token)
     end
 
     let(:path) { '/the/file/path' }
@@ -27,6 +36,7 @@ describe DownloadService do
     end
 
     context 'when no target_dir is given' do
+      let(:target_dir) { nil }
       before do
         allow(Dir).to receive(:mktmpdir).and_return('/a/new/temp/dir')
       end
@@ -39,7 +49,7 @@ describe DownloadService do
 
     context 'when a target_dir is given' do
       subject do
-        described_class.new(urls: [url], target_dir: target_dir)
+        described_class.new(attachments: attachments, target_dir: target_dir, token: token)
       end
 
       let(:target_dir) { '/my/tmp/dir' }
@@ -52,14 +62,29 @@ describe DownloadService do
 
     context 'with an array of urls' do
       subject do
-        described_class.new(args)
+        described_class.new(attachments: attachments, target_dir: path, token: token)
       end
 
       let(:url1) { 'https://example.com/service/some-service/user/some-user/fingerprint' }
       let(:url2) { 'https://another.domain/some/otherfile.ext' }
-      let(:args) { { urls: [url1, url2], target_dir: path, headers: headers } }
       let(:mock_request_1) { instance_double(Typhoeus::Request) }
       let(:mock_request_2) { instance_double(Typhoeus::Request) }
+
+      let(:attachments) do
+        [
+          {
+            'url' => url1,
+            'mimetype' => 'application/pdf',
+            'filename' => 'evidence_one.pdf',
+            'type' => 'filestore'
+          }, {
+            'url' => url2,
+            'mimetype' => 'application/pdf',
+            'filename' => 'evidence_two.pdf',
+            'type' => 'filestore'
+          }
+        ]
+      end
 
       before do
         allow(subject).to receive(:file_path_for_download).with(url: url1, target_dir: path).and_return('/tmp/file1')
