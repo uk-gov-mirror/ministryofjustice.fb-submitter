@@ -19,4 +19,8 @@ class SubmissionPayloadService
     end
     questions
   end
+
+  def urls
+    attachments.map(&:url)
+  end
 end

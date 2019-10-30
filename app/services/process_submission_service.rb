@@ -24,6 +24,22 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
             key: action.fetch(:encryption_key)
           )
         ).execute(submission: payload_service.submission, service_slug: submission.service_slug)
+      when 'email'
+        EmailOutputService.new(
+          pdf_generator: SaveTempPdf.new(
+            generate_pdf_content_service: GeneratePdfContent.new(
+              pdf_api_gateway: pdf_gateway(submission.service_slug),
+              payload: pdf_detail.with_indifferent_access
+            ),
+            tmp_file_gateway: Tempfile
+          ),
+          attachment_downloader: DownloadService.new(
+            attachments: payload_service.attachments,
+            target_dir: nil,
+            submission: submission
+          ),
+          emailer: EmailService.new()
+        ).excute(instructions: action)
       else
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
       end
@@ -91,7 +107,7 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
     @submission ||= Submission.find(submission_id)
   end
 
-  def headers
+  def headers(submission)
     { 'x-encrypted-user-id-and-token' => submission.encrypted_user_id_and_token }
   end
 
