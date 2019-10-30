@@ -23,7 +23,7 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
             url: action.fetch(:url),
             key: action.fetch(:encryption_key)
           )
-        ).execute(submission: payload_service.submission, service_slug: submission.service_slug)
+        ).execute(user_answers: payload_service.user_answers_map, service_slug: submission.service_slug, submission_id: payload_service.submission_id)
       else
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
       end
