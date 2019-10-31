@@ -57,6 +57,9 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
 
       submission.responses << response.to_h
     else
+      # To Do:
+      # 1. Generate the attachments
+      # 2. Iterate over the attachments and send an email for each one
       attachments(payload_service.attachments, action).each_with_index do |a, n|
         response = EmailService.send_mail(
           from: action.from,
@@ -89,12 +92,18 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
 
     attachments.each_with_index do |value, index|
       if action.fetch('include_pdf')
-        attachment_object = Attachment.new(type: value.fetch('type'), filename: 'form', path:, mimetype: 'application/pdf')
+        attachment_object = Attachment.new(type: 'output', filename: 'form', path: nil, mimetype: 'application/pdf')
         attachment_object.file = generate_pdf({ submission: value[:pdf_data] }, @submission_id)
         attachment_objects << attachment_object
-      else
+      elsif action.fetch('include_attachments')
+        # TO DO:
+        # 1. Generate an Attachment object
+        # 2. Make sure it has the correct info
+        # 3. Stuff it into the attachment_objects array
         response = download_attachments(attachments)
-        attachment_objects[index].path = download_attachments[attachment_objects[index].url]
+        attachment_object = Attachment.new(type: value.fetch('type'), filename: 'form', path: nil, mimetype: 'application/pdf')
+        attachment_object.path = download_attachments[attachment_objects[index].url]
+        attachment_objects << attachment_object
       end
     end
     attachment_objects
