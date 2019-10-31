@@ -83,10 +83,12 @@ describe ProcessSubmissionService do
 
     before do
       allow(EmailService).to receive(:send_mail).and_return(mock_send_response)
-      allow(DownloadService).to receive(:download_in_parallel).and_return(
-        mock_downloaded_files
-      )
+
+      allow(DownloadService).to receive(:new).and_return(download_service_mock)
+      allow(download_service_mock).to receive(:download_in_parallel).and_return(mock_downloaded_files)
     end
+
+    let(:download_service_mock) { instance_spy(DownloadService) }
 
     context 'with a mix of email, pdf and json submissions' do
       let(:json_destination_url) { 'https://example.com/json_destination_placeholder' }
@@ -99,6 +101,20 @@ describe ProcessSubmissionService do
           'subject' => 'mail subject',
           'email_body' => 'some plain text',
           'attachments' => attachments
+        }
+      end
+
+      let(:email_action) do
+        {
+          'recipientType' => 'team',
+          'type' => 'email',
+          'from' =>
+             '"Complain about a court or tribunal" <form-builder@digital.justice.gov.uk>',
+          'to' => 'bob.admin@digital.justice.gov.uk',
+          'subject' => 'Complain about a court or tribunal submission',
+          'email_body' => 'Please find an application attached',
+          'include_pdf' => true,
+          'include_attachments' => true
         }
       end
 
@@ -124,7 +140,7 @@ describe ProcessSubmissionService do
 
       let(:submission) do
         create(:submission,
-               submission_details: [
+               submission_details: [ # TODO: this needs to be removed
                  email_submission,
                  email_submission
                ],
@@ -133,6 +149,7 @@ describe ProcessSubmissionService do
                  json_submission,
                  json_submission,
                  json_submission
+                 # email_action # todo this needs to be enabled
                ],
                attachments: attachments)
       end
@@ -211,7 +228,7 @@ describe ProcessSubmissionService do
       end
 
       it 'downloads the resolved unique_attachment_urls in parallel' do
-        expect(DownloadService).to receive(:download_in_parallel)
+        expect(download_service_mock).to receive(:download_in_parallel)
           .with(urls: urls, headers: headers)
           .and_return(mock_downloaded_files)
         subject.perform

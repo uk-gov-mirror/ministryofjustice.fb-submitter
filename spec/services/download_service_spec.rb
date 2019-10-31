@@ -7,7 +7,7 @@ describe DownloadService do
   let(:mock_hydra) { instance_double(Typhoeus::Hydra) }
   let(:attachments) do
     [
-      "url" => url,
+      'url' => url,
       'mimetype' => 'application/pdf',
       'filename' => 'evidence_one.pdf',
       'type' => 'filestore'
@@ -37,6 +37,7 @@ describe DownloadService do
 
     context 'when no target_dir is given' do
       let(:target_dir) { nil }
+
       before do
         allow(Dir).to receive(:mktmpdir).and_return('/a/new/temp/dir')
       end

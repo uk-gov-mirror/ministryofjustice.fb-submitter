@@ -24,7 +24,7 @@ class DownloadService
     results
   end
 
-private
+  private
 
   def headers
     { 'x-encrypted-user-id-and-token' => token }
