@@ -4,6 +4,21 @@ class EmailOutputService
   end
 
   def execute(submission_id:, action:, attachments:, pdf_attachment:)
+    email_attachments = generate_attachments(action: action, attachments: attachments, pdf_attachment: pdf_attachment)
+
+    if email_attachments.empty?
+      send_single_email(
+        action: action,
+        subject: subject(subject: action.fetch(:subject), submission_id: submission_id)
+      )
+    else
+      send_emails_with_attachments(action, email_attachments, submission_id: submission_id)
+    end
+  end
+
+  private
+
+  def generate_attachments(action:, attachments:, pdf_attachment:)
     email_attachments = []
 
     if action.fetch(:include_attachments) == true
@@ -12,24 +27,8 @@ class EmailOutputService
     if action.fetch(:include_pdf) == true
       email_attachments << pdf_attachment
     end
-
-    if email_attachments.empty?
-      send_single_email(
-        action: action,
-        attachments: [],
-        subject: subject(
-          subject: action.fetch(:subject),
-          current_email: 1,
-          number_of_emails: 1,
-          submission_id: submission_id
-        )
-      )
-    else
-      send_emails_with_attachments(action, email_attachments, submission_id: submission_id)
-    end
+    email_attachments
   end
-
-  private
 
   def send_emails_with_attachments(action, email_attachments, submission_id:)
     email_attachments.each_with_index do |email_attachment, index|
@@ -46,7 +45,7 @@ class EmailOutputService
     end
   end
 
-  def send_single_email(subject:, action:, attachments:)
+  def send_single_email(subject:, action:, attachments: [])
     email_service.send_mail(
       from: action.fetch(:from),
       to: action.fetch(:to),
@@ -56,7 +55,7 @@ class EmailOutputService
     )
   end
 
-  def subject(subject:, current_email:, number_of_emails:, submission_id:)
+  def subject(submission_id:, subject:, current_email: 1, number_of_emails: 1)
     "#{subject} {#{submission_id}} [#{current_email}/#{number_of_emails}]"
   end
 

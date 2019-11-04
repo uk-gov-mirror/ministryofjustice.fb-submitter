@@ -48,7 +48,7 @@ describe EmailOutputService do
                                                                  attachments: []).once
   end
 
-  context 'when a include_attachments is true' do
+  context 'when a user uploaded attachments are required' do
     let(:include_attachments) { true }
 
     it 'sends a separate email for each attachment' do
@@ -62,7 +62,7 @@ describe EmailOutputService do
     end
   end
 
-  context 'when a include_pdf is true' do
+  context 'when a user answers pdf is needed' do
     let(:include_pdf) { true }
 
     it 'sends an email with the generated pdf as a attachment' do
@@ -70,7 +70,7 @@ describe EmailOutputService do
     end
   end
 
-  context 'when both include_attachments and include_pdf is true' do
+  context 'when both uploaded attachments and answers pdf are required' do
     let(:include_attachments) { true }
     let(:include_pdf) { true }
 
