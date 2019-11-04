@@ -37,13 +37,13 @@ describe EmailOutputService do
   before do
     allow(email_service_mock).to receive(:send_mail)
 
-    service.execute(action: email_action, attachments: attachments, pdf_attachment: pdf_attachment)
+    service.execute(action: email_action, attachments: attachments, pdf_attachment: pdf_attachment, submission_id: 'an-id-2323')
   end
 
   it 'execute sends an email' do
     expect(email_service_mock).to have_received(:send_mail).with(to: 'bob.admin@digital.justice.gov.uk',
                                                                  from: 'form-builder@digital.justice.gov.uk',
-                                                                 subject: 'Complain about a court or tribunal submission',
+                                                                 subject: 'Complain about a court or tribunal submission {an-id-2323} [1/1]',
                                                                  body_parts: { 'text/plain': 'Please find an application attached' },
                                                                  attachments: []).once
   end
@@ -52,13 +52,13 @@ describe EmailOutputService do
     let(:include_attachments) { true }
 
     it 'sends a separate email for each attachment' do
-      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: attachments[0])).once
-      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: attachments[1])).once
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: [attachments[0]])).once
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: [attachments[1]])).once
     end
 
     it 'the subject is numbered by how many seperte emails there are' do
-      expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission')).once
-      expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission')).once
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]')).once
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]')).once
     end
   end
 
@@ -66,7 +66,7 @@ describe EmailOutputService do
     let(:include_pdf) { true }
 
     it 'sends an email with the generated pdf as a attachment' do
-      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: pdf_attachment)).once
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: [pdf_attachment])).once
     end
   end
 

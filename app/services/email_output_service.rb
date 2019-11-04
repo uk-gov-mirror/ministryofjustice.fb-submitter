@@ -3,7 +3,7 @@ class EmailOutputService
     @email_service = email_service
   end
 
-  def execute(action:, attachments:, pdf_attachment:)
+  def execute(action:, attachments:, pdf_attachment:, submission_id:)
     email_attachments = []
 
     if action.fetch(:include_attachments) == true
@@ -13,30 +13,41 @@ class EmailOutputService
       email_attachments << pdf_attachment
     end
 
-    send_emails(action, email_attachments)
+    if email_attachments.empty?
+      send_single_email(
+        action: action,
+        subject: subject(subject: action.fetch(:subject), current_email: 1, number_of_emails: 1, submission_id: submission_id),
+        attachments: []
+      )
+    else
+      send_emails_with_attachments(action, email_attachments, submission_id: submission_id)
+    end
   end
 
   private
 
-  def send_emails(action, email_attachments)
-    loop do
+  def send_emails_with_attachments(action, email_attachments, submission_id:)
+    email_attachments.each_with_index do |email_attachment, index|
       send_single_email(
         action: action,
-        attachment: email_attachments.pop || []
+        subject: subject(subject: action.fetch(:subject), current_email: index + 1, number_of_emails: email_attachments.size, submission_id: submission_id),
+        attachments: [email_attachment]
       )
-
-      break if email_attachments.size <= 0
     end
   end
 
-  def send_single_email(action:, attachment:)
+  def send_single_email(subject:, action:, attachments:)
     email_service.send_mail(
       from: action.fetch(:from),
       to: action.fetch(:to),
-      subject: action.fetch(:subject),
+      subject: subject,
       body_parts: email_body_parts(action.fetch(:email_body)),
-      attachments: attachment
+      attachments: attachments
     )
+  end
+
+  def subject(subject:, current_email:, number_of_emails:, submission_id:)
+    "#{subject} {#{submission_id}} [#{current_email}/#{number_of_emails}]"
   end
 
   def email_body_parts(email_body)
