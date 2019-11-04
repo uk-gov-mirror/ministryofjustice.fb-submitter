@@ -3,7 +3,7 @@ class EmailOutputService
     @email_service = email_service
   end
 
-  def execute(action:, attachments:, pdf_attachment:, submission_id:)
+  def execute(submission_id:, action:, attachments:, pdf_attachment:)
     email_attachments = []
 
     if action.fetch(:include_attachments) == true
@@ -16,8 +16,13 @@ class EmailOutputService
     if email_attachments.empty?
       send_single_email(
         action: action,
-        subject: subject(subject: action.fetch(:subject), current_email: 1, number_of_emails: 1, submission_id: submission_id),
-        attachments: []
+        attachments: [],
+        subject: subject(
+          subject: action.fetch(:subject),
+          current_email: 1,
+          number_of_emails: 1,
+          submission_id: submission_id
+        )
       )
     else
       send_emails_with_attachments(action, email_attachments, submission_id: submission_id)
@@ -30,8 +35,13 @@ class EmailOutputService
     email_attachments.each_with_index do |email_attachment, index|
       send_single_email(
         action: action,
-        subject: subject(subject: action.fetch(:subject), current_email: index + 1, number_of_emails: email_attachments.size, submission_id: submission_id),
-        attachments: [email_attachment]
+        attachments: [email_attachment],
+        subject: subject(
+          subject: action.fetch(:subject),
+          current_email: index + 1,
+          number_of_emails: email_attachments.size,
+          submission_id: submission_id
+        )
       )
     end
   end
