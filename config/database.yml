@@ -82,4 +82,4 @@ test:
 #
 production:
   <<: *default
-  url: <%= "#{ENV['DATABASE_URL']}?sslmode=verify-full&sslrootcert=#{Rails.root.join("rds-combined-ca-bundle.pem")}" %>
+  url: <%= "#{ENV['DATABASE_URL']}?sslmode=require" %>
