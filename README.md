@@ -16,6 +16,7 @@ The following environment variables are either needed, or read if present:
 - RAILS_ENV: 'development' or 'production'
 - SERVICE_TOKEN_CACHE_ROOT_URL: protocol + hostname of the
   [service token cache](https://github.com/ministryofjustice/fb-service-token-cache)
+- NOTIFY_API_KEY: an API key for the [gov.uk notify service](https://docs.notifications.service.gov.uk/ruby.html#bapi-keys)
 
 ## To deploy and run on Cloud Platforms
 
