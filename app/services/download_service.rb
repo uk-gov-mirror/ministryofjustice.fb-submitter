@@ -1,28 +1,26 @@
 class DownloadService
-  # returns Hash
-  # {"https://my.domain/some/path/file.ext"=>"/the/file/path/file.ext"}
-  def self.download_in_parallel(urls:, target_dir: nil, headers: {})
-    new(urls: urls, target_dir: target_dir, headers: headers).download_in_parallel
-  end
+  attr_reader :attachments, :target_dir, :token
 
-  attr_reader :urls, :target_dir, :headers
-
-  def initialize(urls:, target_dir: nil, headers: {})
-    @urls = urls
+  def initialize(attachments:, target_dir: nil, token:)
+    @attachments = attachments
     @target_dir = target_dir
-    @headers = headers
+    @token = token
   end
 
   def download_in_parallel
     actual_dir = target_dir || Dir.mktmpdir
-    results = {}
+    results = []
 
     hydra = Typhoeus::Hydra.hydra
 
-    urls.each do |url|
-      file = file_path_for_download(url: url, target_dir: actual_dir)
-      request = construct_request(url: url, file_path: file, headers: headers)
-      results[url] = file
+    attachments.each do |attachment|
+      url = attachment.fetch('url')
+      filename = attachment.fetch('filename')
+      mimetype = attachment.fetch('mimetype')
+      tmp_path = file_path_for_download(url: url, target_dir: actual_dir)
+      request = construct_request(url: url, file_path: tmp_path, headers: headers)
+      results << { url: url, tmp_path: tmp_path, filename: filename, mimetype: mimetype }
+
       hydra.queue(request)
     end
     hydra.run
@@ -31,11 +29,8 @@ class DownloadService
 
   private
 
-  def download(url:, target_dir: nil, headers: {})
-    path = file_path_for_download(url: url, target_dir: target_dir)
-    request = construct_request(url: url, file_path: path, headers: headers)
-    request.run
-    path
+  def headers
+    { 'x-encrypted-user-id-and-token' => token }
   end
 
   def construct_request(url:, file_path:, headers: {})

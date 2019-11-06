@@ -1,4 +1,4 @@
-class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
+class ProcessSubmissionService
   attr_reader :submission_id
 
   def initialize(submission_id:)
@@ -7,10 +7,6 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
 
   # rubocop:disable Metrics/MethodLength
   def perform # rubocop:disable Metrics/AbcSize
-    submission.update_status(:processing)
-    submission.responses = []
-
-    payload_service = SubmissionPayloadService.new(submission.payload)
     payload_service.actions.each do |action|
       case action.fetch(:type)
       when 'json'
@@ -24,106 +20,50 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
             key: action.fetch(:encryption_key)
           )
         ).execute(user_answers: payload_service.user_answers_map, service_slug: submission.service_slug, submission_id: payload_service.submission_id)
+      when 'email'
+        pdf = generate_pdf(payload_service.payload, payload_service.submission_id)
+        attachments = generate_attachments(payload_service.attachments, submission.encrypted_user_id_and_token)
+
+        EmailOutputService.new(
+          emailer: EmailService
+        ).execute(submission_id: payload_service.submission_id, action: action, attachments: attachments, pdf_attachment: pdf)
       else
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
-      end
-    end
-
-    submission.detail_objects.to_a.each do |submission_detail|
-      send_email(submission_detail) if submission_detail.instance_of? EmailSubmissionDetail
-    end
-
-    # explicit save! first, to save the responses
-    submission.save!
-    submission.complete!
-  end
-
-  private
-
-  def email_body_parts(email)
-    {
-      'text/plain' => email.email_body
-    }
-  end
-
-  def send_email(mail)
-    email_body = email_body_parts(mail)
-
-    if number_of_attachments(mail) <= 1
-      response = EmailService.send_mail(
-        from: mail.from,
-        to: mail.to,
-        subject: mail.subject,
-        body_parts: email_body,
-        attachments: attachments(mail)
-      )
-
-      submission.responses << response.to_h
-    else
-      attachments(mail).each_with_index do |a, n|
-        response = EmailService.send_mail(
-          from: mail.from,
-          to: mail.to,
-          subject: "#{mail.subject} {#{submission_id}} [#{n + 1}/#{number_of_attachments(mail)}]",
-          body_parts: email_body,
-          attachments: [a]
-        )
-
-        submission.responses << response.to_h
       end
     end
   end
   # rubocop:enable Metrics/MethodLength
 
-  def number_of_attachments(mail)
-    attachments(mail).size
-  end
+  private
 
-  # returns array of urls
-  # this is done over all files so we download all needed files at once
-  def unique_attachment_urls
-    attachments = submission.detail_objects.map(&:attachments).flatten
-    urls = attachments.map { |e| e['url'] }
-    urls.compact.sort.uniq
-  end
+  def generate_attachments(attachments_payload, token)
+    tmp_file_map = DownloadService.new(
+      attachments: attachments_payload,
+      target_dir: nil,
+      token: token
+    ).download_in_parallel
+    attachments = []
 
-  def submission
-    @submission ||= Submission.find(submission_id)
-  end
-
-  def headers
-    { 'x-encrypted-user-id-and-token' => submission.encrypted_user_id_and_token }
-  end
-
-  def attachments(mail)
-    attachments = mail.attachments.map(&:with_indifferent_access)
-    attachment_objects = AttachmentParserService.new(attachments: attachments).execute
-
-    attachments.each_with_index do |value, index|
-      if value[:pdf_data]
-        attachment_objects[index].file = generate_pdf({ submission: value[:pdf_data] }, @submission_id)
-      else
-        attachment_objects[index].path = download_attachments[attachment_objects[index].url]
-      end
+    tmp_file_map.each do |attachment_info|
+      attachment = Attachment.new(filename: attachment_info[:filename], mimetype: attachment_info[:mimetype])
+      attachment.path = attachment_info[:tmp_path]
+      attachments << attachment
     end
-    attachment_objects
-  end
 
-  def download_attachments
-    @download_attachments ||= DownloadService.download_in_parallel(
-      urls: unique_attachment_urls,
-      headers: headers
-    )
+    attachments
   end
 
   def generate_pdf(pdf_detail, submission_id)
-    SaveTempPdf.new(
+    tmp_file = SaveTempPdf.new(
       generate_pdf_content_service: GeneratePdfContent.new(
         pdf_api_gateway: pdf_gateway(submission.service_slug),
-        payload: pdf_detail.with_indifferent_access
+        payload: pdf_detail
       ),
       tmp_file_gateway: Tempfile
     ).execute(file_name: submission_id)
+    attachment = Attachment.new(filename: "#{payload_service.submission_id}-answers.pdf", mimetype: 'application/pdf')
+    attachment.file = tmp_file
+    attachment
   end
 
   def pdf_gateway(service_slug)
@@ -142,6 +82,14 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
       ),
       service_slug: service_slug
     ).execute
+  end
+
+  def submission
+    @submission ||= Submission.find(submission_id)
+  end
+
+  def payload_service
+    @payload_service ||= SubmissionPayloadService.new(submission.payload)
   end
 
   def disable_jwt?
