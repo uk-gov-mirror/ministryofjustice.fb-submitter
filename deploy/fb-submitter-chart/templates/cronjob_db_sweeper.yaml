@@ -49,12 +49,12 @@ spec:
                   secretKeyRef:
                     name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                     key: sentry_dsn
-              - name: encryption_key
+              - name: ENCRYPTION_KEY
                 valuefrom:
                   secretkeyref:
                     name: fb-submitter-app-secrets-{{ .values.environmentName }}
                     key: encryption_key
-              - name: encryption_salt
+              - name: ENCRYPTION_SALT
                 valuefrom:
                   secretkeyref:
                     name: fb-submitter-app-secrets-{{ .values.environmentName }}
