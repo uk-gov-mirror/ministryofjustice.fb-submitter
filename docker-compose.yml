@@ -33,6 +33,8 @@ services:
       SECRET_KEY_BASE: 'xxxyyy'
       SERVICE_TOKEN_CACHE_ROOT_URL: "http://fake_service_token_cache_root_url/"
       PDF_GENERATOR_ROOT_URL: 'http://pdf-generator.com'
+      ENCRYPTION_KEY: 'i6USnzeRKljfLMPbRlB2E9oikURx4ou3'
+      ENCRYPTION_SALT: 'lGlcn9HabIducdpwlSHcM06e9gFuIfS1Ogg5krtn1Fw='
     links:
       - db
 
@@ -56,5 +58,7 @@ services:
       FB_ENVIRONMENT_SLUG: 'test'
       SECRET_KEY_BASE: 'xxxyyy'
       PDF_GENERATOR_ROOT_URL: 'http://pdf-generator.com'
+      ENCRYPTION_KEY: 'i6USnzeRKljfLMPbRlB2E9oikURx4ou3'
+      ENCRYPTION_SALT: 'lGlcn9HabIducdpwlSHcM06e9gFuIfS1Ogg5krtn1Fw='
     links:
       - db

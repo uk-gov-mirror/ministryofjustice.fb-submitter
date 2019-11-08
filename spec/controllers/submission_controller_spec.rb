@@ -16,7 +16,7 @@ RSpec.describe SubmissionController, type: :controller do
   end
 
   it 'saves the payload into the submission' do
-    expect(Submission.first.payload).to eq(payload.deep_stringify_keys)
+    expect(Submission.first.decrypted_payload).to eq(payload.deep_stringify_keys)
   end
 
   it 'creates a delayed job' do
