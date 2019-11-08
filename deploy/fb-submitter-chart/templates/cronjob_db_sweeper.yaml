@@ -50,13 +50,13 @@ spec:
                     name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                     key: sentry_dsn
               - name: ENCRYPTION_KEY
-                valuefrom:
-                  secretkeyref:
-                    name: fb-submitter-app-secrets-{{ .values.environmentName }}
+                valueFrom:
+                  secretKeyRef:
+                    name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                     key: encryption_key
               - name: ENCRYPTION_SALT
-                valuefrom:
-                  secretkeyref:
-                    name: fb-submitter-app-secrets-{{ .values.environmentName }}
+                valueFrom:
+                  secretKeyRef:
+                    name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                     key: encryption_salt
           restartPolicy: Never
