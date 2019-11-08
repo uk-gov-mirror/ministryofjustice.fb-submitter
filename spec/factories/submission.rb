@@ -144,7 +144,11 @@ FactoryBot.define do
       end
     end
 
-    payload { { actions: actions, submission: submission, attachments: attachments } }
+    payload do
+      EncryptionService.new.encrypt(
+        actions: actions, submission: submission, attachments: attachments
+      )
+    end
 
     trait :json do
       submission_details do

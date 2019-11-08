@@ -73,6 +73,16 @@ spec:
               secretKeyRef:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: sentry_dsn
+          - name: ENCRYPTION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: encryption_key
+          - name: ENCRYPTION_SALT
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: encryption_salt
       volumes:
         - name: tmp-files
           emptyDir: {}
@@ -202,6 +212,16 @@ spec:
               secretKeyRef:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: sentry_dsn
+          - name: ENCRYPTION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: encryption_key
+          - name: ENCRYPTION_SALT
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: encryption_salt
       volumes:
         - name: tmp-files
           emptyDir: {}

@@ -74,7 +74,7 @@ class ProcessSubmissionService
   end
 
   def payload_service
-    @payload_service ||= SubmissionPayloadService.new(submission.payload)
+    @payload_service ||= SubmissionPayloadService.new(submission.decrypted_payload)
   end
 
   def disable_jwt?

@@ -75,7 +75,7 @@ describe ProcessSubmissionService do
 
       it 'passes the correct submission_id to the EmailOutputService' do
         expect(submission_service_spy).to have_received(:execute) do |args|
-          expect(args[:submission_id]).to eq(submission.payload['submission']['submission_id'])
+          expect(args[:submission_id]).to eq(submission.decrypted_payload[:submission]['submission_id'])
         end
       end
 
@@ -150,7 +150,7 @@ describe ProcessSubmissionService do
     end
 
     it 'passes the correct user_answers payload as an argument' do
-      user_answers = SubmissionPayloadService.new(submission.payload).user_answers_map
+      user_answers = SubmissionPayloadService.new(submission.decrypted_payload).user_answers_map
 
       expect(json_webhook_service_spy).to have_received(:execute) do |args|
         expect(args[:user_answers]).to eq(user_answers)
@@ -159,7 +159,7 @@ describe ProcessSubmissionService do
 
     it 'passes the correct submission_id as an argument' do
       expect(json_webhook_service_spy).to have_received(:execute) do |args|
-        expect(args[:submission_id]).to eq(submission.payload['submission']['submission_id'])
+        expect(args[:submission_id]).to eq(submission.decrypted_payload[:submission]['submission_id'])
       end
     end
 

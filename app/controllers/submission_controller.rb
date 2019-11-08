@@ -2,9 +2,10 @@ class SubmissionController < ApplicationController
   def create
     @submission = Submission.create!(
       submission_params.merge(
-        payload: payload
+        payload: EncryptionService.new.encrypt(payload)
       )
     )
+
     Delayed::Job.enqueue(
       ProcessSubmissionService.new(submission_id: @submission.id),
       run_at: 3.seconds.from_now
