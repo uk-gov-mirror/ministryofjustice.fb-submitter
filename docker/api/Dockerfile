@@ -11,7 +11,11 @@ WORKDIR /app
 
 RUN chown appuser:appgroup /app
 
-ADD --chown=appuser:appgroup https://s3.amazonaws.com/rds-downloads/rds-combined-ca-bundle.pem ./rds-combined-ca-bundle.pem
+ADD --chown=appuser:appgroup https://s3.amazonaws.com/rds-downloads/rds-ca-2019-root.pem ./rds-ca-2019-root.pem
+ADD --chown=appuser:appgroup https://s3.amazonaws.com/rds-downloads/rds-ca-2015-root.pem ./rds-ca-2015-root.pem
+RUN cat ./rds-ca-2019-root.pem > ./rds-ca-bundle-root.crt
+RUN cat ./rds-ca-2015-root.pem >> ./rds-ca-bundle-root.crt
+RUN chown appuser:appgroup ./rds-ca-bundle-root.crt
 
 COPY --chown=appuser:appgroup Gemfile Gemfile.lock .ruby-version ./
 
