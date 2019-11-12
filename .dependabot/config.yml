@@ -11,8 +11,3 @@ update_configs:
     update_schedule: "daily"
     default_reviewers:
     - asmega
-  - package_manager: "docker"
-    directory: "/docker/worker"
-    update_schedule: "daily"
-    default_reviewers:
-    - asmega
