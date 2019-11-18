@@ -34,16 +34,6 @@ spec:
                   secretKeyRef:
                     name: rds-instance-formbuilder-submitter-{{ .Values.environmentName }}
                     key: url
-              - name: REDIS_AUTH_TOKEN
-                valueFrom:
-                  secretKeyRef:
-                    name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
-                    key: auth_token
-              - name: REDIS_URL
-                valueFrom:
-                  secretKeyRef:
-                    name: elasticache-formbuilder-submitter-{{ .Values.environmentName }}
-                    key: primary_endpoint_address
               - name: SENTRY_DSN
                 valueFrom:
                   secretKeyRef:
