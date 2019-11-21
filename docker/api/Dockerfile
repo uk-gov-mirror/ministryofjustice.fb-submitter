@@ -21,7 +21,7 @@ COPY --chown=appuser:appgroup Gemfile Gemfile.lock .ruby-version ./
 
 RUN gem install bundler
 
-ARG BUNDLE_ARGS='--without test development'
+ARG BUNDLE_ARGS='--jobs 2 --without test development'
 RUN bundle install --no-cache ${BUNDLE_ARGS}
 
 COPY --chown=appuser:appgroup . .
