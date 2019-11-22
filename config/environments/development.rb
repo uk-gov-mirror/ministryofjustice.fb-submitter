@@ -57,5 +57,5 @@ Rails.application.configure do
     max_threads: 2 * Concurrent.processor_count,
     idletime: 600.seconds
 
-  config.hosts << 'submitter-app'
+  config.hosts.clear
 end
