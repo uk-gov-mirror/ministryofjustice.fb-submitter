@@ -13,10 +13,9 @@ RSpec.describe MetricsController do
       end
 
       it 'shows pending jobs' do
-        expected_result = '# TYPE delayed_jobs_pending gauge
-# HELP delayed_jobs_pending Number of pending jobs
-delayed_jobs_pending 1'
-        expect(response.body).to include(expected_result)
+        expect(response.body).to include('# HELP delayed_jobs_pending Number of pending jobs')
+        expect(response.body).to include('# TYPE delayed_jobs_failed gauge')
+        expect(response.body).to include('delayed_jobs_pending 1')
       end
     end
 
@@ -27,11 +26,26 @@ delayed_jobs_pending 1'
       end
 
       it 'shows failed jobs' do
-        expected_result = '# TYPE delayed_jobs_failed gauge
-# HELP delayed_jobs_failed Number of jobs failed
-delayed_jobs_failed 1'
+        expect(response.body).to include('# HELP delayed_jobs_failed Number of jobs failed')
+        expect(response.body).to include('# TYPE delayed_jobs_failed gauge')
+        expect(response.body).to include('delayed_jobs_failed 1')
+      end
+    end
 
-        expect(response.body).to include(expected_result)
+    context 'with submissions' do
+      before do
+        Submission.create!(service_slug: 'form1')
+        Submission.create!(service_slug: 'form1')
+        Submission.create!(service_slug: 'form2')
+      end
+
+      it 'includes submissions per form' do
+        get :show, format: 'text'
+
+        expect(response.body).to include('# HELP submissions Number of submissions')
+        expect(response.body).to include('# TYPE submissions counter')
+        expect(response.body).to include('submissions{form="form1"} 2')
+        expect(response.body).to include('submissions{form="form2"} 1')
       end
     end
 
