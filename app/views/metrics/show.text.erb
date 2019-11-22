@@ -1,5 +1,5 @@
-<% @stats.each do |gauge| %>
-# TYPE <%= gauge.fetch(:name) %> gauge
-# HELP <%= gauge.fetch(:name) %> <%= gauge.fetch(:docstring) %>
-<%= gauge.fetch(:name) %> <%= gauge.fetch(:value) %>
+<% @stats.each do |stat| %>
+# HELP <%= stat.fetch(:name) %> <%= stat.fetch(:docstring) %>
+# TYPE <%= stat.fetch(:name) %> <%= stat.fetch(:type) %>
+<%= stat.fetch(:name) %><%= filter_to_string(stat.fetch(:filter, nil)) %> <%= stat.fetch(:value) %>
 <% end %>
