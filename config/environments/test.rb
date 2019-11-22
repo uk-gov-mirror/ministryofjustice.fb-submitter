@@ -46,5 +46,5 @@ Rails.application.configure do
 
   config.active_job.queue_adapter = :test
 
-  config.hosts << 'submitter-app'
+  config.hosts.clear
 end
