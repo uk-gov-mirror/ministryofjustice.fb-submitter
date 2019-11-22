@@ -14,9 +14,11 @@ class MetricsController < ActionController::Base
 
     [
       { name: :delayed_jobs_pending,
+        type: 'gauge',
         docstring: 'Number of pending jobs',
         value: pending_job_count },
       { name: :delayed_jobs_failed,
+        type: 'gauge',
         docstring: 'Number of jobs failed',
         value: failed_job_count }
     ]
