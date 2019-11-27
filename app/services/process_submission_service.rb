@@ -128,23 +128,7 @@ class ProcessSubmissionService # rubocop:disable  Metrics/ClassLength
 
   def pdf_gateway(service_slug)
     Adapters::PdfApi.new(
-      root_url: ENV.fetch('PDF_GENERATOR_ROOT_URL'),
-      token: authentication_token(service_slug)
+      root_url: ENV.fetch('PDF_GENERATOR_ROOT_URL')
     )
-  end
-
-  def authentication_token(service_slug)
-    return if disable_jwt?
-
-    JwtAuthService.new(
-      service_token_cache: Adapters::ServiceTokenCacheClient.new(
-        root_url: ENV.fetch('SERVICE_TOKEN_CACHE_ROOT_URL')
-      ),
-      service_slug: service_slug
-    ).execute
-  end
-
-  def disable_jwt?
-    Rails.env.development?
   end
 end

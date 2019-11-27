@@ -275,7 +275,6 @@ DEPENDENCIES
   guard-rspec
   guard-shell
   jwe (~> 0.4.0)
-  jwt
   listen
   mime-types
   notifications-ruby-client

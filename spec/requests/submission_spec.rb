@@ -4,7 +4,8 @@ require 'webmock/rspec'
 describe 'UserData API', type: :request do
   let(:headers) do
     {
-      'Content-type' => 'application/json'
+      'Content-type' => 'application/json',
+      'authorization' => ActionController::HttpAuthentication::Basic.encode_credentials('', ENV['AUTH_BASIC_PASSWORD'])
     }
   end
   let(:service_slug) { 'my-service' }
@@ -21,11 +22,11 @@ describe 'UserData API', type: :request do
       end
 
       include_context 'when a JSON-only API', :get, '/submission/abcdef'
-      include_context 'a JWT-authenticated method', :get, '/submission/abcdef', {}
+      include_context 'an authenticated method', :get, '/submission/abcdef', {}
 
       context 'with a valid token' do
         before do
-          allow_any_instance_of(ApplicationController).to receive(:verify_token!)
+          allow_any_instance_of(ApplicationController).to receive(:authenticate)
           get_request
         end
 
@@ -95,11 +96,11 @@ describe 'UserData API', type: :request do
       end
 
       include_context 'when a JSON-only API', :post, '/submission'
-      include_context 'a JWT-authenticated method', :post, '/submission', {}
+      include_context 'an authenticated method', :post, '/submission', {}
 
       context 'with a valid token' do
         before do
-          allow_any_instance_of(ApplicationController).to receive(:verify_token!)
+          allow_any_instance_of(ApplicationController).to receive(:authenticate)
         end
 
         context 'with a valid email JSON body' do

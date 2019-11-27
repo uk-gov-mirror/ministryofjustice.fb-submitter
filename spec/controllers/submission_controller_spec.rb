@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe SubmissionController, type: :controller do
   before do
     request.env['CONTENT_TYPE'] = 'application/json'
-    allow_any_instance_of(ApplicationController).to receive(:verify_token!)
+    request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials('', ENV['AUTH_BASIC_PASSWORD'])
   end
 
   it 'creates a submission' do

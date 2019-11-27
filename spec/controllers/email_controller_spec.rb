@@ -3,7 +3,7 @@ require 'rails_helper'
 describe EmailController do
   before do
     request.env['CONTENT_TYPE'] = 'application/json'
-    allow_any_instance_of(ApplicationController).to receive(:verify_token!)
+    request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials('', ENV['AUTH_BASIC_PASSWORD'])
   end
 
   let(:json_hash) do

@@ -126,7 +126,12 @@ describe 'Submits JSON given a JSON submission type', type: :request do
     ]
   end
 
-  let(:headers) { { 'Content-type' => 'application/json' } }
+  let(:basic_auth) {
+    password = ENV['AUTH_BASIC_PASSWORD']
+    raise unless password.present?
+    ActionController::HttpAuthentication::Basic.encode_credentials('', password)
+  }
+  let(:headers) { { 'Content-type' => 'application/json', 'authorization' => basic_auth } }
   let(:params) do
     {
       service_slug: service_slug,
@@ -139,7 +144,6 @@ describe 'Submits JSON given a JSON submission type', type: :request do
 
   before do
     Delayed::Worker.delay_jobs = false
-    allow_any_instance_of(ApplicationController).to receive(:verify_token!)
 
     stub_request(:post, json_destination_url).to_return(status: 200, body: '')
 
