@@ -31,7 +31,7 @@ stop:
 
 .PHONY: build
 spec: build
-	$(DOCKER_COMPOSE) run --rm app bundle exec rspec
+	$(DOCKER_COMPOSE) run --rm app bundle exec rspec ${ARGS}
 
 .PHONY: shell
 shell: stop build

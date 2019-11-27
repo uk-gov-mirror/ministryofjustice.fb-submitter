@@ -33,8 +33,11 @@ services:
       SECRET_KEY_BASE: 'xxxyyy'
       SERVICE_TOKEN_CACHE_ROOT_URL: "http://fake_service_token_cache_root_url/"
       PDF_GENERATOR_ROOT_URL: 'http://pdf-generator.com'
+      AUTH_BASIC_PASSWORD: "hello"
     links:
       - db
+    volumes:
+      - $PWD:/app
 
   worker:
     build:
@@ -58,3 +61,5 @@ services:
       PDF_GENERATOR_ROOT_URL: 'http://pdf-generator.com'
     links:
       - db
+    volumes:
+      - $PWD:/app
