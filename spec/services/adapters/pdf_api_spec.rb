@@ -3,7 +3,7 @@ require 'webmock/rspec'
 
 describe Adapters::PdfApi do
   subject(:adapter) do
-    described_class.new(root_url: root_url, token: 'some-token')
+    described_class.new(root_url: root_url)
   end
 
   let(:submission) do
@@ -26,16 +26,16 @@ describe Adapters::PdfApi do
   end
 
   let(:expected_headers) do
-    { 'x-access-token' => 'some-token' }
+    { }
   end
 
   before do
-    stub_request(:post, expected_url).to_return(status: 200, body: response, headers: {})
+    stub_request(:post, expected_url).to_return(status: 200, body: response)
   end
 
   it 'requests a generated PDF' do
     adapter.generate_pdf(submission: submission)
-    expect(WebMock).to have_requested(:post, expected_url).with(headers: expected_headers).once
+    expect(WebMock).to have_requested(:post, expected_url).once
   end
 
   it 'returns the pdf file from the response' do
