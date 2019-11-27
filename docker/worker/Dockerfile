@@ -20,8 +20,6 @@ RUN gem install bundler
 ARG BUNDLE_ARGS='--without test development'
 RUN bundle install --no-cache ${BUNDLE_ARGS}
 
-COPY --chown=appuser:appgroup . .
-
 USER ${UID}
 
 ARG RAILS_ENV=production
