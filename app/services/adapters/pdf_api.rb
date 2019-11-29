@@ -2,6 +2,7 @@ module Adapters
   class PdfApi
     class ClientRequestError < StandardError
     end
+
     def initialize(root_url:, token:)
       @root_url = root_url
       @token = token

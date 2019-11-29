@@ -59,8 +59,6 @@ class ProcessSubmissionService
   end
 
   def authentication_token(service_slug)
-    return if disable_jwt?
-
     JwtAuthService.new(
       service_token_cache: Adapters::ServiceTokenCacheClient.new(
         root_url: ENV.fetch('SERVICE_TOKEN_CACHE_ROOT_URL')
@@ -75,9 +73,5 @@ class ProcessSubmissionService
 
   def payload_service
     @payload_service ||= SubmissionPayloadService.new(submission.decrypted_payload)
-  end
-
-  def disable_jwt?
-    Rails.env.development?
   end
 end
