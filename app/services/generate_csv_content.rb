@@ -3,8 +3,8 @@ require 'tempfile'
 require_relative '../value_objects/attachment'
 
 class GenerateCsvContent
-  def initialize(payload:)
-    @payload = payload
+  def initialize(payload_service:)
+    @payload_service = payload_service
   end
 
   def execute
@@ -23,16 +23,12 @@ class GenerateCsvContent
   end
 
   def csv_data
-    data = []
-    data << payload[:submission][:serviceSlug]
-    data << payload[:submission][:submission_id]
-    data.concat(payload[:submission][:submissionAnswers].values)
-    data
+    payload_service.user_answers_map.values
   end
 
   def csv_headers
-    fixed_headers = ['slug', 'submission_id']
-    dynamic_headers = payload[:submission][:submissionAnswers].keys
+    fixed_headers = ['submission_id']
+    dynamic_headers = payload_service.user_answers_map.keys
 
     fixed_headers + dynamic_headers
   end
@@ -52,12 +48,12 @@ class GenerateCsvContent
 
   def generate_attachment_object(tmp_csv)
     attachment = Attachment.new(
-      filename: "#{payload[:submission][:submission_id]}-answers.csv",
+      filename: "#{payload_service.submission_id}-answers.csv",
       mimetype: 'text/csv'
     )
     attachment.file = tmp_csv
     attachment
   end
 
-  attr_reader :payload
+  attr_reader :payload_service
 end
