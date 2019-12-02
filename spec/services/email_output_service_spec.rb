@@ -16,11 +16,13 @@ describe EmailOutputService do
       subject: 'Complain about a court or tribunal submission',
       email_body: 'Please find an application attached',
       include_pdf: include_pdf,
+      include_csv: include_csv,
       include_attachments: include_attachments
     }
   end
 
   let(:include_pdf) { false }
+  let(:include_csv) { false }
   let(:include_attachments) { false }
 
   let(:attachments) do
@@ -31,13 +33,29 @@ describe EmailOutputService do
   end
 
   let(:pdf_attachment) do
-    Attachment.new(type: 'output', url: nil, mimetype: 'application/pdf', filename: 'a generated pff', path: nil)
+    Attachment.new(type: 'output',
+                   url: nil,
+                   mimetype: 'application/pdf',
+                   filename: 'a generated pdf',
+                   path: nil)
+  end
+
+  let(:csv_attachment) do
+    Attachment.new(type: 'output',
+                   url: nil,
+                   mimetype: 'text/csv',
+                   filename: 'a generated csv',
+                   path: nil)
   end
 
   before do
     allow(email_service_mock).to receive(:send_mail)
 
-    service.execute(action: email_action, attachments: attachments, pdf_attachment: pdf_attachment, submission_id: 'an-id-2323')
+    subject.execute(action: email_action,
+                    attachments: attachments,
+                    pdf_attachment: pdf_attachment,
+                    csv_attachment: csv_attachment,
+                    submission_id: 'an-id-2323')
   end
 
   it 'execute sends an email' do

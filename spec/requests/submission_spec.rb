@@ -63,7 +63,8 @@ describe 'UserData API', type: :request do
               subject: 'Complain about a court or tribunal submission',
               email_body: 'this is the body of the email',
               include_attachments: true,
-              include_pdf: true
+              include_pdf: true,
+              include_csv: true
             }
           ]
         end
@@ -122,7 +123,7 @@ describe 'UserData API', type: :request do
 
           it 'sends 4 emails' do
             post_request
-            expect(stub_aws.api_requests.size).to eq(3)
+            expect(stub_aws.api_requests.size).to eq(4)
           end
 
           it 'email contains downloaded attachment' do
@@ -141,8 +142,15 @@ describe 'UserData API', type: :request do
           it 'sends the PDF of answers with the first email' do
             post_request
 
-            expect(raw_messages.first).to include('1/3')
+            expect(raw_messages.first).to include('1/4')
             expect(raw_messages.first).to include('-answers.pdf')
+          end
+
+          it 'sends the CSV of answers with the second email' do
+            post_request
+
+            expect(raw_messages.second).to include('2/4')
+            expect(raw_messages.second).to include('-answers.csv')
           end
 
           it 'creates a submission record' do
