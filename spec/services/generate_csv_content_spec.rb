@@ -58,7 +58,7 @@ describe GenerateCsvContent do
                              'Grand theft auto',
                              '1 January 1990',
                              'A genuine reason',
-                             'an-image.jpg'])
+                             'data not available in csv format'])
     end
   end
   # rubocop:enable RSpec/ExampleLength

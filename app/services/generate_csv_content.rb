@@ -26,7 +26,7 @@ class GenerateCsvContent
     data = []
 
     data << payload_service.submission_id
-    data.concat(payload_service.user_answers_map.values)
+    data.concat(payload_service.csv_row)
 
     data
   end
