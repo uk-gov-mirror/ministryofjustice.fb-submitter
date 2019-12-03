@@ -3,8 +3,11 @@ class EmailOutputService
     @emailer = emailer
   end
 
-  def execute(submission_id:, action:, attachments:, pdf_attachment:)
-    email_attachments = generate_attachments(action: action, attachments: attachments, pdf_attachment: pdf_attachment)
+  def execute(submission_id:, action:, attachments:, pdf_attachment:, csv_attachment:)
+    email_attachments = generate_attachments(action: action,
+                                             attachments: attachments,
+                                             pdf_attachment: pdf_attachment,
+                                             csv_attachment: csv_attachment)
 
     if email_attachments.empty?
       send_single_email(
@@ -18,15 +21,19 @@ class EmailOutputService
 
   private
 
-  def generate_attachments(action:, attachments:, pdf_attachment:)
+  def generate_attachments(action:, attachments:, pdf_attachment:, csv_attachment:)
     email_attachments = []
 
-    if action.fetch(:include_attachments) == true
+    if action.fetch(:include_attachments)
       email_attachments = email_attachments.concat attachments
     end
-    if action.fetch(:include_pdf) == true
+    if action.fetch(:include_csv, false)
+      email_attachments.prepend(csv_attachment)
+    end
+    if action.fetch(:include_pdf)
       email_attachments.prepend(pdf_attachment)
     end
+
     email_attachments
   end
 

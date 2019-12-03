@@ -134,7 +134,13 @@ FactoryBot.define do
               'questions' => [
                 {
                   'label' => 'Attach any documentation that supports your appeal',
-                  'answer' => 'an-image.jpg',
+                  'answer' => [{
+                    'fieldname' => 'upload[1]',
+                    'originalname' => 'hello_world.txt',
+                    'encoding' => '7bit',
+                    'mimetype' => 'text/plain'
+                  }],
+                  'human_value' => 'an-image.jpg',
                   'key' => 'documentation'
                 }
               ]
