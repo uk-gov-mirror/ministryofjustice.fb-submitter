@@ -46,7 +46,8 @@ describe GenerateCsvContent do
         'documentation'
       ])
 
-      expect(csv[1]).to eql(['1234567',
+      expect(csv[1]).to eql([payload_service.submission_id,
+                             '1234567',
                              '6123456',
                              'john doe',
                              '1 January 1990',

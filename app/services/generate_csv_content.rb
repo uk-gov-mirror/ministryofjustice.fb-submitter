@@ -23,7 +23,12 @@ class GenerateCsvContent
   end
 
   def csv_data
-    payload_service.user_answers_map.values
+    data = []
+
+    data << payload_service.submission_id
+    data.concat(payload_service.user_answers_map.values)
+
+    data
   end
 
   def csv_headers
