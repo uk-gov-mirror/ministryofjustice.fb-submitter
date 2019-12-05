@@ -12,6 +12,44 @@ describe ProcessSubmissionService do
       .to_return(status: 200, body: { token: '123' }.to_json, headers: {})
   end
 
+  context 'when csv' do
+    let(:actions) do
+      [
+        {
+          'type' => 'csv',
+          'include_attachments' => true,
+          'user_answers' => {
+            'a' => 'b'
+          }
+        }
+      ]
+    end
+
+    let(:submission) { create(:submission, :csv, actions: actions, attachments: []) }
+    let(:submission_service_spy) { instance_spy(EmailOutputService) }
+
+    before do
+      allow(EmailOutputService).to receive(:new).and_return(submission_service_spy)
+
+      service.perform
+    end
+
+    # rubocop:disable RSpec/MultipleExpectations
+    it 'sends email with csv attachment' do
+      expect(submission_service_spy).to have_received(:execute) do |args|
+        expect(args[:submission_id]).to be_present
+        expect(args[:action]).to eql(actions[0])
+        expect(args[:attachments].length).to eq(1)
+
+        attachment = args[:attachments].first
+        expect(attachment.filename).to match(/-answers\.csv/)
+
+        expect(args[:pdf_attachment]).to be_nil
+      end
+    end
+    # rubocop:enable RSpec/MultipleExpectations
+  end
+
   context 'when sending an email submission' do
     let(:actions) do
       [

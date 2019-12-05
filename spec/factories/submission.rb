@@ -168,6 +168,30 @@ FactoryBot.define do
       end
     end
 
+    trait :csv do
+      actions do
+        [
+          {
+            type: 'csv',
+            user_answers: {
+              first_name: 'Bob',
+              last_name: 'Smith',
+              'has-email': 'yes',
+              email_address: 'bob.smith@digital.justice.gov.uk',
+              complaint_details: 'Foo bar baz',
+              'checkbox-apples' => 'yes',
+              'checkbox-pears' => 'yes',
+              date: '2007-11-12',
+              number_cats: 28,
+              cat_spy: 'machine answer 3',
+              cat_breed: 'California Spangled',
+              upload: [{ filename: 'cat.jpg' }]
+            }
+          }
+        ]
+      end
+    end
+
     trait :email do
       actions do
         [

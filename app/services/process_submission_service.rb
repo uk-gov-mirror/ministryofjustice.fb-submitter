@@ -22,7 +22,6 @@ class ProcessSubmissionService
         ).execute(user_answers: payload_service.user_answers_map, service_slug: submission.service_slug, submission_id: payload_service.submission_id)
       when 'email'
         pdf = generate_pdf(payload_service.payload, payload_service.submission_id)
-        csv = generate_csv(payload_service)
 
         attachments = generate_attachments(payload_service.attachments, submission.encrypted_user_id_and_token)
 
@@ -31,8 +30,16 @@ class ProcessSubmissionService
         ).execute(submission_id: payload_service.submission_id,
                   action: action,
                   attachments: attachments,
-                  pdf_attachment: pdf,
-                  csv_attachment: csv)
+                  pdf_attachment: pdf)
+      when 'csv'
+        csv_attachment = generate_csv(payload_service)
+
+        EmailOutputService.new(
+          emailer: EmailService
+        ).execute(submission_id: payload_service.submission_id,
+                  action: action,
+                  attachments: [csv_attachment],
+                  pdf_attachment: nil)
       else
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
       end

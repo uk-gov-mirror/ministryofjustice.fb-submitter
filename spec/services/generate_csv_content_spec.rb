@@ -11,7 +11,7 @@ describe GenerateCsvContent do
   end
 
   let(:payload) do
-    create(:submission).decrypted_payload
+    create(:submission, :csv).decrypted_payload
   end
 
   # rubocop:disable RSpec/ExampleLength
@@ -30,35 +30,35 @@ describe GenerateCsvContent do
       file_contents = File.open(result.path).read
       csv = CSV.new(file_contents).read
 
-      expect(csv[0]).to eql([
-        'submission_id',
-        'usn',
-        'maat[1]',
-        'fullname',
-        'dob',
-        'solicitor_fullname',
-        'firm',
-        'solicitor_email',
-        'lapan',
-        'offence[1].type',
-        'offence[1].date',
-        'offence[1].reasons',
-        'documentation'
+      expect(csv[0]).to eql(%w[
+        submission_id
+        first_name
+        last_name
+        has-email
+        email_address
+        complaint_details
+        checkbox-apples
+        checkbox-pears
+        date
+        number_cats
+        cat_spy
+        cat_breed
+        upload
       ])
 
       expect(csv[1]).to eql([payload_service.submission_id,
-                             '1234567',
-                             '6123456',
-                             'john doe',
-                             '1 January 1990',
-                             'Mr Solicitor',
-                             'Pearson',
-                             'info@solicitor.co.uk',
-                             '1A234B',
-                             'Grand theft auto',
-                             '1 January 1990',
-                             'A genuine reason',
-                             'data not available in csv format'])
+                             'Bob',
+                             'Smith',
+                             'yes',
+                             'bob.smith@digital.justice.gov.uk',
+                             'Foo bar baz',
+                             'yes',
+                             'yes',
+                             '2007-11-12',
+                             '28',
+                             'machine answer 3',
+                             'California Spangled',
+                             'data not available in CSV format'])
     end
   end
   # rubocop:enable RSpec/ExampleLength

@@ -22,18 +22,42 @@ class GenerateCsvContent
     @csv_contents << csv_data
   end
 
+  def action
+    payload_service.actions.find { |hash| hash[:type] && hash[:type] == 'csv' }
+  end
+
+  def keys_to_reject
+    %w[submissionId submissionDate]
+  end
+
+  def answer_keys
+    action[:user_answers].reject { |k, _| keys_to_reject.include?(k) }.keys
+  end
+
+  def answer_values
+    array = action[:user_answers].reject { |k, _| keys_to_reject.include?(k) }.values
+
+    array.map do |e|
+      if e.is_a?(Hash) || e.is_a?(Array)
+        'data not available in CSV format'
+      else
+        e
+      end
+    end
+  end
+
   def csv_data
     data = []
 
     data << payload_service.submission_id
-    data.concat(payload_service.csv_row)
+    data.concat(answer_values)
 
     data
   end
 
   def csv_headers
     fixed_headers = ['submission_id']
-    dynamic_headers = payload_service.user_answers_map.keys
+    dynamic_headers = answer_keys
 
     fixed_headers + dynamic_headers
   end

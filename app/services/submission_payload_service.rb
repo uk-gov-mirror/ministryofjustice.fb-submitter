@@ -20,17 +20,4 @@ class SubmissionPayloadService
     end
     questions
   end
-
-  # return array representing as row in a csv
-  def csv_row
-    row = user_answers_map.values
-
-    row.map do |cell|
-      if cell.is_a?(Hash) || cell.is_a?(Array)
-        'data not available in csv format'
-      else
-        cell
-      end
-    end
-  end
 end
