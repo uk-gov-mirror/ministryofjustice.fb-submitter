@@ -63,8 +63,7 @@ describe 'UserData API', type: :request do
               subject: 'Complain about a court or tribunal submission',
               email_body: 'this is the body of the email',
               include_attachments: true,
-              include_pdf: true,
-              include_csv: true
+              include_pdf: true
             }
           ]
         end
@@ -121,9 +120,9 @@ describe 'UserData API', type: :request do
             expect(WebMock).to have_requested(:get, %r{fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/}).times(2)
           end
 
-          it 'sends 4 emails' do
+          it 'sends 3 emails' do
             post_request
-            expect(stub_aws.api_requests.size).to eq(4)
+            expect(stub_aws.api_requests.size).to eq(3)
           end
 
           it 'email contains downloaded attachment' do
@@ -142,15 +141,8 @@ describe 'UserData API', type: :request do
           it 'sends the PDF of answers with the first email' do
             post_request
 
-            expect(raw_messages.first).to include('1/4')
+            expect(raw_messages.first).to include('1/3')
             expect(raw_messages.first).to include('-answers.pdf')
-          end
-
-          it 'sends the CSV of answers with the second email' do
-            post_request
-
-            expect(raw_messages.second).to include('2/4')
-            expect(raw_messages.second).to include('-answers.csv')
           end
 
           it 'creates a submission record' do
