@@ -14,6 +14,31 @@ describe 'UserData API', type: :request do
   let(:user_identifier) { SecureRandom.uuid }
 
   describe 'a GET request' do
+    describe 'to /submissions' do
+      before do
+        @submissions = [
+          Submission.create!(
+            status: 'queued',
+            encrypted_user_id_and_token: '123456789',
+            service_slug: 'my-service',
+            submission_details: %w[some details]),
+          Submission.create!(
+            status: 'queued',
+            encrypted_user_id_and_token: '123456789',
+            service_slug: 'my-service',
+            submission_details: %w[some details])
+        ]
+      end
+
+      it 'responds with a list of submissions' do
+        get '/submissions', headers: headers
+        expect(JSON.parse(response.body)).to be_a(Array)
+      end
+
+      include_context 'when a JSON-only API', :get, '/submissions'
+      include_context 'an authenticated method', :get, '/submissions', {}
+    end
+    
     describe 'to /submission/:id' do
       let(:submission_id) { 'abcdef' }
       let(:url) { "/submission/#{submission_id}" }

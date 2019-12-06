@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   get '/health', to: 'health#show'
+  get '/submissions', to: 'submission#index'
   get '/submission/:id', to: 'submission#show'
   post '/submission', to: 'submission#create'
 

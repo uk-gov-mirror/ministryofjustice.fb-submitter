@@ -19,6 +19,11 @@ class SubmissionController < ApplicationController
     render json: @submission, status: :ok
   end
 
+  def index
+    @submissions = Submission.all
+    render json: @submissions, status: :ok
+  end
+
   private
 
   def submission_params
