@@ -41,7 +41,7 @@ Style/ConditionalAssignment:
 Metrics/BlockLength:
   ExcludedMethods: ['describe', 'context', 'let']
 
-Layout/IndentFirstArrayElement:
+Layout/FirstArrayElementIndentation:
   EnforcedStyle: consistent
 
 Metrics/MethodLength:
