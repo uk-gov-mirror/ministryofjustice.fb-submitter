@@ -26,4 +26,8 @@ RSpec.describe SubmissionController, type: :controller do
   it 'marks delayed job as created' do
     expect(response).to have_http_status(:created)
   end
+
+  it 'returns valid json response' do
+    expect { JSON.parse(response.body) }.not_to raise_error
+  end
 end
