@@ -11,7 +11,7 @@ class SubmissionController < ApplicationController
       run_at: 3.seconds.from_now
     )
 
-    render status: :created
+    render json: {}, status: :created
   end
 
   private
