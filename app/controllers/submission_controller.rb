@@ -25,6 +25,7 @@ class SubmissionController < ApplicationController
 
   def payload
     params.slice(
+      :meta,
       :actions,
       :submission,
       :attachments

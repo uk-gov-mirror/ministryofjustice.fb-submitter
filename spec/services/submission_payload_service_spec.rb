@@ -4,7 +4,12 @@ RSpec.describe SubmissionPayloadService do
   subject(:service) { described_class.new(payload) }
 
   let(:payload) do
-    { 'actions' =>
+    { 'meta' =>
+      {
+        'submission_id' => '8f5dd756-df07-40e7-afc7-682cdf490264',
+        'submission_at' => '2019-12-18T09:25:59.238Z'
+      },
+      'actions' =>
         [{ 'recipientType' => 'team',
            'type' => 'email',
            'from' =>
@@ -93,5 +98,11 @@ RSpec.describe SubmissionPayloadService do
 
   it 'returns a map of question ids to user answers' do
     expect(service.user_answers_map).to eq(expected_user_answers_map)
+  end
+
+  describe '#submission_at' do
+    it 'returns timestamp' do
+      expect(subject.submission_at.to_i).to eql(DateTime.new(2019, 12, 18, 9, 25, 59.238).to_i)
+    end
   end
 end

@@ -32,6 +32,7 @@ describe GenerateCsvContent do
 
       expect(csv[0]).to eql(%w[
         submission_id
+        submission_at
         first_name
         last_name
         has-email
@@ -47,6 +48,7 @@ describe GenerateCsvContent do
       ])
 
       expect(csv[1]).to eql([payload_service.submission_id,
+                             '2019-12-18T09:25:59.238Z',
                              'Bob',
                              'Smith',
                              'yes',

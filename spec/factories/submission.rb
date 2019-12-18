@@ -5,6 +5,12 @@ FactoryBot.define do
     service_slug { 'service-slug' }
     encrypted_user_id_and_token { 'some token' }
     transient do
+      meta do
+        {
+          'submission_id' => submission_id,
+          'submission_at' => '2019-12-18T09:25:59.238Z'
+        }
+      end
       actions { [] }
       attachments { [] }
       submission do
@@ -152,7 +158,7 @@ FactoryBot.define do
 
     payload do
       EncryptionService.new.encrypt(
-        actions: actions, submission: submission, attachments: attachments
+        meta: meta, actions: actions, submission: submission, attachments: attachments
       )
     end
 
