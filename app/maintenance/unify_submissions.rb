@@ -5,7 +5,7 @@ class UnifySubmissions
       h['answer'] = 'negative' if v == '0'
     end
     if v = h['key']
-      if v =~ /^.*negativeorpositive$/
+      if v =~ /^.*positiveornegative$/
         h['key'] = 'theme'
       end
       if v =~ /^.+id$/
