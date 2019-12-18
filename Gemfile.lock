@@ -274,6 +274,7 @@ DEPENDENCIES
   factory_bot_rails (~> 5.1)
   guard-rspec
   guard-shell
+  hashdiff
   jwe (~> 0.4.0)
   listen
   mime-types

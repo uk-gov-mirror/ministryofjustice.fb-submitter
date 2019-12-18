@@ -15,6 +15,7 @@ gem 'rails', '~> 5.2.3'
 gem 'sentry-raven'
 gem 'typhoeus'
 gem 'tzinfo-data'
+gem 'hashdiff'
 
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
