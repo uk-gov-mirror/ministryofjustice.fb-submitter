@@ -11,6 +11,14 @@ class SubmissionPayloadService
     @submission_id = @payload.fetch(:submission).fetch('submission_id')
   end
 
+  def submission_at
+    string = payload.fetch(:meta, {}).fetch('submission_at', nil)
+
+    return unless string
+
+    Time.parse string
+  end
+
   def user_answers_map
     questions = {}
     submission.fetch('sections', []).each do |section|

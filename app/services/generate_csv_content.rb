@@ -50,13 +50,14 @@ class GenerateCsvContent
     data = []
 
     data << payload_service.submission_id
+    data << payload_service.submission_at.iso8601(3)
     data.concat(answer_values)
 
     data
   end
 
   def csv_headers
-    fixed_headers = ['submission_id']
+    fixed_headers = %w[submission_id submission_at]
     dynamic_headers = answer_keys
 
     fixed_headers + dynamic_headers
