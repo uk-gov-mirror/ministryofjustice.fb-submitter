@@ -1,17 +1,27 @@
-RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
+require 'rails_helper'
+
+RSpec.describe 'Concerns::JWTAuthentication' do
+  let(:service_token) { 'service-token' }
+  let(:service_slug) { 'service-slug' }
   let(:body) { response.body }
-  let(:parsed_body) do
-    JSON.parse(response.body.to_s)
+  let(:parsed_body) { JSON.parse(response.body) }
+  let(:payload) { {} }
+  let(:headers) { {} }
+
+  controller do
+    include Concerns::ErrorHandling
+    include Concerns::JWTAuthentication
+
+    def index
+      head :ok
+    end
   end
-  let(:headers) do
-    {
-      'content-type' => 'application/json'
-    }
-  end
-  let(:service_token) { 'ServiceToken' }
-  before do
-    allow_any_instance_of(ApplicationController).to receive(:get_service_token).and_return(service_token)
-    send(method, url, headers: headers)
+
+  before :each do
+    allow(ServiceTokenService).to receive(:get).with(service_slug).and_return(service_token)
+
+    request.headers.merge!(headers)
+    get :index, params: { service_slug: service_slug }
   end
 
   context 'with no x-access-token header' do
@@ -20,8 +30,6 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
     end
 
     describe 'the body' do
-      let(:body) { response.body }
-
       it 'is valid JSON' do
         expect { parsed_body }.not_to raise_error
       end
@@ -43,7 +51,6 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
         'x-access-token' => token
       }
     end
-    let(:service_token) { 'ServiceToken' }
     let(:algorithm) { 'HS256' }
 
     context 'when valid' do
@@ -62,7 +69,7 @@ RSpec.shared_examples 'a JWT-authenticated method' do |method, url, payload|
       let(:token) { 'invalid token' }
 
       context 'when the timestamp is older than MAX_IAT_SKEW_SECONDS' do
-        let(:iat) { Time.current.to_i - (ENV['MAX_IAT_SKEW_SECONDS'].to_i + 1) }
+        let(:iat) { Time.current.to_i - 1.year }
         let(:token) do
           JWT.encode payload.merge(iat: iat), service_token, algorithm
         end

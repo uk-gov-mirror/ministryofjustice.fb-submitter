@@ -17,13 +17,9 @@ module Concerns
 
     private
 
-    # may raise any of:
-    #   TokenInvalidError
-    #   TokenNotPresentError
-    #
-    def verify_token!(token: request.headers['x-access-token'],
-                      args: params,
-                      leeway: ENV['MAX_IAT_SKEW_SECONDS'])
+    def verify_token!
+      token = request.headers['x-access-token']
+      leeway = ENV['MAX_IAT_SKEW_SECONDS'].to_i
 
       raise Exceptions::TokenNotPresentError unless token.present?
 
@@ -40,6 +36,7 @@ module Concerns
         # NOTE: verify_iat used to be in the JWT gem, but was removed in v2.2
         # so we have to do it manually
         iat_skew = payload['iat'].to_i - Time.current.to_i
+
         if iat_skew.abs > leeway.to_i
           Rails.logger.debug("iat skew is #{iat_skew}, max is #{leeway} - INVALID")
           raise Exceptions::TokenNotValidError
