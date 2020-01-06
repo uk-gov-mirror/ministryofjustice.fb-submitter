@@ -28,7 +28,6 @@ describe 'UserData API', type: :request do
     end
 
     include_context 'when a JSON-only API', :post, '/submission'
-    include_context 'a JWT-authenticated method', :post, '/submission', {}
 
     context 'with a valid token' do
       before do

@@ -17,18 +17,21 @@ module Concerns
 
     private
 
-    # may raise any of:
-    #   TokenInvalidError
-    #   TokenNotPresentError
-    #
-    def verify_token!(token: request.headers['x-access-token'],
-                      args: params,
-                      leeway: ENV['MAX_IAT_SKEW_SECONDS'])
+    def verify_token!
+      if request.headers['x-access-token-v2']
+        verify_v2
+      elsif request.headers['x-access-token']
+        verify_v1
+      else
+        raise Exceptions::TokenNotPresentError
+      end
+    end
 
-      raise Exceptions::TokenNotPresentError unless token.present?
+    def verify_v1
+      token = request.headers['x-access-token']
 
       begin
-        hmac_secret = get_service_token(params[:service_slug])
+        hmac_secret = service_token(params[:service_slug])
         payload, _header = JWT.decode(
           token,
           hmac_secret,
@@ -40,6 +43,7 @@ module Concerns
         # NOTE: verify_iat used to be in the JWT gem, but was removed in v2.2
         # so we have to do it manually
         iat_skew = payload['iat'].to_i - Time.current.to_i
+
         if iat_skew.abs > leeway.to_i
           Rails.logger.debug("iat skew is #{iat_skew}, max is #{leeway} - INVALID")
           raise Exceptions::TokenNotValidError
@@ -52,8 +56,49 @@ module Concerns
       end
     end
 
-    def get_service_token(service_slug)
-      ServiceTokenService.get(service_slug)
+    def verify_v2
+      token = request.headers['x-access-token-v2']
+
+      begin
+        hmac_secret = public_key(params[:service_slug])
+        payload, _header = JWT.decode(
+          token,
+          hmac_secret,
+          true,
+          exp_leeway: leeway,
+          algorithm: 'RS256'
+        )
+
+        # NOTE: verify_iat used to be in the JWT gem, but was removed in v2.2
+        # so we have to do it manually
+        iat_skew = payload['iat'].to_i - Time.current.to_i
+
+        if iat_skew.abs > leeway.to_i
+          Rails.logger.debug("iat skew is #{iat_skew}, max is #{leeway} - INVALID")
+          raise Exceptions::TokenNotValidError
+        end
+
+        Rails.logger.debug 'token is valid'
+      rescue StandardError => e
+        Rails.logger.debug("Couldn't parse that token - error #{e}")
+        raise Exceptions::TokenNotValidError
+      end
+    end
+
+    def leeway
+      ENV['MAX_IAT_SKEW_SECONDS'].to_i
+    end
+
+    def service_token(service_slug)
+      service = ServiceTokenService.new(service_slug: service_slug)
+      service.get
+    end
+
+    def public_key(service_slug)
+      service = ServiceTokenService.new(service_slug: service_slug)
+      public_key = service.public_key
+
+      OpenSSL::PKey::RSA.new(public_key)
     end
   end
 end
