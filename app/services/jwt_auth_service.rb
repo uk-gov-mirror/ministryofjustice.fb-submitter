@@ -6,7 +6,7 @@ class JwtAuthService
 
   def execute
     secret = service_token_cache.get(service_slug)
-    JWT.encode({}, secret, 'HS256', iss: service_slug)
+    JWT.encode({ iss: service_slug }, secret, 'HS256', iss: service_slug)
   end
 
   private
