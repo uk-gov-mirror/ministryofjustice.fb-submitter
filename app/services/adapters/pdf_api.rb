@@ -20,7 +20,7 @@ module Adapters
     private
 
     def headers
-      { 'x-access-token' => token }
+      { 'x-access-token-v2' => token }
     end
 
     attr_reader :root_url, :token

@@ -4,6 +4,7 @@ FactoryBot.define do
   factory :submission do
     service_slug { 'service-slug' }
     encrypted_user_id_and_token { 'some token' }
+    access_token { 'some-access-token' }
     transient do
       meta do
         {
