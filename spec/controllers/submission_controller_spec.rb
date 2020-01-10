@@ -16,14 +16,27 @@ RSpec.describe SubmissionController, type: :controller do
     }
   end
 
+  let(:headers) do
+    {
+      'content-type' => 'application/json',
+      'x-access-token-v2' => token
+    }
+  end
+
+  let(:token) { 'some-access-token' }
+
   before do
-    request.env['CONTENT_TYPE'] = 'application/json'
+    request.headers.merge!(headers)
     allow_any_instance_of(ApplicationController).to receive(:verify_token!)
     post :create, body: payload.to_json
   end
 
   it 'creates a submission' do
     expect(Submission.all.count).to eq(1)
+  end
+
+  it 'persists access token' do
+    expect(Submission.first.access_token).to eq(token)
   end
 
   it 'saves the payload into the submission' do

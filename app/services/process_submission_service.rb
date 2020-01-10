@@ -59,7 +59,7 @@ class ProcessSubmissionService
 
   def generate_pdf(pdf_detail, _submission_id)
     GeneratePdfContent.new(
-      pdf_api_gateway: pdf_gateway(submission.service_slug),
+      pdf_api_gateway: pdf_gateway,
       payload: pdf_detail
     ).execute
   end
@@ -68,20 +68,11 @@ class ProcessSubmissionService
     GenerateCsvContent.new(payload_service: payload_service).execute
   end
 
-  def pdf_gateway(service_slug)
+  def pdf_gateway
     Adapters::PdfApi.new(
       root_url: ENV.fetch('PDF_GENERATOR_ROOT_URL'),
-      token: authentication_token(service_slug)
+      token: submission.access_token
     )
-  end
-
-  def authentication_token(service_slug)
-    JwtAuthService.new(
-      service_token_cache: Adapters::ServiceTokenCacheClient.new(
-        root_url: ENV.fetch('SERVICE_TOKEN_CACHE_ROOT_URL')
-      ),
-      service_slug: service_slug
-    ).execute
   end
 
   def submission
