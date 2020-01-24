@@ -3,7 +3,13 @@ require 'rails_helper'
 describe DownloadService do
   let(:url) { 'https://my.domain/some/path/file.ext' }
   let(:token) { 'sometoken' }
-  let(:headers) { { 'x-encrypted-user-id-and-token' => token } }
+  let(:access_token) { 'someaccesstoken' }
+  let(:headers) do
+    {
+      'x-encrypted-user-id-and-token' => token,
+      'x-access-token-v2' => access_token
+    }
+  end
   let(:mock_hydra) { instance_double(Typhoeus::Hydra) }
   let(:attachments) do
     [
@@ -17,7 +23,10 @@ describe DownloadService do
 
   describe '#download_in_parallel' do
     subject(:downloader) do
-      described_class.new(attachments: attachments, target_dir: target_dir, token: token)
+      described_class.new(attachments: attachments,
+                          target_dir: target_dir,
+                          token: token,
+                          access_token: access_token)
     end
 
     let(:path) { '/the/file/path' }
@@ -47,7 +56,10 @@ describe DownloadService do
 
     context 'when a target_dir is given' do
       subject(:downloader) do
-        described_class.new(attachments: attachments, target_dir: target_dir, token: token)
+        described_class.new(attachments: attachments,
+                            target_dir: target_dir,
+                            token: token,
+                            access_token: access_token)
       end
 
       let(:target_dir) { '/my/tmp/dir' }
@@ -60,7 +72,10 @@ describe DownloadService do
 
     context 'with an array of urls' do
       subject(:downloader) do
-        described_class.new(attachments: attachments, target_dir: path, token: token)
+        described_class.new(attachments: attachments,
+                            target_dir: path,
+                            token: token,
+                            access_token: access_token)
       end
 
       let(:url1) { 'https://example.com/service/some-service/user/some-user/fingerprint' }
@@ -112,10 +127,9 @@ describe DownloadService do
 
             expected_url1 = 'https://example.com/service/some-service/user/some-user/fingerprint'
             expected_url2 = 'https://another.domain/some/otherfile.ext'
-            expected_headers = { 'x-encrypted-user-id-and-token' => 'sometoken' }
 
-            expect(Typhoeus::Request).to receive(:new).with(expected_url1, followlocation: true, headers: expected_headers).and_return(double.as_null_object)
-            expect(Typhoeus::Request).to receive(:new).with(expected_url2, followlocation: true, headers: expected_headers).and_return(double.as_null_object)
+            expect(Typhoeus::Request).to receive(:new).with(expected_url1, followlocation: true, headers: headers).and_return(double.as_null_object)
+            expect(Typhoeus::Request).to receive(:new).with(expected_url2, followlocation: true, headers: headers).and_return(double.as_null_object)
 
             downloader.download_in_parallel
           end
@@ -172,7 +186,10 @@ describe DownloadService do
 
   context 'when the network request is unsuccessful' do
     subject(:downloader) do
-      described_class.new(attachments: attachments, target_dir: target_dir, token: token)
+      described_class.new(attachments: attachments,
+                          target_dir: target_dir,
+                          token: token,
+                          access_token: access_token)
     end
 
     let(:mock_request) { instance_double(Typhoeus::Request, url: 'some_url') }
