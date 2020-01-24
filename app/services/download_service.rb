@@ -1,10 +1,11 @@
 class DownloadService
-  attr_reader :attachments, :target_dir, :token
+  attr_reader :attachments, :target_dir, :token, :access_token
 
-  def initialize(attachments:, target_dir: nil, token:)
+  def initialize(attachments:, target_dir: nil, token:, access_token:)
     @attachments = attachments
     @target_dir = target_dir
     @token = token
+    @access_token = access_token
   end
 
   def download_in_parallel
@@ -30,7 +31,10 @@ class DownloadService
   private
 
   def headers
-    { 'x-encrypted-user-id-and-token' => token }
+    {
+      'x-encrypted-user-id-and-token' => token,
+      'x-access-token-v2' => access_token
+    }
   end
 
   def construct_request(url:, file_path:, headers: {})
