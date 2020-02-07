@@ -6,6 +6,8 @@ update_configs:
     update_schedule: "live"
     default_reviewers:
     - asmega
+    - tomas-stefano
+    - brenetic
   - package_manager: "docker"
     directory: "/docker/api"
     update_schedule: "daily"
@@ -16,3 +18,5 @@ update_configs:
     update_schedule: "daily"
     default_reviewers:
     - asmega
+    - tomas-stefano
+    - brenetic
