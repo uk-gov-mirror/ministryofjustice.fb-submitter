@@ -15,8 +15,11 @@ jobs:
           command: docker-compose run --rm app bundle exec rubocop
   build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
-    docker:
-      - image: asmega/fb-builder:latest
+    docker: &ecr_image
+      - image: $AWS_ECR_ACCOUNT_URL
+        aws_auth:
+          aws_access_key_id: $AWS_ACCESS_KEY_ID
+          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
     steps:
       - checkout
       - setup_remote_docker
@@ -46,11 +49,7 @@ jobs:
           command: './scripts/circleci_deploy.sh test production $KUBE_TOKEN_TEST_PRODUCTION'
   build_and_deploy_to_live:
     working_directory: ~/circle/git/fb-submitter
-    docker:
-      - image: $AWS_ECR_ACCOUNT_URL
-        aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+    docker: *ecr_image
     steps:
       - checkout
       - setup_remote_docker
