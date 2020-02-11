@@ -159,7 +159,7 @@ GEM
     notifications-ruby-client (5.1.0)
       jwt (>= 1.5, < 3)
     parallel (1.19.1)
-    parser (2.7.0.1)
+    parser (2.7.0.2)
       ast (~> 2.4.0)
     pg (1.1.4)
     pry (0.12.2)
@@ -230,7 +230,7 @@ GEM
       rainbow (>= 2.2.2, < 4.0)
       ruby-progressbar (~> 1.7)
       unicode-display_width (>= 1.4.0, < 1.7)
-    rubocop-rspec (1.37.1)
+    rubocop-rspec (1.38.0)
       rubocop (>= 0.68.1)
     ruby-progressbar (1.10.1)
     safe_yaml (1.0.5)
@@ -263,7 +263,7 @@ GEM
       thread_safe (~> 0.1)
     tzinfo-data (1.2019.3)
       tzinfo (>= 1.0.0)
-    unicode-display_width (1.6.0)
+    unicode-display_width (1.6.1)
     webmock (3.8.1)
       addressable (>= 2.3.6)
       crack (>= 0.3.2)
@@ -296,7 +296,7 @@ DEPENDENCIES
   rails (~> 6.0.2)
   rspec-rails (>= 3.8.0)
   rubocop (~> 0.79.0)
-  rubocop-rspec (~> 1.37)
+  rubocop-rspec (~> 1.38)
   sentry-raven
   simplecov
   simplecov-console
