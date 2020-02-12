@@ -27,7 +27,7 @@ RSpec.describe 'Concerns::JWTAuthentication' do
     get :index, params: { service_slug: service_slug }
   end
 
-  context 'with no x-access-token header' do
+  context 'with no x-access-token-v2 header' do
     it 'has status 401' do
       expect(response).to have_http_status(:unauthorized)
     end
@@ -47,19 +47,20 @@ RSpec.describe 'Concerns::JWTAuthentication' do
     end
   end
 
-  context 'with a header called x-access-token' do
+  context 'with a header called x-access-token-v2' do
     let(:headers) do
       {
         'content-type' => 'application/json',
-        'x-access-token' => token
+        'x-access-token-v2' => token
       }
     end
-    let(:algorithm) { 'HS256' }
+    let(:algorithm) { 'RS256' }
+    let(:private_key) { OpenSSL::PKey::RSA.new(Base64.strict_decode64(encoded_private_key)) }
 
     context 'when valid' do
       let(:iat) { Time.current.to_i }
       let(:token) do
-        JWT.encode payload.merge(iat: iat), service_token, algorithm
+        JWT.encode payload.merge(iat: iat), private_key, algorithm
       end
 
       it 'does not respond with an unauthorized or forbidden status' do
@@ -70,6 +71,7 @@ RSpec.describe 'Concerns::JWTAuthentication' do
 
     context 'when not valid' do
       let(:token) { 'invalid token' }
+      let(:algorithm) { 'HS256' }
 
       context 'when the timestamp is older than MAX_IAT_SKEW_SECONDS' do
         let(:iat) { Time.current.to_i - 1.year }
@@ -119,29 +121,6 @@ RSpec.describe 'Concerns::JWTAuthentication' do
             end
           end
         end
-      end
-    end
-  end
-
-  context 'with a header called x-access-token-v2' do
-    let(:headers) do
-      {
-        'content-type' => 'application/json',
-        'x-access-token-v2' => token
-      }
-    end
-    let(:algorithm) { 'RS256' }
-    let(:private_key) { OpenSSL::PKey::RSA.new(Base64.strict_decode64(encoded_private_key)) }
-
-    context 'when valid' do
-      let(:iat) { Time.current.to_i }
-      let(:token) do
-        JWT.encode payload.merge(iat: iat), private_key, algorithm
-      end
-
-      it 'does not respond with an unauthorized or forbidden status' do
-        expect(response).not_to have_http_status(:unauthorized)
-        expect(response).not_to have_http_status(:forbidden)
       end
     end
   end

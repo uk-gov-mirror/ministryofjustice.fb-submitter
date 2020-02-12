@@ -18,45 +18,14 @@ module Concerns
     private
 
     def verify_token!
-      if request.headers['x-access-token-v2']
-        verify_v2
-      elsif request.headers['x-access-token']
-        verify_v1
-      else
+      unless request.headers['x-access-token-v2']
         raise Exceptions::TokenNotPresentError
       end
+
+      verify
     end
 
-    def verify_v1
-      token = request.headers['x-access-token']
-
-      begin
-        hmac_secret = service_token(params[:service_slug])
-        payload, _header = JWT.decode(
-          token,
-          hmac_secret,
-          true,
-          exp_leeway: leeway,
-          algorithm: 'HS256'
-        )
-
-        # NOTE: verify_iat used to be in the JWT gem, but was removed in v2.2
-        # so we have to do it manually
-        iat_skew = payload['iat'].to_i - Time.current.to_i
-
-        if iat_skew.abs > leeway.to_i
-          Rails.logger.debug("iat skew is #{iat_skew}, max is #{leeway} - INVALID")
-          raise Exceptions::TokenNotValidError
-        end
-
-        Rails.logger.debug 'token is valid'
-      rescue StandardError => e
-        Rails.logger.debug("Couldn't parse that token - error #{e}")
-        raise Exceptions::TokenNotValidError
-      end
-    end
-
-    def verify_v2
+    def verify
       token = request.headers['x-access-token-v2']
 
       begin
