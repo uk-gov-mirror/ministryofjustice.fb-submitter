@@ -1,22 +1,20 @@
 # fb-submitter
 
 [![CircleCI](https://circleci.com/gh/ministryofjustice/fb-submitter/tree/master.svg?style=svg)](https://circleci.com/gh/ministryofjustice/fb-submitter/tree/master)
-[![Build Status](https://travis-ci.org/ministryofjustice/fb-submitter.svg?branch=master)](https://travis-ci.org/ministryofjustice/fb-submitter)
 
-API for services built &amp; deployed on Form Builder to send the user data to
-where it ultimately needs to go.
+API for services built and deployed on Form Builder to send the user data to where it ultimately needs to go.
 
-## Environment Variables
+## Running tests
 
-The following environment variables are either needed, or read if present:
+Docker is a prerequisite for running the tests
 
-- DATABASE_URL: used to connect to the database
-- FB_ENVIRONMENT_SLUG: what FormBuilder environment is this submitter for?
-  Should be equal to one of the keys in config/service_environments.rb
-- RAILS_ENV: 'development' or 'production'
-- SERVICE_TOKEN_CACHE_ROOT_URL: protocol + hostname of the
-  [service token cache](https://github.com/ministryofjustice/fb-service-token-cache)
+```sh
+make spec
+```
 
-## To deploy and run on Cloud Platforms
+## Deployment
 
-See [deployment instructions](DEPLOY.md)
+Continuous Integration (CI) is enabled on this project via CircleCI.
+
+On merge to master tests are executed and if green deployed to the test environment.
+This build can then be promoted to production
