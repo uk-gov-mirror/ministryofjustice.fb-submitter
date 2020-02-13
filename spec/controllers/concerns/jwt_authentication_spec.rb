@@ -70,14 +70,12 @@ RSpec.describe 'Concerns::JWTAuthentication' do
     end
 
     context 'when not valid' do
-      let(:token) { 'invalid token' }
-      let(:algorithm) { 'HS256' }
-
       context 'when the timestamp is older than MAX_IAT_SKEW_SECONDS' do
         let(:iat) { Time.current.to_i - 1.year }
         let(:token) do
           JWT.encode payload.merge(iat: iat), service_token, algorithm
         end
+        let(:algorithm) { 'HS256' }
 
         it 'has status 403' do
           expect(response).to have_http_status(:forbidden)
@@ -99,9 +97,17 @@ RSpec.describe 'Concerns::JWTAuthentication' do
       end
 
       context 'when timestamp is > MAX_IAT_SKEW_SECONDS seconds in the future' do
+        let(:headers) do
+          {
+            'content-type' => 'application/json',
+            'x-access-token-v2' => token
+          }
+        end
+        let(:algorithm) { 'RS256' }
+        let(:private_key) { OpenSSL::PKey::RSA.new(Base64.strict_decode64(encoded_private_key)) }
         let(:iat) { Time.current.to_i + (ENV['MAX_IAT_SKEW_SECONDS'].to_i + 1) }
         let(:token) do
-          JWT.encode payload, service_token, algorithm
+          JWT.encode payload, private_key, algorithm
         end
 
         it 'has status 403' do
