@@ -20,7 +20,7 @@ gem 'tzinfo-data'
 group :development, :test do
   gem 'byebug', platforms: [:mri, :mingw, :x64_mingw]
   gem 'rspec-rails', '>= 3.8.0'
-  gem 'rubocop', '~> 0.79.0'
+  gem 'rubocop', '~> 0.80.0'
   gem 'rubocop-rspec', '~> 1.38'
 end
 
