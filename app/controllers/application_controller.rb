@@ -12,6 +12,8 @@ class ApplicationController < ActionController::API
   end
 
   def enforce_json_only
-    response.status = :unacceptable unless request.format.json?
+    unless request.format.json?
+      render json: { error: 'Format not acceptable'}, status: :not_acceptable
+    end
   end
 end
