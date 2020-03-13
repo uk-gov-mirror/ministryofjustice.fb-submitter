@@ -32,6 +32,7 @@ describe 'UserData API', type: :request do
     context 'with a valid token' do
       before do
         allow_any_instance_of(ApplicationController).to receive(:verify_token!)
+        allow_any_instance_of(ApplicationController).to receive(:enforce_json_only).and_return(true)
       end
 
       context 'with a valid email JSON body' do
