@@ -20,17 +20,17 @@ describe EmailController do
   describe 'POST #create' do
     it 'enqueues job' do
       expect do
-        post :create, body: json_hash.to_json
+        post :create, body: json_hash.to_json, format: :json
       end.to change { ActiveJob::Base.queue_adapter.enqueued_jobs.size }.by(1)
     end
 
     it 'returns 201' do
-      post :create, body: json_hash.to_json
+      post :create, body: json_hash.to_json, format: :json
       expect(response).to be_created
     end
 
     it 'returns empty json object in body' do
-      post :create, body: json_hash.to_json
+      post :create, body: json_hash.to_json, format: :json
       expect(response.body).to eql('{}')
     end
 
@@ -50,7 +50,7 @@ describe EmailController do
       end
 
       it 'adds data to job' do
-        post :create, body: json_hash.to_json
+        post :create, body: json_hash.to_json, format: :json
 
         expect(ActiveJob::Base.queue_adapter.enqueued_jobs.last[:args][0]['message']['extra_personalisation']['token']).to eql('my-token')
       end
@@ -69,12 +69,12 @@ describe EmailController do
       end
 
       it 'returns 400' do
-        post :create, body: json_hash.to_json
+        post :create, body: json_hash.to_json, format: :json
         expect(response).to be_bad_request
       end
 
       it 'returns an with error message body' do
-        post :create, body: json_hash.to_json
+        post :create, body: json_hash.to_json, format: :json
         expect(JSON.parse(response.body)['name']).to eql('bad-request.invalid-parameters')
       end
     end

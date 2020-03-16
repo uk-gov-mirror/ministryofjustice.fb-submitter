@@ -145,6 +145,7 @@ describe 'Submits JSON given a JSON submission type', type: :request do
 
     stub_request(:post, 'https://some-url/1/presigned-s3-url').to_return(status: 200, body: expected_attachments[0].to_json)
     stub_request(:post, 'https://some-url/2/presigned-s3-url').to_return(status: 200, body: expected_attachments[1].to_json)
+    allow_any_instance_of(ApplicationController).to receive(:enforce_json_only).and_return(true)
   end
 
   after do

@@ -28,7 +28,7 @@ RSpec.describe SubmissionController, type: :controller do
   before do
     request.headers.merge!(headers)
     allow_any_instance_of(ApplicationController).to receive(:verify_token!)
-    post :create, body: payload.to_json
+    post :create, body: payload.to_json, format: :json
   end
 
   it 'creates a submission' do
