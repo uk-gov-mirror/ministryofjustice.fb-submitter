@@ -73,6 +73,11 @@ spec:
               secretKeyRef:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: encryption_salt
+          - name: METRICS_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: metrics_access_key
       volumes:
         - name: tmp-files
           emptyDir: {}
@@ -202,6 +207,11 @@ spec:
               secretKeyRef:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: encryption_salt
+          - name: METRICS_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: metrics_access_key
       volumes:
         - name: tmp-files
           emptyDir: {}

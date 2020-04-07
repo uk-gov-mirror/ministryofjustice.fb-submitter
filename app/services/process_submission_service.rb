@@ -46,6 +46,11 @@ class ProcessSubmissionService
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
       end
     end
+
+    Metrics.new(submission).track(
+      'Submission',
+      { form: submission.service_slug }
+    )
   end
   # rubocop:enable Metrics/MethodLength
 
