@@ -11,16 +11,36 @@ describe MixpanelClient do
 
   describe '#can_track?' do
     context 'when mixpanel access token is present' do
-      it 'returns true' do
-        allow(ENV).to receive(:[]).with('METRICS_ACCESS_KEY').and_return('foo')
-        expect(client).to be_can_track
+      context 'when env is production' do
+        it 'returns true' do
+          client.metrics_access_key = 'foo'
+          client.deployment_env = 'live-production'
+          expect(client).to be_can_track
+        end
+      end
+
+      context 'when env is not production' do
+        it 'returns false' do
+          client.metrics_access_key = 'foo'
+          client.deployment_env = 'live-dev'
+          expect(client).not_to be_can_track
+        end
       end
     end
 
     context 'when mixpanel access token is blank' do
-      it 'returns false' do
-        allow(ENV).to receive(:[]).with('METRICS_ACCESS_KEY').and_return(nil)
-        expect(client).not_to be_can_track
+      context 'when is nil' do
+        it 'returns false' do
+          client.metrics_access_key = nil
+          expect(client).not_to be_can_track
+        end
+      end
+
+      context 'when is blank' do
+        it 'returns false' do
+          client.metrics_access_key = ''
+          expect(client).not_to be_can_track
+        end
       end
     end
   end
