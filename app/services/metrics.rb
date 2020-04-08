@@ -1,5 +1,5 @@
 class Metrics
-  attr_reader :object, :client
+  attr_reader :object, :client, :logger
 
   def initialize(object, client = MixpanelClient.new, logger = Rails.logger)
     @object = object
