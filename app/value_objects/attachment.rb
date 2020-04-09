@@ -21,4 +21,8 @@ class Attachment
 
     "#{raw_filename}.#{ext}"
   end
+
+  def size
+    File.size(path)
+  end
 end
