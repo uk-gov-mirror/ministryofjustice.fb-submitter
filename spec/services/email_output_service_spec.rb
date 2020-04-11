@@ -23,24 +23,55 @@ describe EmailOutputService do
   let(:include_pdf) { false }
   let(:include_attachments) { false }
 
+  let(:upload1) do
+    Attachment.new(
+      type: 'output',
+      url: 'example.com/upload1',
+      mimetype: 'application/pdf',
+      filename: 'upload1',
+      path: nil
+    )
+  end
+  let(:upload2) do
+    Attachment.new(
+      type: 'output',
+      url: 'example.com/upload2',
+      mimetype: 'application/json',
+      filename: 'upload2',
+      path: nil
+    )
+  end
+  let(:upload3) do
+    Attachment.new(
+      type: 'output',
+      url: 'example.com/upload3',
+      mimetype: 'image/jpeg',
+      filename: 'upload3',
+      path: nil
+    )
+  end
+
   let(:attachments) do
-    [
-      Attachment.new(type: 'output', url: 'example.com/foo', mimetype: 'application/pdf', filename: 'form1', path: nil),
-      Attachment.new(type: 'output', url: 'example.com/bar', mimetype: 'application/json', filename: 'form2', path: nil)
-    ]
+    [upload1, upload2, upload3]
   end
 
   let(:pdf_attachment) do
-    Attachment.new(type: 'output',
-                   url: nil,
-                   mimetype: 'application/pdf',
-                   filename: 'a generated pdf',
-                   path: nil)
+    Attachment.new(
+      type: 'output',
+      url: nil,
+      mimetype: 'application/pdf',
+      filename: 'a generated pdf',
+      path: nil
+    )
   end
 
   before do
-    allow(email_service_mock).to receive(:send_mail)
+    allow(upload1).to receive(:size).and_return(1234)
+    allow(upload2).to receive(:size).and_return(5678)
+    allow(upload3).to receive(:size).and_return(9_999_999)
+    allow(pdf_attachment).to receive(:size).and_return(7777)
 
+    allow(email_service_mock).to receive(:send_mail)
     subject.execute(action: email_action,
                     attachments: attachments,
                     pdf_attachment: pdf_attachment,
@@ -55,25 +86,34 @@ describe EmailOutputService do
                                                                  attachments: []).once
   end
 
-  context 'when a user uploaded attachments are required' do
+  context 'when a user uploaded attachments are required but not answers pdf' do
     let(:include_attachments) { true }
 
-    it 'sends a separate email for each attachment' do
-      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: [attachments[0]])).once
-      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: [attachments[1]])).once
+    it 'groups attachments into emails up to maximum limit' do
+      first_email_attachments = [upload1, upload2]
+      second_email_attachments = [upload3]
+
+      expect(email_service_mock).to have_received(:send_mail).exactly(2).times
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: first_email_attachments)).once
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: second_email_attachments)).once
     end
 
-    it 'the subject is numbered by how many seperte emails there are' do
+    it 'the subject is numbered by how many separate emails there are' do
       expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]')).once
       expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]')).once
     end
   end
 
-  context 'when a user answers pdf is needed' do
+  context 'when a user answers pdf is needed but not uploaded attachments' do
     let(:include_pdf) { true }
 
     it 'sends an email with the generated pdf as a attachment' do
+      expect(email_service_mock).to have_received(:send_mail).exactly(1).times
       expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: [pdf_attachment])).once
+    end
+
+    it 'the subject is numbered [1/1] as there will be a single email' do
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission {an-id-2323} [1/1]')).once
     end
   end
 
@@ -81,8 +121,13 @@ describe EmailOutputService do
     let(:include_attachments) { true }
     let(:include_pdf) { true }
 
-    it 'sends a separate email for each attachment' do
-      expect(email_service_mock).to have_received(:send_mail).exactly(3).times
+    it 'groups attachments for all emails based on attachment size' do
+      first_email_attachments = [upload1, upload2, pdf_attachment]
+      second_email_attachments = [upload3]
+
+      expect(email_service_mock).to have_received(:send_mail).exactly(2).times
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: first_email_attachments)).once
+      expect(email_service_mock).to have_received(:send_mail).with(hash_including(attachments: second_email_attachments)).once
     end
   end
 end

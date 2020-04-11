@@ -1,4 +1,6 @@
 class EmailOutputService
+  MAX_ATTACHMENTS_SIZE = 10_000_000 # 10MB in bytes. AWS SES limitation
+
   def initialize(emailer:)
     @emailer = emailer
   end
@@ -34,18 +36,43 @@ class EmailOutputService
   end
 
   def send_emails_with_attachments(action, email_attachments, submission_id:)
-    email_attachments.each_with_index do |email_attachment, index|
+    per_email_attachments = attachments_per_email(email_attachments)
+
+    per_email_attachments.each_with_index do |attachments, index|
       send_single_email(
         action: action,
-        attachments: [email_attachment],
+        attachments: attachments,
         subject: subject(
           subject: action.fetch(:subject),
           current_email: index + 1,
-          number_of_emails: email_attachments.size,
+          number_of_emails: per_email_attachments.size,
           submission_id: submission_id
         )
       )
     end
+  end
+
+  def attachments_per_email(attachments)
+    all = []
+    per_email = []
+    by_size(attachments).each do |attachment|
+      if sum(per_email, attachment) >= MAX_ATTACHMENTS_SIZE
+        all << per_email
+        attachment == attachments.last ? all << [attachment] : per_email = [attachment]
+      else
+        per_email << attachment
+        all << per_email if attachment == attachments.last
+      end
+    end
+    all
+  end
+
+  def by_size(attachments)
+    attachments.sort_by { |attachment| attachment.size }
+  end
+
+  def sum(attachments, to_add)
+    attachments.inject(0) { |sum, attachment| sum + attachment.size } + to_add.size
   end
 
   def send_single_email(subject:, action:, attachments: [])
