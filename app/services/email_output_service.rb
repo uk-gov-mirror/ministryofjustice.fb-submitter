@@ -26,36 +26,28 @@ class EmailOutputService
     email_attachments = []
 
     if action.fetch(:include_attachments, false)
-      email_attachments = email_attachments.concat attachments
+      email_attachments = email_attachments.concat(by_size(attachments))
     end
     if action.fetch(:include_pdf, false)
       email_attachments.prepend(pdf_attachment)
     end
 
-    email_attachments
+    attachments_per_email(email_attachments)
   end
 
-  def send_emails_with_attachments(action, email_attachments, submission_id:)
-    per_email_attachments = attachments_per_email(email_attachments)
+  def by_size(attachments)
+    attachments.sort_by { |attachment| attachment.size }
+  end
 
-    per_email_attachments.each_with_index do |attachments, index|
-      send_single_email(
-        action: action,
-        attachments: attachments,
-        subject: subject(
-          subject: action.fetch(:subject),
-          current_email: index + 1,
-          number_of_emails: per_email_attachments.size,
-          submission_id: submission_id
-        )
-      )
-    end
+  def sum(attachments, to_add)
+    attachments.inject(0) { |sum, attachment| sum + attachment.size } + to_add.size
   end
 
   def attachments_per_email(attachments)
     all = []
     per_email = []
-    by_size(attachments).each do |attachment|
+
+    attachments.each do |attachment|
       if sum(per_email, attachment) >= MAX_ATTACHMENTS_SIZE
         all << per_email
         attachment == attachments.last ? all << [attachment] : per_email = [attachment]
@@ -67,12 +59,19 @@ class EmailOutputService
     all
   end
 
-  def by_size(attachments)
-    attachments.sort_by { |attachment| attachment.size }
-  end
-
-  def sum(attachments, to_add)
-    attachments.inject(0) { |sum, attachment| sum + attachment.size } + to_add.size
+  def send_emails_with_attachments(action, email_attachments, submission_id:)
+    email_attachments.each_with_index do |attachments, index|
+      send_single_email(
+        action: action,
+        attachments: attachments,
+        subject: subject(
+          subject: action.fetch(:subject),
+          current_email: index + 1,
+          number_of_emails: email_attachments.size,
+          submission_id: submission_id
+        )
+      )
+    end
   end
 
   def send_single_email(subject:, action:, attachments: [])
