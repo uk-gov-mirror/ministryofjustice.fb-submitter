@@ -100,7 +100,9 @@ workflows:
             - test
           filters:
             branches:
-              only: master
+              only:
+              - master
+              - multiple-attachments-per-submission-email
       - confirm_live_deploy:
           type: approval
           requires:
