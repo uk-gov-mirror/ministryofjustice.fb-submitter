@@ -23,47 +23,15 @@ describe EmailOutputService do
   let(:include_pdf) { false }
   let(:include_attachments) { false }
 
-  let(:upload1) do
-    Attachment.new(
-      type: 'output',
-      url: 'example.com/upload1',
-      mimetype: 'application/pdf',
-      filename: 'upload1',
-      path: nil
-    )
-  end
-  let(:upload2) do
-    Attachment.new(
-      type: 'output',
-      url: 'example.com/upload2',
-      mimetype: 'application/json',
-      filename: 'upload2',
-      path: nil
-    )
-  end
-  let(:upload3) do
-    Attachment.new(
-      type: 'output',
-      url: 'example.com/upload3',
-      mimetype: 'image/jpeg',
-      filename: 'upload3',
-      path: nil
-    )
-  end
+  let(:upload1) { build(:attachment) }
+  let(:upload2) { build(:attachment) }
+  let(:upload3) { build(:attachment) }
 
   let(:attachments) do
     [upload1, upload2, upload3]
   end
 
-  let(:pdf_attachment) do
-    Attachment.new(
-      type: 'output',
-      url: nil,
-      mimetype: 'application/pdf',
-      filename: 'a generated pdf',
-      path: nil
-    )
-  end
+  let(:pdf_attachment) { build(:attachment, mimetype: 'application/pdf', url: nil) }
 
   before do
     allow(upload1).to receive(:size).and_return(1234)

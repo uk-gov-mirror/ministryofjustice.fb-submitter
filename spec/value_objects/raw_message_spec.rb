@@ -18,10 +18,9 @@ RSpec.describe RawMessage do
   end
 
   let(:attachment) do
-    Attachment.new(
-      type: nil,
+    build(
+      :attachment,
       filename: 'some-file-name.jpg',
-      url: nil,
       mimetype: 'application/pdf',
       path: file_fixture('hello_world.txt')
     )
@@ -67,10 +66,9 @@ RSpec.describe RawMessage do
 
   context 'when filename does not have extension' do
     let(:attachment) do
-      Attachment.new(
-        type: nil,
+      build(
+        :attachment,
         filename: 'some-file-name',
-        url: nil,
         mimetype: 'application/pdf',
         path: file_fixture('hello_world.txt')
       )
