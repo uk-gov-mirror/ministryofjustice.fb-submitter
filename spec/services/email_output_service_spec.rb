@@ -1,11 +1,18 @@
 require_relative '../../app/services/email_output_service'
 require_relative '../../app/services/email_service'
+require_relative '../../app/services/attachment_generator'
 require_relative '../../app/value_objects/attachment'
 
 describe EmailOutputService do
-  subject(:service) { described_class.new(emailer: email_service_mock) }
+  subject(:service) do
+    described_class.new(
+      emailer: email_service_mock,
+      attachment_generator: attachment_generator
+    )
+  end
 
   let(:email_service_mock) { class_double(EmailService) }
+  let(:attachment_generator) { AttachmentGenerator.new }
 
   let(:email_action) do
     {
