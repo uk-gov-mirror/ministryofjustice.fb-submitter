@@ -15,10 +15,10 @@ describe AttachmentGenerator do
   before do
     allow(upload1).to receive(:size).and_return(5678)
     allow(upload2).to receive(:size).and_return(1234)
-    allow(upload3).to receive(:size).and_return(9_999_999)
+    allow(upload3).to receive(:size).and_return(8_999_999)
     allow(upload4).to receive(:size).and_return(44_444)
     allow(upload5).to receive(:size).and_return(111)
-    allow(upload6).to receive(:size).and_return(9_999_999)
+    allow(upload6).to receive(:size).and_return(8_999_999)
     allow(pdf_attachment).to receive(:size).and_return(7777)
   end
 

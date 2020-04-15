@@ -43,7 +43,7 @@ describe EmailOutputService do
   before do
     allow(upload1).to receive(:size).and_return(1234)
     allow(upload2).to receive(:size).and_return(5678)
-    allow(upload3).to receive(:size).and_return(9_999_999)
+    allow(upload3).to receive(:size).and_return(8_999_999)
     allow(pdf_attachment).to receive(:size).and_return(7777)
 
     allow(email_service_mock).to receive(:send_mail)
