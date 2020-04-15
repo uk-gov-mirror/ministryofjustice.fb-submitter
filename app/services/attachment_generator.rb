@@ -1,8 +1,9 @@
 class AttachmentGenerator
   # AWS SES limit is 10MB for each email message including all attachments and images
   # https://aws.amazon.com/ses/faqs/#Limits_and_Restrictions
-  # Leaving a 1MB headroom for email contents, which is pretty generous
-  MAX_EMAIL_SIZE = 9_000_000
+  # Leaving a 3MB headroom for email body contents and the fact that the attachments
+  # get base64 encoded before being sent
+  MAX_EMAIL_SIZE = 7_000_000
 
   attr_reader :sorted_attachments
 
