@@ -120,9 +120,10 @@ describe 'UserData API', type: :request do
             expect(WebMock).to have_requested(:get, %r{fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/}).times(2)
           end
 
-          it 'sends 3 emails' do
+          # the tmp file sizes are small so there will only ever be a single email
+          it 'sends the correct number of emails' do
             post_request
-            expect(stub_aws.api_requests.size).to eq(3)
+            expect(stub_aws.api_requests.size).to eq(1)
           end
 
           it 'email contains downloaded attachment' do
@@ -138,10 +139,10 @@ describe 'UserData API', type: :request do
             expect(raw_messages).to all(include('this is the body of the email'))
           end
 
-          it 'sends the PDF of answers with the first email' do
+          it 'sends the PDF of answers in the same email' do
             post_request
 
-            expect(raw_messages.first).to include('1/3')
+            expect(raw_messages.first).to include('1/1')
             expect(raw_messages.first).to include('-answers.pdf')
           end
 

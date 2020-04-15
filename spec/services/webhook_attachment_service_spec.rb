@@ -14,8 +14,8 @@ describe WebhookAttachmentService do
 
   let(:attachments) do
     [
-      Attachment.new(type: 'output', url: attachment_1, mimetype: 'application/pdf', filename: 'form1', path: nil),
-      Attachment.new(type: 'output', url: attachment_2, mimetype: 'application/json', filename: 'afile', path: nil)
+      build(:attachment, url: attachment_1, mimetype: 'application/pdf', filename: 'form1'),
+      build(:attachment, url: attachment_2, mimetype: 'application/json', filename: 'afile')
     ]
   end
 

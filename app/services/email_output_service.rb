@@ -1,43 +1,37 @@
 class EmailOutputService
-  def initialize(emailer:)
+  def initialize(emailer:, attachment_generator:)
     @emailer = emailer
+    @attachment_generator = attachment_generator
   end
 
   def execute(submission_id:, action:, attachments:, pdf_attachment:)
-    email_attachments = generate_attachments(action: action,
-                                             attachments: attachments,
-                                             pdf_attachment: pdf_attachment)
+    attachment_generator.execute(
+      action: action,
+      attachments: attachments,
+      pdf_attachment: pdf_attachment
+    )
 
-    if email_attachments.empty?
+    if attachment_generator.sorted_attachments.empty?
       send_single_email(
         action: action,
         subject: subject(subject: action.fetch(:subject), submission_id: submission_id)
       )
     else
-      send_emails_with_attachments(action, email_attachments, submission_id: submission_id)
+      send_emails_with_attachments(
+        action,
+        attachment_generator.sorted_attachments,
+        submission_id: submission_id
+      )
     end
   end
 
   private
 
-  def generate_attachments(action:, attachments:, pdf_attachment:)
-    email_attachments = []
-
-    if action.fetch(:include_attachments, false)
-      email_attachments = email_attachments.concat attachments
-    end
-    if action.fetch(:include_pdf, false)
-      email_attachments.prepend(pdf_attachment)
-    end
-
-    email_attachments
-  end
-
   def send_emails_with_attachments(action, email_attachments, submission_id:)
-    email_attachments.each_with_index do |email_attachment, index|
+    email_attachments.each_with_index do |attachments, index|
       send_single_email(
         action: action,
-        attachments: [email_attachment],
+        attachments: attachments,
         subject: subject(
           subject: action.fetch(:subject),
           current_email: index + 1,
@@ -68,5 +62,5 @@ class EmailOutputService
     }
   end
 
-  attr_reader :emailer
+  attr_reader :emailer, :attachment_generator
 end
