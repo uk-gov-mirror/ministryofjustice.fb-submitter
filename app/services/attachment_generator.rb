@@ -1,5 +1,8 @@
 class AttachmentGenerator
-  MAX_ATTACHMENTS_SIZE = 10_000_000 # 10MB in bytes. AWS SES limitation
+  # AWS SES limit is 10MB for each email message including all attachments and images
+  # https://aws.amazon.com/ses/faqs/#Limits_and_Restrictions
+  # Leaving a 1MB headroom for email contents, which is pretty generous
+  MAX_EMAIL_SIZE = 9_000_000
 
   attr_reader :sorted_attachments
 
@@ -25,7 +28,7 @@ class AttachmentGenerator
   def attachments_per_email(email_attachments)
     per_email = []
     email_attachments.each do |attachment|
-      if sum(per_email, attachment) >= MAX_ATTACHMENTS_SIZE
+      if sum(per_email, attachment) >= MAX_EMAIL_SIZE
         sorted_attachments << per_email
         if attachment == email_attachments.last
           sorted_attachments << [attachment]
