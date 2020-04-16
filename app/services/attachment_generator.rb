@@ -44,6 +44,6 @@ class AttachmentGenerator
   end
 
   def sum(per_email, to_add)
-    per_email.inject(0) { |sum, attachment| sum + attachment.size } + to_add.size
+    per_email.map(&:size).sum + to_add.size
   end
 end
