@@ -11,6 +11,12 @@ class RawMessage
   end
 
   def to_s
+    inline_attachments = @attachments.map do |attachment|
+      inline_attachment(attachment)
+    end
+
+    Rails.logger.info("Attachments size: #{inline_attachments.join.bytesize}")
+
     <<~RAW_MESSAGE
       From: #{@from}
       To: #{@to}
@@ -28,7 +34,7 @@ class RawMessage
       #{[@body_parts[:'text/plain']].pack('M')}
 
       --NextPart
-      #{@attachments.map { |attachment| inline_attachment(attachment) }.join("\n\n--NextPart\n")}
+      #{inline_attachments.join("\n\n--NextPart\n")}
 
     RAW_MESSAGE
   end
