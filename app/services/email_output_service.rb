@@ -1,7 +1,8 @@
 class EmailOutputService
-  def initialize(emailer:, attachment_generator:)
+  def initialize(emailer:, attachment_generator:, encryption_service:)
     @emailer = emailer
     @attachment_generator = attachment_generator
+    @encryption_service = encryption_service
   end
 
   def execute(submission_id:, action:, attachments:, pdf_attachment:)
@@ -14,7 +15,8 @@ class EmailOutputService
     if attachment_generator.sorted_attachments.empty?
       send_single_email(
         action: action,
-        subject: subject(subject: action.fetch(:subject), submission_id: submission_id)
+        subject: subject(subject: action.fetch(:subject), submission_id: submission_id),
+        submission_id: submission_id
       )
     else
       send_emails_with_attachments(
@@ -37,19 +39,26 @@ class EmailOutputService
           current_email: index + 1,
           number_of_emails: email_attachments.size,
           submission_id: submission_id
-        )
+        ),
+        submission_id: submission_id
       )
     end
   end
 
-  def send_single_email(subject:, action:, attachments: [])
-    emailer.send_mail(
-      from: action.fetch(:from),
-      to: action.fetch(:to),
-      subject: subject,
-      body_parts: email_body_parts(action.fetch(:email_body)),
-      attachments: attachments
-    )
+  def send_single_email(subject:, action:, attachments: [], submission_id:)
+    email_payload = find_or_create_email_payload(submission_id, attachments)
+
+    if email_payload.succeeded_at.nil? # rubocop:disable Style/GuardClause
+      emailer.send_mail(
+        from: action.fetch(:from),
+        to: action.fetch(:to),
+        subject: subject,
+        body_parts: email_body_parts(action.fetch(:email_body)),
+        attachments: attachments
+      )
+
+      email_payload.update(succeeded_at: Time.now)
+    end
   end
 
   def subject(submission_id:, subject:, current_email: 1, number_of_emails: 1)
@@ -62,5 +71,14 @@ class EmailOutputService
     }
   end
 
-  attr_reader :emailer, :attachment_generator
+  def find_or_create_email_payload(submission_id, attachments)
+    filenames = attachments.map(&:filename).sort
+    email_payload = EmailPayload.where(submission_id: submission_id)
+                                .find { |payload| payload.decrypted_attachments == filenames }
+
+    email_payload || EmailPayload.create(submission_id: submission_id,
+                                         attachments: encryption_service.encrypt(filenames))
+  end
+
+  attr_reader :emailer, :attachment_generator, :encryption_service
 end

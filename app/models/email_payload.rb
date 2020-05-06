@@ -1,3 +1,5 @@
 class EmailPayload < ActiveRecord::Base
-  serialize :attachments, Array
+  def decrypted_attachments
+    EncryptionService.new.decrypt(attachments)
+  end
 end
