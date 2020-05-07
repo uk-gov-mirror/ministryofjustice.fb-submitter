@@ -8,7 +8,7 @@ RSpec.describe DbSweeper do
         create(:submission, created_at: 5.days.ago)
       end
 
-      it 'destroys the older records' do
+      it 'destroys the older submission records' do
         expect do
           subject.call
         end.to change(Submission, :count).by(-1)
@@ -20,10 +20,36 @@ RSpec.describe DbSweeper do
         create(:submission, created_at: 5.days.ago)
       end
 
-      it 'leaves records intact' do
+      it 'leaves submission records intact' do
         expect do
           subject.call
         end.not_to change(Submission, :count)
+      end
+    end
+
+    context 'when there are email payloads over 7 days old' do
+      before do
+        create(:email_payload, created_at: 10.days.ago)
+        create(:email_payload, created_at: 10.days.ago, succeeded_at: 10.days.ago)
+        create(:email_payload, created_at: 5.days.ago, succeeded_at: 5.days.ago)
+      end
+
+      it 'destroys the older records unless email sending failed' do
+        expect do
+          subject.call
+        end.to change(EmailPayload, :count).by(-1)
+      end
+    end
+
+    context 'when there are no email payloads over 7 days old' do
+      before do
+        create(:email_payload, created_at: 5.days.ago)
+      end
+
+      it 'leaves email payload records intact' do
+        expect do
+          subject.call
+        end.not_to change(EmailPayload, :count)
       end
     end
   end
