@@ -5,6 +5,15 @@ require_relative '../../app/services/attachment_generator'
 require_relative '../../app/value_objects/attachment'
 
 describe EmailOutputService do
+  def match_payload(email_payloads, to, expected_filenames)
+    expect(
+      email_payloads.any? do |payload|
+        payload.decrypted_attachments == expected_filenames.sort &&
+        payload.decrypted_to == to
+      end
+    ).to be true
+  end
+
   subject(:service) do
     described_class.new(
       emailer: email_service_mock,
@@ -196,6 +205,138 @@ describe EmailOutputService do
       end
     end
     # rubocop:enable RSpec/MultipleExpectations
+  end
+
+  context 'when there are multiple service output emails' do
+    let(:first_service) do
+      described_class.new(
+        emailer: email_service_mock,
+        attachment_generator: AttachmentGenerator.new,
+        encryption_service: encryption_service
+      )
+    end
+    let(:second_service) do
+      described_class.new(
+        emailer: email_service_mock,
+        attachment_generator: AttachmentGenerator.new,
+        encryption_service: encryption_service
+      )
+    end
+    let(:first_email_attachments) { [pdf_attachment, upload1, upload2] }
+    let(:second_email_attachments) { [upload3] }
+    let(:include_attachments) { true }
+    let(:include_pdf) { true }
+    let(:second_email_action) { email_action.merge(to: 'robert.admin@digital.justice.gov.uk') }
+    let(:second_execution_payload) { execution_payload.merge(action: second_email_action) }
+
+    context 'when email are sent successfully' do
+      before do
+        allow(email_service_mock).to receive(:send_mail)
+        first_service.execute(execution_payload)
+        second_service.execute(second_execution_payload)
+      end
+
+      # rubocop:disable RSpec/MultipleExpectations
+      it 'will send emails to the necessary recipients' do
+        expect(email_service_mock).to have_received(:send_mail).exactly(4).times
+        expect(email_service_mock).to have_received(:send_mail).with(hash_including(to: 'bob.admin@digital.justice.gov.uk')).twice
+        expect(email_service_mock).to have_received(:send_mail).with(hash_including(to: 'robert.admin@digital.justice.gov.uk')).twice
+        expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]')).twice
+        expect(email_service_mock).to have_received(:send_mail).with(hash_including(subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]')).twice
+      end
+
+      it 'will creates email payloads to the necessary recipients with the correct attachments' do
+        email_payloads = EmailPayload.all
+        expect(email_payloads.count).to eq(4)
+        ['bob.admin@digital.justice.gov.uk', 'robert.admin@digital.justice.gov.uk'].each do |to|
+          match_payload(email_payloads, to, first_email_attachments.map(&:filename).sort)
+          match_payload(email_payloads, to, second_email_attachments.map(&:filename).sort)
+        end
+      end
+      # rubocop:enable RSpec/MultipleExpectations
+    end
+
+    context 'when some emails fail to be sent' do
+      let(:third_service) do
+        described_class.new(
+          emailer: email_service_mock,
+          attachment_generator: AttachmentGenerator.new,
+          encryption_service: encryption_service
+        )
+      end
+      let(:fourth_service) do
+        described_class.new(
+          emailer: email_service_mock,
+          attachment_generator: AttachmentGenerator.new,
+          encryption_service: encryption_service
+        )
+      end
+      let(:first_payload) do
+        send_email_payload.merge(
+          subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]',
+          attachments: first_email_attachments
+        )
+      end
+      let(:second_payload) do
+        send_email_payload.merge(
+          subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]',
+          attachments: second_email_attachments
+        )
+      end
+      let(:third_payload) do
+        send_email_payload.merge(
+          to: 'robert.admin@digital.justice.gov.uk',
+          subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]',
+          attachments: first_email_attachments
+        )
+      end
+      let(:fourth_payload) do
+        send_email_payload.merge(
+          to: 'robert.admin@digital.justice.gov.uk',
+          subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]',
+          attachments: second_email_attachments
+        )
+      end
+
+      # rubocop:disable RSpec/MultipleExpectations
+      it 'only retries emails to recipients that did not previously succeed' do
+        allow(email_service_mock).to receive(:send_mail).with(first_payload)
+        allow(email_service_mock).to receive(:send_mail).with(second_payload)
+        allow(email_service_mock).to receive(:send_mail).with(third_payload)
+        allow(email_service_mock).to receive(:send_mail).with(fourth_payload).and_raise(Aws::SES::Errors::MessageRejected.new({}, 'it was a pleasure to burn'))
+
+        first_service.execute(execution_payload)
+        expect { second_service.execute(second_execution_payload) }.to raise_error(Aws::SES::Errors::MessageRejected)
+
+        email_payloads = EmailPayload.all
+        expect(email_payloads.count).to eq(4)
+
+        email_payloads.each do |payload|
+          if payload.decrypted_to == 'robert.admin@digital.justice.gov.uk' && payload.decrypted_attachments == second_email_attachments.map(&:filename).sort
+            expect(payload.succeeded_at).to be_nil
+          end
+        end
+
+        # rubocop:disable  RSpec/MessageSpies
+        allow(email_service_mock).to receive(:send_mail)
+        expect(email_service_mock).not_to receive(:send_mail).with(first_payload)
+        expect(email_service_mock).not_to receive(:send_mail).with(second_payload)
+        expect(email_service_mock).not_to receive(:send_mail).with(third_payload)
+        # rubocop:enable  RSpec/MessageSpies
+
+        third_service.execute(execution_payload)
+        fourth_service.execute(second_execution_payload)
+
+        email_payloads = EmailPayload.all
+        expect(email_payloads.count).to eq(4)
+        email_payloads.each do |payload|
+          if payload.decrypted_to == 'robert.admin@digital.justice.gov.uk' && payload.decrypted_attachments == second_email_attachments.map(&:filename).sort
+            expect(payload.succeeded_at).not_to be_nil
+          end
+        end
+      end
+      # rubocop:enable RSpec/MultipleExpectations
+    end
   end
   # rubocop:enable RSpec/ExampleLength
 end
