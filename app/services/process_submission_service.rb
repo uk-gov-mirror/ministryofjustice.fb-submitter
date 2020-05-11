@@ -29,7 +29,8 @@ class ProcessSubmissionService
 
         EmailOutputService.new(
           emailer: EmailService,
-          attachment_generator: AttachmentGenerator.new
+          attachment_generator: AttachmentGenerator.new,
+          encryption_service: EncryptionService.new
         ).execute(submission_id: payload_service.submission_id,
                   action: action,
                   attachments: attachments,
@@ -39,7 +40,8 @@ class ProcessSubmissionService
 
         EmailOutputService.new(
           emailer: EmailService,
-          attachment_generator: AttachmentGenerator.new
+          attachment_generator: AttachmentGenerator.new,
+          encryption_service: EncryptionService.new
         ).execute(submission_id: payload_service.submission_id,
                   action: action,
                   attachments: [csv_attachment],
