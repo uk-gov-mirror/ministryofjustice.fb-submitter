@@ -46,12 +46,13 @@ class EmailOutputService
   end
 
   def send_single_email(subject:, action:, attachments: [], submission_id:)
-    email_payload = find_or_create_email_payload(submission_id, attachments)
+    to = action.fetch(:to)
+    email_payload = find_or_create_email_payload(submission_id, to, attachments)
 
     if email_payload.succeeded_at.nil? # rubocop:disable Style/GuardClause
       emailer.send_mail(
         from: action.fetch(:from),
-        to: action.fetch(:to),
+        to: to,
         subject: subject,
         body_parts: email_body_parts(action.fetch(:email_body)),
         attachments: attachments
@@ -71,12 +72,16 @@ class EmailOutputService
     }
   end
 
-  def find_or_create_email_payload(submission_id, attachments)
+  def find_or_create_email_payload(submission_id, to, attachments)
     filenames = attachments.map(&:filename).sort
     email_payload = EmailPayload.where(submission_id: submission_id)
-                                .find { |payload| payload.decrypted_attachments == filenames }
+                                .find do |payload|
+                                  payload.decrypted_to == to &&
+                                    payload.decrypted_attachments == filenames
+                                end
 
     email_payload || EmailPayload.create(submission_id: submission_id,
+                                         to: encryption_service.encrypt(to),
                                          attachments: encryption_service.encrypt(filenames))
   end
 
