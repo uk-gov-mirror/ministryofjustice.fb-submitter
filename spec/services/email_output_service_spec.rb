@@ -24,7 +24,7 @@ describe EmailOutputService do
     )
   end
 
-  let(:submission_id) { SecureRandom.uuid }
+  let(:submission_id) { create(:submission).id }
   let(:payload_submission_id) { 'an-id-2323' }
 
   let(:email_service_mock) { class_double(EmailService) }
