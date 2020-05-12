@@ -19,7 +19,11 @@ class ProcessSubmissionService
             url: action.fetch(:url),
             key: action.fetch(:encryption_key)
           )
-        ).execute(user_answers: payload_service.user_answers_map, service_slug: submission.service_slug, submission_id: payload_service.submission_id)
+        ).execute(
+          user_answers: payload_service.user_answers_map,
+          service_slug: submission.service_slug,
+          payload_submission_id: payload_service.submission_id
+        )
       when 'email'
         pdf = generate_pdf(payload_service.payload, payload_service.submission_id)
 
@@ -27,25 +31,10 @@ class ProcessSubmissionService
                                            submission.encrypted_user_id_and_token,
                                            submission.access_token)
 
-        EmailOutputService.new(
-          emailer: EmailService,
-          attachment_generator: AttachmentGenerator.new,
-          encryption_service: EncryptionService.new
-        ).execute(submission_id: payload_service.submission_id,
-                  action: action,
-                  attachments: attachments,
-                  pdf_attachment: pdf)
+        send_email(action: action, attachments: attachments, pdf_attachment: pdf)
       when 'csv'
         csv_attachment = generate_csv(payload_service)
-
-        EmailOutputService.new(
-          emailer: EmailService,
-          attachment_generator: AttachmentGenerator.new,
-          encryption_service: EncryptionService.new
-        ).execute(submission_id: payload_service.submission_id,
-                  action: action,
-                  attachments: [csv_attachment],
-                  pdf_attachment: nil)
+        send_email(action: action, attachments: [csv_attachment])
       else
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
       end
@@ -69,7 +58,7 @@ class ProcessSubmissionService
     ).download_in_parallel
   end
 
-  def generate_pdf(pdf_detail, _submission_id)
+  def generate_pdf(pdf_detail, _payload_submission_id)
     GeneratePdfContent.new(
       pdf_api_gateway: pdf_gateway,
       payload: pdf_detail
@@ -93,5 +82,19 @@ class ProcessSubmissionService
 
   def payload_service
     @payload_service ||= SubmissionPayloadService.new(submission.decrypted_payload)
+  end
+
+  def send_email(action:, attachments:, pdf_attachment: nil)
+    EmailOutputService.new(
+      emailer: EmailService,
+      attachment_generator: AttachmentGenerator.new,
+      encryption_service: EncryptionService.new,
+      submission_id: submission_id,
+      payload_submission_id: payload_service.submission_id
+    ).execute(
+      action: action,
+      attachments: attachments,
+      pdf_attachment: pdf_attachment
+    )
   end
 end

@@ -49,7 +49,7 @@ describe JsonWebhookService do
     allow(webhook_destination_adapter).to receive(:send_webhook)
     allow(webhook_attachment_fetcher).to receive(:execute).and_return(attachments)
     service.execute(
-      user_answers: user_answers, service_slug: submission.service_slug, submission_id: submission.decrypted_payload[:submission_id]
+      user_answers: user_answers, service_slug: submission.service_slug, payload_submission_id: submission.decrypted_payload[:submission_id]
     )
   end
 
