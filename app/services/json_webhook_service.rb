@@ -4,11 +4,11 @@ class JsonWebhookService
     @webhook_destination_adapter = webhook_destination_adapter
   end
 
-  def execute(user_answers:, service_slug:, submission_id:)
+  def execute(user_answers:, service_slug:, payload_submission_id:)
     webhook_destination_adapter.send_webhook(
       body: {
         "serviceSlug": service_slug,
-        "submissionId": submission_id,
+        "submissionId": payload_submission_id,
         "submissionAnswers": user_answers,
         "attachments": webhook_attachment_fetcher.execute
       }.to_json
