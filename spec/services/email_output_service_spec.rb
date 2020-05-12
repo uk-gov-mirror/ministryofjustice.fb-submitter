@@ -112,8 +112,8 @@ describe EmailOutputService do
 
         expect(email_payloads.count).to eq(2)
         email_payloads.each { |payload| expect(payload.succeeded_at).not_to be_nil }
-        expect(email_payloads.first.decrypted_attachments).to eq(first_email_attachments.map(&:filename).sort)
-        expect(email_payloads.last.decrypted_attachments).to eq(second_email_attachments.map(&:filename).sort)
+        match_payload(email_payloads, 'bob.admin@digital.justice.gov.uk', first_email_attachments.map(&:filename).sort)
+        match_payload(email_payloads, 'bob.admin@digital.justice.gov.uk', second_email_attachments.map(&:filename).sort)
       end
     end
 
