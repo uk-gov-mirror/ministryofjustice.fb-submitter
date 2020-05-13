@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe EmailPayload do
   describe 'decrypted_payload' do
+    let(:submission) { create(:submission) }
     let(:attachments) { %w[call me ishmael] }
     let(:to) { 'ahab@pequod.boat' }
     let(:encrypted_to) { EncryptionService.new.encrypt(to) }
@@ -9,6 +10,7 @@ RSpec.describe EmailPayload do
 
     let(:email_payload) do
       described_class.create!(
+        submission_id: submission.id,
         to: encrypted_to,
         attachments: encrypted_attachments
       )
