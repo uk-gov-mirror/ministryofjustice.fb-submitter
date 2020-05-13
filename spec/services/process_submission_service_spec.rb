@@ -37,7 +37,6 @@ describe ProcessSubmissionService do
     # rubocop:disable RSpec/MultipleExpectations
     it 'sends email with csv attachment' do
       expect(submission_service_spy).to have_received(:execute) do |args|
-        expect(args[:submission_id]).to be_present
         expect(args[:action]).to eql(actions[0])
         expect(args[:attachments].length).to eq(1)
 
@@ -108,12 +107,6 @@ describe ProcessSubmissionService do
           expect(args[:attachments].length).to eq(attachments.length)
           attachment = args[:attachments].first
           expect(attachment.filename).to eq(attachments.first['filename'])
-        end
-      end
-
-      it 'passes the correct submission_id to the EmailOutputService' do
-        expect(submission_service_spy).to have_received(:execute) do |args|
-          expect(args[:submission_id]).to eq(submission.decrypted_payload[:submission]['submission_id'])
         end
       end
 
@@ -197,7 +190,7 @@ describe ProcessSubmissionService do
 
     it 'passes the correct submission_id as an argument' do
       expect(json_webhook_service_spy).to have_received(:execute) do |args|
-        expect(args[:submission_id]).to eq(submission.decrypted_payload[:submission]['submission_id'])
+        expect(args[:payload_submission_id]).to eq(submission.decrypted_payload[:submission]['submission_id'])
       end
     end
 

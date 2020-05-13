@@ -1,11 +1,14 @@
 class EmailOutputService
-  def initialize(emailer:, attachment_generator:, encryption_service:)
+  def initialize(emailer:, attachment_generator:, encryption_service:, submission_id:,
+                 payload_submission_id:)
     @emailer = emailer
     @attachment_generator = attachment_generator
     @encryption_service = encryption_service
+    @submission_id = submission_id
+    @payload_submission_id = payload_submission_id
   end
 
-  def execute(submission_id:, action:, attachments:, pdf_attachment:)
+  def execute(action:, attachments:, pdf_attachment:)
     attachment_generator.execute(
       action: action,
       attachments: attachments,
@@ -15,21 +18,19 @@ class EmailOutputService
     if attachment_generator.sorted_attachments.empty?
       send_single_email(
         action: action,
-        subject: subject(subject: action.fetch(:subject), submission_id: submission_id),
-        submission_id: submission_id
+        subject: subject(subject: action.fetch(:subject))
       )
     else
       send_emails_with_attachments(
         action,
-        attachment_generator.sorted_attachments,
-        submission_id: submission_id
+        attachment_generator.sorted_attachments
       )
     end
   end
 
   private
 
-  def send_emails_with_attachments(action, email_attachments, submission_id:)
+  def send_emails_with_attachments(action, email_attachments)
     email_attachments.each_with_index do |attachments, index|
       send_single_email(
         action: action,
@@ -37,17 +38,15 @@ class EmailOutputService
         subject: subject(
           subject: action.fetch(:subject),
           current_email: index + 1,
-          number_of_emails: email_attachments.size,
-          submission_id: submission_id
-        ),
-        submission_id: submission_id
+          number_of_emails: email_attachments.size
+        )
       )
     end
   end
 
-  def send_single_email(subject:, action:, attachments: [], submission_id:)
+  def send_single_email(subject:, action:, attachments: [])
     to = action.fetch(:to)
-    email_payload = find_or_create_email_payload(submission_id, to, attachments)
+    email_payload = find_or_create_email_payload(to, attachments)
 
     if email_payload.succeeded_at.nil? # rubocop:disable Style/GuardClause
       emailer.send_mail(
@@ -62,8 +61,8 @@ class EmailOutputService
     end
   end
 
-  def subject(submission_id:, subject:, current_email: 1, number_of_emails: 1)
-    "#{subject} {#{submission_id}} [#{current_email}/#{number_of_emails}]"
+  def subject(subject:, current_email: 1, number_of_emails: 1)
+    "#{subject} {#{payload_submission_id}} [#{current_email}/#{number_of_emails}]"
   end
 
   def email_body_parts(email_body)
@@ -72,7 +71,7 @@ class EmailOutputService
     }
   end
 
-  def find_or_create_email_payload(submission_id, to, attachments)
+  def find_or_create_email_payload(to, attachments)
     filenames = attachments.map(&:filename).sort
     email_payload = EmailPayload.where(submission_id: submission_id)
                                 .find do |payload|
@@ -85,5 +84,6 @@ class EmailOutputService
                                          attachments: encryption_service.encrypt(filenames))
   end
 
-  attr_reader :emailer, :attachment_generator, :encryption_service
+  attr_reader :emailer, :attachment_generator, :encryption_service, :submission_id,
+              :payload_submission_id
 end
