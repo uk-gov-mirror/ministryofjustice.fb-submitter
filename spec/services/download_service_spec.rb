@@ -26,7 +26,8 @@ describe DownloadService do
       described_class.new(attachments: attachments,
                           target_dir: target_dir,
                           token: token,
-                          access_token: access_token)
+                          access_token: access_token,
+                          jwt_skew_override: nil)
     end
 
     let(:path) { '/the/file/path' }
@@ -59,7 +60,8 @@ describe DownloadService do
         described_class.new(attachments: attachments,
                             target_dir: target_dir,
                             token: token,
-                            access_token: access_token)
+                            access_token: access_token,
+                            jwt_skew_override: nil)
       end
 
       let(:target_dir) { '/my/tmp/dir' }
@@ -75,7 +77,8 @@ describe DownloadService do
         described_class.new(attachments: attachments,
                             target_dir: path,
                             token: token,
-                            access_token: access_token)
+                            access_token: access_token,
+                            jwt_skew_override: nil)
       end
 
       let(:url1) { 'https://example.com/service/some-service/user/some-user/fingerprint' }
@@ -181,6 +184,23 @@ describe DownloadService do
           ]
         )
       end
+
+      context 'when a jwt skew override is supplied' do
+        subject(:downloader) do
+          described_class.new(attachments: attachments,
+                              target_dir: target_dir,
+                              token: token,
+                              access_token: access_token,
+                              jwt_skew_override: '600')
+        end
+
+        it 'sends the jwt skew override with the other headers' do
+          expected_headers = headers.merge('x-jwt-skew-override' => '600')
+          expect(downloader).to receive(:construct_request).with(url: url1, file_path: '/the/file/path/file.ext', headers: expected_headers)
+
+          downloader.download_in_parallel
+        end
+      end
     end
   end
 
@@ -189,7 +209,8 @@ describe DownloadService do
       described_class.new(attachments: attachments,
                           target_dir: target_dir,
                           token: token,
-                          access_token: access_token)
+                          access_token: access_token,
+                          jwt_skew_override: nil)
     end
 
     let(:mock_request) { instance_double(Typhoeus::Request, url: 'some_url') }
