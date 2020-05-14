@@ -1,8 +1,9 @@
 class ProcessSubmissionService
   attr_reader :submission_id
 
-  def initialize(submission_id:)
+  def initialize(submission_id:, jwt_skew_override: nil)
     @submission_id = submission_id
+    @jwt_skew_override = jwt_skew_override
   end
 
   # rubocop:disable Metrics/MethodLength
@@ -49,12 +50,15 @@ class ProcessSubmissionService
 
   private
 
+  attr_reader :jwt_skew_override
+
   def download_attachments(attachments_payload, token, access_token)
     DownloadService.new(
       attachments: attachments_payload,
       target_dir: nil,
       token: token,
-      access_token: access_token
+      access_token: access_token,
+      jwt_skew_override: jwt_skew_override
     ).download_in_parallel
   end
 

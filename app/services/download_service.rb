@@ -1,11 +1,12 @@
 class DownloadService
   attr_reader :attachments, :target_dir, :token, :access_token
 
-  def initialize(attachments:, target_dir: nil, token:, access_token:)
+  def initialize(attachments:, target_dir: nil, token:, access_token:, jwt_skew_override:)
     @attachments = attachments
     @target_dir = target_dir
     @token = token
     @access_token = access_token
+    @jwt_skew_override = jwt_skew_override
   end
 
   def download_in_parallel
@@ -30,11 +31,14 @@ class DownloadService
 
   private
 
+  attr_reader :jwt_skew_override
+
   def headers
     {
       'x-encrypted-user-id-and-token' => token,
-      'x-access-token-v2' => access_token
-    }
+      'x-access-token-v2' => access_token,
+      'x-jwt-skew-override' => jwt_skew_override
+    }.compact
   end
 
   def construct_request(url:, file_path:, headers: {})
