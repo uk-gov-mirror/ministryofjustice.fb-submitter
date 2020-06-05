@@ -142,7 +142,7 @@ GEM
     marcel (0.3.3)
       mimemagic (~> 0.3.2)
     method_source (0.9.2)
-    metrics_adapter (0.1.0)
+    metrics_adapter (0.2.0)
       activesupport
       keen
       mixpanel-ruby
@@ -303,7 +303,7 @@ DEPENDENCIES
   jwe (~> 0.4.0)
   jwt
   listen
-  metrics_adapter
+  metrics_adapter (= 0.2.0)
   mime-types
   mixpanel-ruby
   notifications-ruby-client
