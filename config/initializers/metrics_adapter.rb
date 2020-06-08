@@ -12,6 +12,6 @@ MetricsAdapter.configure do |config|
 
   ## Only send metrics if is production
   ##
-  block = -> { ENV['HOSTNAME'].to_s.include?('live-production') }
+  block = -> { ENV['HOSTNAME'].to_s.include?('test-dev') }
   config.conditionals = { slow_request: block }
 end

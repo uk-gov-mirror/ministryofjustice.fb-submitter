@@ -100,7 +100,9 @@ workflows:
             - test
           filters:
             branches:
-              only: master
+              only:
+                - master
+                - test-delay-between-page
       - confirm_live_deploy:
           type: approval
           requires:
