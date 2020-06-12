@@ -90,12 +90,14 @@ workflows:
   version: 2
   test_and_build:
     jobs:
-      - trigger_acceptance_tests:
+      - test
+      - build_and_deploy_to_test:
+          requires:
+            - test
           filters:
             branches:
               only: master
-      - test
-      - build_and_deploy_to_test:
+      - trigger_acceptance_tests:
           requires:
             - test
           filters:
