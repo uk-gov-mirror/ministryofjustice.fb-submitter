@@ -99,8 +99,8 @@ workflows:
     jobs:
       - verify
       - test:
-        requires:
-          verify
+          requires:
+            - verify
       - build_and_deploy_to_test:
           requires:
             - test
