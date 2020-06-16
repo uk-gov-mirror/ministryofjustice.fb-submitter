@@ -9,7 +9,7 @@ jobs:
       - setup_remote_docker
       - run:
           name: fb-deploy-utils-clone
-          command: git clone -b deployment/move-test-scripts-to-repo git@github.com:ministryofjustice/fb-deploy-utils.git ~/circle/git/fb-deploy
+          command: git clone git@github.com:ministryofjustice/fb-deploy-utils.git ~/circle/git/fb-deploy
       - run:
           name: lint
           command: ~/circle/git/fb-deploy/bin/lint
