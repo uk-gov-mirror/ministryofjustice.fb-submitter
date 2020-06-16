@@ -1,18 +1,5 @@
 version: 2
 jobs:
-  verify:
-    working_directory: ~/circle
-    docker:
-      - image: circleci/ruby:2.6.4
-    steps:
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: lint
-          command: docker-compose run --rm app bundle exec rubocop
-      - run:
-          name: security
-          command: docker-compose run --rm app bundle exec brakeman -q --no-pager
   test:
     working_directory: ~/circle
     docker:
@@ -21,8 +8,17 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
+          name: fb-deploy-utils-clone
+          command: git clone -b deployment/move-test-scripts-to-repo git@github.com:ministryofjustice/fb-deploy-utils.git ~/circle/git/fb-deploy
+      - run:
+          name: lint
+          command: ~/circle/git/fb-deploy/bin/lint
+      - run:
+          name: security
+          command: ~/circle/git/fb-deploy/bin/security-scan
+      - run:
           name: test
-          command: docker-compose run --rm app bundle exec rspec
+          command: ~/circle/git/fb-deploy/bin/tests
   build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
     docker: &ecr_image
@@ -100,10 +96,7 @@ workflows:
   version: 2
   test_and_build:
     jobs:
-      - verify
-      - test:
-          requires:
-            - verify
+      - test
       - build_and_deploy_to_test:
           requires:
             - test
