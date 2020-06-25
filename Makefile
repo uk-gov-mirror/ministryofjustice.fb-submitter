@@ -9,10 +9,6 @@ dev:
 test:
 	echo "TODO: Remove test function call from deploy-utils"
 
-.PHONY: pentest
-pentest:
-	echo "TODO: Do something about the TODOs"
-
 .PHONY: live
 live:
 	echo "TODO: Remove live function call from deploy-utils"
