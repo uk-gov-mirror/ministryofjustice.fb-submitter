@@ -84,7 +84,7 @@ describe EmailOutputService do
   context 'when email sending succeeds' do
     before do
       allow(email_service_mock).to receive(:send_mail)
-      subject.execute(execution_payload)
+      subject.execute(**execution_payload)
     end
 
     it 'execute sends an email' do
@@ -167,7 +167,7 @@ describe EmailOutputService do
       allow(email_service_mock).to receive(:send_mail).with(first_payload)
       allow(email_service_mock).to receive(:send_mail).with(second_payload).and_raise(Aws::SES::Errors::MessageRejected.new({}, 'it was the day my grandmother exploded'))
 
-      expect { subject.execute(execution_payload) }.to raise_error(Aws::SES::Errors::MessageRejected)
+      expect { subject.execute(**execution_payload) }.to raise_error(Aws::SES::Errors::MessageRejected)
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -180,7 +180,7 @@ describe EmailOutputService do
       allow(email_service_mock).to receive(:send_mail)
       expect(email_service_mock).not_to receive(:send_mail).with(first_payload) # rubocop:disable  RSpec/MessageSpies
 
-      subject.execute(execution_payload)
+      subject.execute(**execution_payload)
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -194,10 +194,10 @@ describe EmailOutputService do
     it 'does not care about the ordering of the attachments when retrying' do
       allow(email_service_mock).to receive(:send_mail).with(first_payload).and_raise(Aws::SES::Errors::MessageRejected.new({}, 'all children, except one, grow up'))
       allow(email_service_mock).to receive(:send_mail).with(second_payload)
-      expect { subject.execute(execution_payload) }.to raise_error(Aws::SES::Errors::MessageRejected)
+      expect { subject.execute(**execution_payload) }.to raise_error(Aws::SES::Errors::MessageRejected)
 
       allow(email_service_mock).to receive(:send_mail)
-      subject.execute(execution_payload.merge(attachments: [upload3, upload2, upload1]))
+      subject.execute(**execution_payload.merge(attachments: [upload3, upload2, upload1]))
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -238,8 +238,8 @@ describe EmailOutputService do
     context 'when email are sent successfully' do
       before do
         allow(email_service_mock).to receive(:send_mail)
-        first_service.execute(execution_payload)
-        second_service.execute(second_execution_payload)
+        first_service.execute(**execution_payload)
+        second_service.execute(**second_execution_payload)
       end
 
       it 'will send emails to the necessary recipients' do
@@ -312,8 +312,8 @@ describe EmailOutputService do
         allow(email_service_mock).to receive(:send_mail).with(third_payload)
         allow(email_service_mock).to receive(:send_mail).with(fourth_payload).and_raise(Aws::SES::Errors::MessageRejected.new({}, 'it was a pleasure to burn'))
 
-        first_service.execute(execution_payload)
-        expect { second_service.execute(second_execution_payload) }.to raise_error(Aws::SES::Errors::MessageRejected)
+        first_service.execute(**execution_payload)
+        expect { second_service.execute(**second_execution_payload) }.to raise_error(Aws::SES::Errors::MessageRejected)
 
         email_payloads = EmailPayload.all
         expect(email_payloads.count).to eq(4)
@@ -331,8 +331,8 @@ describe EmailOutputService do
         expect(email_service_mock).not_to receive(:send_mail).with(third_payload)
         # rubocop:enable  RSpec/MessageSpies
 
-        third_service.execute(execution_payload)
-        fourth_service.execute(second_execution_payload)
+        third_service.execute(**execution_payload)
+        fourth_service.execute(**second_execution_payload)
 
         email_payloads = EmailPayload.all
         expect(email_payloads.count).to eq(4)
