@@ -102,7 +102,7 @@ RSpec.describe SubmissionPayloadService do
 
   describe '#submission_at' do
     it 'returns timestamp' do
-      expect(subject.submission_at.to_i).to eql(DateTime.new(2019, 12, 18, 9, 25, 59.238).to_i)
+      expect(subject.submission_at.to_i).to eql(DateTime.new(2019, 12, 18, 9, 25, 59.238).to_i) # rubocop:disable Style/DateTime
     end
   end
 end

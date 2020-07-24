@@ -40,7 +40,7 @@ module Concerns
 
         # NOTE: verify_iat used to be in the JWT gem, but was removed in v2.2
         # so we have to do it manually
-        iat_skew = payload['iat'].to_i - Time.current.to_i
+        iat_skew = payload['iat'].to_i - Time.zone.now.to_i
 
         if iat_skew.abs > leeway.to_i
           Rails.logger.debug("iat skew is #{iat_skew}, max is #{leeway} - INVALID")

@@ -124,7 +124,7 @@ describe DownloadService do
         end
 
         it 'includes x-access-token header with JWT' do
-          time = Time.new(2019, 1, 1, 13, 57).utc
+          time = Time.zone.local(2019, 1, 1, 13, 57).utc
 
           Timecop.freeze(time) do
             allow(downloader).to receive(:construct_request).and_call_original
