@@ -12,7 +12,7 @@ namespace :replay_submission do
       if job.nil?
         puts "No job for submission ID #{args[:submission_id]}"
       else
-        job.update(run_at: 10.seconds.from_now)
+        job.update!(run_at: 10.seconds.from_now)
         puts "Replayed job for job ID #{job.id} - submission ID #{args[:submission_id]}"
       end
     end
@@ -41,7 +41,7 @@ namespace :replay_submission do
         )
         puts "Queued new job for submission ID #{args[:submission_id]}"
 
-        old_job.destroy
+        old_job.destroy!
         puts "Destroyed previous delayed job #{old_job.id}"
       end
     end

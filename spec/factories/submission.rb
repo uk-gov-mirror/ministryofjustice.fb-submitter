@@ -213,7 +213,7 @@ FactoryBot.define do
       end
     end
 
-    created_at { Time.current }
-    updated_at { Time.current }
+    created_at { Time.zone.now }
+    updated_at { Time.zone.now }
   end
 end

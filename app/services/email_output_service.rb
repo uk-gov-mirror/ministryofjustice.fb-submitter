@@ -57,7 +57,7 @@ class EmailOutputService
         attachments: attachments
       )
 
-      email_payload.update(succeeded_at: Time.now)
+      email_payload.update!(succeeded_at: Time.now)
     end
   end
 
@@ -79,9 +79,9 @@ class EmailOutputService
                                     payload.decrypted_attachments == filenames
                                 end
 
-    email_payload || EmailPayload.create(submission_id: submission_id,
-                                         to: encryption_service.encrypt(to),
-                                         attachments: encryption_service.encrypt(filenames))
+    email_payload || EmailPayload.create!(submission_id: submission_id,
+                                          to: encryption_service.encrypt(to),
+                                          attachments: encryption_service.encrypt(filenames))
   end
 
   attr_reader :emailer, :attachment_generator, :encryption_service, :submission_id,

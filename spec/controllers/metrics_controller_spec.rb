@@ -8,7 +8,7 @@ RSpec.describe MetricsController do
 
     context 'with a pending job' do
       before do
-        job.update(attempts: 0)
+        job.update!(attempts: 0)
         get :show, format: 'text'
       end
 
@@ -21,7 +21,7 @@ RSpec.describe MetricsController do
 
     context 'when a failed job' do
       before do
-        job.update(attempts: 1)
+        job.update!(attempts: 1)
         get :show, format: 'text'
       end
 

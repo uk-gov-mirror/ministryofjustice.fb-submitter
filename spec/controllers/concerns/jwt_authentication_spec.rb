@@ -58,7 +58,7 @@ RSpec.describe 'Concerns::JWTAuthentication' do
     let(:private_key) { OpenSSL::PKey::RSA.new(Base64.strict_decode64(encoded_private_key)) }
 
     context 'when valid' do
-      let(:iat) { Time.current.to_i }
+      let(:iat) { Time.zone.now.to_i }
       let(:token) do
         JWT.encode payload.merge(iat: iat), private_key, algorithm
       end
@@ -71,7 +71,7 @@ RSpec.describe 'Concerns::JWTAuthentication' do
 
     context 'when not valid' do
       context 'when the timestamp is older than MAX_IAT_SKEW_SECONDS' do
-        let(:iat) { Time.current.to_i - 1.year }
+        let(:iat) { Time.zone.now.to_i - 1.year }
         let(:token) do
           JWT.encode payload.merge(iat: iat), service_token, algorithm
         end
@@ -105,7 +105,7 @@ RSpec.describe 'Concerns::JWTAuthentication' do
         end
         let(:algorithm) { 'RS256' }
         let(:private_key) { OpenSSL::PKey::RSA.new(Base64.strict_decode64(encoded_private_key)) }
-        let(:iat) { Time.current.to_i + (ENV['MAX_IAT_SKEW_SECONDS'].to_i + 1) }
+        let(:iat) { Time.zone.now.to_i + (ENV['MAX_IAT_SKEW_SECONDS'].to_i + 1) }
         let(:token) do
           JWT.encode payload, private_key, algorithm
         end
