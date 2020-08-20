@@ -81,6 +81,11 @@ spec:
               secretKeyRef:
                 name: fb-submitter-app-secrets-{{ .Values.environmentName }}
                 key: metrics_access_key
+          - name: SUBMISSION_DECRYPTION_KEY
+            valueFrom:
+              secretKeyRef:
+                name: fb-submitter-app-secrets-{{ .Values.environmentName }}
+                key: submission_decryption_key
       volumes:
         - name: tmp-files
           emptyDir: {}

@@ -9,6 +9,7 @@ describe 'UserData API', type: :request do
     let(:pdf_file_content) { 'pdf binary goes here' }
     let(:url) { '/submission' }
     let(:post_request) { post url, params: params.to_json, headers: headers }
+    let(:submission_decryption_key) { '58992847-4155-4c' }
 
     before do
       Delayed::Worker.delay_jobs = false
@@ -21,6 +22,8 @@ describe 'UserData API', type: :request do
       # PDF Generator stubs
       stub_request(:get, 'http://fake_service_token_cache_root_url/service/my-service').to_return(status: 200, body: { token: '123' }.to_json)
       stub_request(:post, 'http://pdf-generator.com/v1/pdfs').to_return(status: 200, body: pdf_file_content)
+      allow(ENV).to receive(:[])
+      allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(submission_decryption_key)
     end
 
     after do
@@ -98,13 +101,25 @@ describe 'UserData API', type: :request do
             ]
           }
         end
+        let(:payload) do
+          {
+            meta: {
+              submission_id: submission_id,
+              submission_at: '2019-12-18T13:19:29.626Z'
+            },
+            actions: actions,
+            submission: submission,
+            attachments: attachments
+          }
+        end
+        let(:encrypted_submission) do
+          JWE.encrypt(JSON.generate(payload), submission_decryption_key, alg: 'dir')
+        end
         let(:params) do
           {
             service_slug: service_slug,
             encrypted_user_id_and_token: encrypted_user_id_and_token,
-            actions: actions,
-            submission: submission,
-            attachments: attachments
+            encrypted_submission: encrypted_submission
           }
         end
 

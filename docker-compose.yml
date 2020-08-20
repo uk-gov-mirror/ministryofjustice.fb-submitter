@@ -36,6 +36,7 @@ services:
       ENCRYPTION_KEY: 'i6USnzeRKljfLMPbRlB2E9oikURx4ou3'
       ENCRYPTION_SALT: 'lGlcn9HabIducdpwlSHcM06e9gFuIfS1Ogg5krtn1Fw='
       MAX_IAT_SKEW_SECONDS: 60
+      SUBMISSION_DECRYPTION_KEY: eRIF8glaggYMluja
     links:
       - db
 

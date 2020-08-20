@@ -5,6 +5,7 @@
 Rails.application.config.filter_parameters += [
   :actions,
   :submission,
+  :encrypted_submission,
   :attachments,
   :password,
   :encrypted_user_id_and_token,
