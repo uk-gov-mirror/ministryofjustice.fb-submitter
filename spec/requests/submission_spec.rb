@@ -9,7 +9,7 @@ describe 'UserData API', type: :request do
     let(:pdf_file_content) { 'pdf binary goes here' }
     let(:url) { '/submission' }
     let(:post_request) { post url, params: params.to_json, headers: headers }
-    let(:submission_decryption_key) { '58992847-4155-4c' }
+    let(:submission_decryption_key) { SecureRandom.uuid[0..31] }
 
     before do
       Delayed::Worker.delay_jobs = false
@@ -113,7 +113,9 @@ describe 'UserData API', type: :request do
           }
         end
         let(:encrypted_submission) do
-          JWE.encrypt(JSON.generate(payload), submission_decryption_key, alg: 'dir')
+          SubmissionEncryption.new(
+            key: submission_decryption_key
+          ).encrypt(payload)
         end
         let(:params) do
           {

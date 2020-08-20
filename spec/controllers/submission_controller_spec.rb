@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe SubmissionController, type: :controller do
-  let(:submission_decryption_key) { '58992847-4155-4c' }
+  let(:submission_decryption_key) { SecureRandom.uuid[0..31] }
   let(:submission) do
     {
       meta: {
@@ -14,11 +14,7 @@ RSpec.describe SubmissionController, type: :controller do
     }
   end
   let(:encrypted_submission) do
-    JWE.encrypt(
-      JSON.generate(submission),
-      submission_decryption_key,
-      alg: 'dir'
-    )
+    SubmissionEncryption.new(key: submission_decryption_key).encrypt(submission)
   end
   let(:payload) do
     {
@@ -37,8 +33,10 @@ RSpec.describe SubmissionController, type: :controller do
 
   context 'with encrypted payload' do
     before do
-      allow(controller).to receive(:submission_decryption_key)
-        .and_return(submission_decryption_key)
+      allow(ENV).to receive(:[])
+      allow(ENV).to receive(:[]).with(
+        'SUBMISSION_DECRYPTION_KEY'
+      ).and_return(submission_decryption_key)
       request.headers.merge!(headers)
       allow_any_instance_of(ApplicationController).to receive(:verify_token!)
       post :create, body: payload.to_json, format: :json
