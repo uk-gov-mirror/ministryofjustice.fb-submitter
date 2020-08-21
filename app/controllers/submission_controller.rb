@@ -30,16 +30,15 @@ class SubmissionController < ApplicationController
 
   def payload
     if params[:encrypted_submission]
-      decrypted_submission = JSON.parse(
-        JWE.decrypt(params[:encrypted_submission], submission_decryption_key)
+      decrypted_submission = SubmissionEncryption.new.decrypt(
+        params[:encrypted_submission]
       )
-      params.merge(decrypted_submission).slice(:meta, :actions, :submission, :attachments).permit!
+
+      params.merge(decrypted_submission).slice(
+        :meta, :actions, :submission, :attachments
+      ).permit!
     else
       params.slice(:meta, :actions, :submission, :attachments).permit!
     end
-  end
-
-  def submission_decryption_key
-    ENV['SUBMISSION_DECRYPTION_KEY']
   end
 end
