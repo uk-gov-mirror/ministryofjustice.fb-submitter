@@ -20,6 +20,7 @@ end
 describe 'Submits JSON given a JSON submission type', type: :request do
   let(:service_slug) { 'my-service' }
   let(:submission_id) { '1e937616-dd0b-4bc3-8c67-40e4ffd54f78' }
+  let(:submission_decryption_key) { SecureRandom.uuid[0..31] }
 
   let(:expected_submission_answers) do
     {
@@ -128,13 +129,25 @@ describe 'Submits JSON given a JSON submission type', type: :request do
   end
 
   let(:headers) { { 'Content-type' => 'application/json' } }
+  let(:payload) do
+    {
+      meta: {
+        submission_id: submission_id,
+        submission_at: '2019-12-18T13:19:29.626Z'
+      },
+      attachments: attachments,
+      actions: actions,
+      submission: submission
+    }
+  end
+  let(:encrypted_submission) do
+    SubmissionEncryption.new(key: submission_decryption_key).encrypt(payload)
+  end
   let(:params) do
     {
       service_slug: service_slug,
       encrypted_user_id_and_token: encrypted_user_id_and_token,
-      attachments: attachments,
-      actions: actions,
-      submission: submission
+      encrypted_submission: encrypted_submission
     }.to_json
   end
 
@@ -147,6 +160,8 @@ describe 'Submits JSON given a JSON submission type', type: :request do
     stub_request(:post, 'https://some-url/1/presigned-s3-url').to_return(status: 200, body: expected_attachments[0].to_json)
     stub_request(:post, 'https://some-url/2/presigned-s3-url').to_return(status: 200, body: expected_attachments[1].to_json)
     allow_any_instance_of(ApplicationController).to receive(:enforce_json_only).and_return(true)
+    allow(ENV).to receive(:[])
+    allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(submission_decryption_key)
   end
 
   after do

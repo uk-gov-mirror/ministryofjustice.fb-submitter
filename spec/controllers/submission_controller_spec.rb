@@ -72,29 +72,4 @@ RSpec.describe SubmissionController, type: :controller do
       expect { JSON.parse(response.body) }.not_to raise_error
     end
   end
-
-  context 'with old payload' do
-    let(:old_payload) do
-      {
-        service_slug: 'service-slug',
-        encrypted_user_id_and_token: 'encrypted-token'
-      }.merge(submission)
-    end
-
-    before do
-      request.headers.merge!(headers)
-      allow_any_instance_of(ApplicationController).to receive(:verify_token!)
-      post :create, body: old_payload.to_json, format: :json
-    end
-
-    after do
-      Submission.destroy_all
-    end
-
-    it 'saves the older style payload into the submission' do
-      expect(Submission.first.decrypted_payload).to eq(
-        ActiveSupport::HashWithIndifferentAccess.new(submission)
-      )
-    end
-  end
 end
