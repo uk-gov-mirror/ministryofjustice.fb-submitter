@@ -8,17 +8,14 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: fb-deploy-utils-clone
-          command: git clone git@github.com:ministryofjustice/fb-deploy-utils.git ~/circle/git/fb-deploy
-      - run:
           name: lint
-          command: ~/circle/git/fb-deploy/bin/lint
+          command: docker-compose run --rm app bundle exec rubocop
       - run:
           name: security
-          command: ~/circle/git/fb-deploy/bin/security-scan
+          command: docker-compose run --rm app bundle exec brakeman -q --no-pager
       - run:
           name: test
-          command: ~/circle/git/fb-deploy/bin/tests
+          command: docker-compose run --rm app bundle exec rspec
   build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
     docker: &ecr_image
@@ -33,26 +30,34 @@ jobs:
           fingerprints:
             - "5d:c8:80:1b:1a:82:af:e0:30:26:d1:62:37:7e:c9:c1"
       - run:
-          name: checkout fb-submitter-deploy
-          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_5dc8801b1a82afe03026d162377ec9c1 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
+          name: Setup base environment variable
+          command: |
+            echo "export BUILD_SHA=$CIRCLE_SHA1" >> $BASH_ENV
+            echo "export SSH_FILE_FOR_SECRETS=~/.ssh/id_rsa_5dc8801b1a82afe03026d162377ec9c1" >> $BASH_ENV
       - run:
-          name: persist git crypt key to disk
-          command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
-      - run:
-          name: unlock git crypt
-          command: "cd ~/circle/git/fb-submitter-deploy && git-crypt unlock /root/circle/git_crypt.key"
-      - run:
-          name: npm install
-          command: 'npm install'
+          name: cloning deploy scripts
+          command: 'git clone git@github.com:ministryofjustice/fb-deploy.git deploy-scripts'
       - run:
           name: build and push docker images
-          command: './scripts/circleci_build.sh test'
+          environment:
+            ENVIRONMENT_NAME: test
+          command: './deploy-scripts/bin/build'
       - run:
           name: deploy to test dev
-          command: './scripts/circleci_deploy.sh test dev $KUBE_TOKEN_TEST_DEV'
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: test
+            DEPLOYMENT_ENV: dev
+            K8S_NAMESPACE: formbuilder-platform-test-dev
+          command: './deploy-scripts/bin/deploy'
       - run:
           name: deploy to test production
-          command: './scripts/circleci_deploy.sh test production $KUBE_TOKEN_TEST_PRODUCTION'
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: test
+            DEPLOYMENT_ENV: production
+            K8S_NAMESPACE: formbuilder-platform-test-production
+          command: './deploy-scripts/bin/deploy'
   build_and_deploy_to_live:
     working_directory: ~/circle/git/fb-submitter
     docker: *ecr_image
@@ -63,26 +68,34 @@ jobs:
           fingerprints:
             - "5d:c8:80:1b:1a:82:af:e0:30:26:d1:62:37:7e:c9:c1"
       - run:
-          name: checkout fb-submitter-deploy
-          command: "GIT_SSH_COMMAND='ssh -v -i ~/.ssh/id_rsa_5dc8801b1a82afe03026d162377ec9c1 -o \"IdentitiesOnly=yes\"' git clone git@github.com:ministryofjustice/fb-submitter-deploy.git ~/circle/git/fb-submitter-deploy"
+          name: Setup base environment variable
+          command: |
+            echo "export BUILD_SHA=$CIRCLE_SHA1" >> $BASH_ENV
+            echo "export SSH_FILE_FOR_SECRETS=~/.ssh/id_rsa_5dc8801b1a82afe03026d162377ec9c1" >> $BASH_ENV
       - run:
-          name: persist git crypt key to disk
-          command: "echo $ENCODED_GIT_CRYPT_KEY | base64 -d > /root/circle/git_crypt.key"
-      - run:
-          name: unlock git crypt
-          command: "cd ~/circle/git/fb-submitter-deploy && git-crypt unlock /root/circle/git_crypt.key"
-      - run:
-          name: npm install
-          command: 'npm install'
+          name: cloning deploy scripts
+          command: 'git clone git@github.com:ministryofjustice/fb-deploy.git deploy-scripts'
       - run:
           name: build and push docker images
-          command: './scripts/circleci_build.sh live'
+          environment:
+            ENVIRONMENT_NAME: live
+          command: './deploy-scripts/bin/build'
       - run:
           name: deploy to live dev
-          command: './scripts/circleci_deploy.sh live dev $KUBE_TOKEN_LIVE_DEV'
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: live
+            DEPLOYMENT_ENV: dev
+            K8S_NAMESPACE: formbuilder-platform-live-dev
+          command: './deploy-scripts/bin/deploy'
       - run:
           name: deploy to live production
-          command: './scripts/circleci_deploy.sh live production $KUBE_TOKEN_LIVE_PRODUCTION'
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: live
+            DEPLOYMENT_ENV: production
+            K8S_NAMESPACE: formbuilder-platform-live-production
+          command: './deploy-scripts/bin/deploy'
   trigger_acceptance_tests:
     docker:
       - image: circleci/ruby:latest
@@ -101,7 +114,8 @@ workflows:
             - test
           filters:
             branches:
-              only: master
+              only:
+                - master
       - trigger_acceptance_tests:
           requires:
             - test
