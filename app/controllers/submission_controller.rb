@@ -29,16 +29,12 @@ class SubmissionController < ApplicationController
   end
 
   def payload
-    if params[:encrypted_submission]
-      decrypted_submission = SubmissionEncryption.new.decrypt(
-        params[:encrypted_submission]
-      )
+    decrypted_submission = SubmissionEncryption.new.decrypt(
+      params[:encrypted_submission]
+    )
 
-      params.merge(decrypted_submission).slice(
-        :meta, :actions, :submission, :attachments
-      ).permit!
-    else
-      params.slice(:meta, :actions, :submission, :attachments).permit!
-    end
+    params.merge(decrypted_submission).slice(
+      :meta, :actions, :submission, :attachments
+    ).permit!
   end
 end
