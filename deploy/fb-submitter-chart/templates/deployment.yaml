@@ -110,8 +110,8 @@ spec:
     spec:
       serviceAccountName: "formbuilder-submitter-workers-{{ .Values.environmentName }}"
       containers:
-      - name: "fb-submitter-worker"
-        image: "754256621582.dkr.ecr.eu-west-2.amazonaws.com/formbuilder/fb-submitter-worker:{{ .Values.circleSha1 }}"
+      - name: "fb-submitter-workers"
+        image: "754256621582.dkr.ecr.eu-west-2.amazonaws.com/formbuilder/fb-submitter-workers:{{ .Values.circleSha1 }}"
         imagePullPolicy: Always
         volumeMounts:
         - mountPath: /tmp
