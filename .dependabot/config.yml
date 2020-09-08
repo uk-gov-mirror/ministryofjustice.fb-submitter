@@ -14,7 +14,7 @@ update_configs:
     - tomas-stefano
     - brenetic
   - package_manager: "docker"
-    directory: "/docker/worker"
+    directory: "/docker/workers"
     update_schedule: "daily"
     default_reviewers:
     - tomas-stefano
