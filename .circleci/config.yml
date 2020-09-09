@@ -19,10 +19,10 @@ jobs:
   build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
     docker: &ecr_image
-      - image: $AWS_ECR_ACCOUNT_URL
+      - image: $AWS_BUILD_IMAGE_ECR_ACCOUNT_URL
         aws_auth:
-          aws_access_key_id: $AWS_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_SECRET_ACCESS_KEY
+          aws_access_key_id: $AWS_BUILD_IMAGE_ACCESS_KEY_ID
+          aws_secret_access_key: $AWS_BUILD_IMAGE_SECRET_ACCESS_KEY
     steps:
       - checkout
       - setup_remote_docker
