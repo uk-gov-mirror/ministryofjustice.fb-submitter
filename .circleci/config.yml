@@ -100,9 +100,6 @@ jobs:
     working_directory: ~/circle/git/fb-submitter
     docker: *ecr_image
     steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "5d:c8:80:1b:1a:82:af:e0:30:26:d1:62:37:7e:c9:c1"
       - run:
           name: cloning deploy scripts
           command: 'git clone git@github.com:ministryofjustice/fb-deploy.git deploy-scripts'
