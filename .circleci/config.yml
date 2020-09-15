@@ -1,4 +1,7 @@
-version: 2
+version: 2.1
+orbs:
+  slack: circleci/slack@3.4.2
+
 jobs:
   test:
     working_directory: ~/circle
@@ -16,6 +19,11 @@ jobs:
       - run:
           name: test
           command: docker-compose run --rm app bundle exec rspec
+      - slack/status: &slack_status
+          fail_only: true
+          only_for_branches: master
+          failure_message: ":facepalm:  Failed job $CIRCLE_JOB  :homer-disappear:"
+          include_job_number_field: false
   build_and_deploy_to_test:
     working_directory: ~/circle/git/fb-submitter
     docker: &ecr_image
@@ -58,6 +66,7 @@ jobs:
             DEPLOYMENT_ENV: production
             K8S_NAMESPACE: formbuilder-platform-test-production
           command: './deploy-scripts/bin/deploy'
+      - slack/status: *slack_status
   build_and_deploy_to_live:
     working_directory: ~/circle/git/fb-submitter
     docker: *ecr_image
@@ -88,6 +97,11 @@ jobs:
             DEPLOYMENT_ENV: production
             K8S_NAMESPACE: formbuilder-platform-live-production
           command: './deploy-scripts/bin/deploy'
+      - slack/status:
+          only_for_branches: master
+          success_message: ":rocket:  Successfully deployed to Live  :guitar:"
+          failure_message: ":alert:  Failed to deploy to Live  :try_not_to_cry:"
+          include_job_number_field: false
   acceptance_tests:
     docker: *ecr_image
     resource_class: large
@@ -97,6 +111,7 @@ jobs:
       - run:
           name: Run acceptance tests
           command: './deploy-scripts/bin/acceptance_tests'
+      - slack/status: *slack_status
 
 
 workflows:
@@ -117,6 +132,11 @@ workflows:
           filters:
             branches:
               only: master
+      - slack/approval-notification:
+          message: ":portalorangeparrot:  Deployment to Live pending approval  :portalblueparrot:"
+          include_job_number_field: false
+          requires:
+            - acceptance_tests
       - confirm_live_deploy:
           type: approval
           requires:
