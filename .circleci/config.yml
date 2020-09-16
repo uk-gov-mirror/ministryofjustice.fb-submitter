@@ -6,7 +6,7 @@ jobs:
   test:
     working_directory: ~/circle
     docker:
-      - image: circleci/ruby:2.6.4
+      - image: cimg/ruby:2.7.1
     steps:
       - checkout
       - setup_remote_docker
