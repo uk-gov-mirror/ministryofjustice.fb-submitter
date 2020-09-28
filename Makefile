@@ -1,18 +1,6 @@
 UID ?= $(shell id -u)
 DOCKER_COMPOSE = env UID=$(UID) docker-compose -f docker-compose.yml -f docker-compose.development.yml
 
-.PHONY: dev
-dev:
-	echo "TODO: Remove dev function call from deploy-utils"
-
-.PHONY: test
-test:
-	echo "TODO: Remove test function call from deploy-utils"
-
-.PHONY: live
-live:
-	echo "TODO: Remove live function call from deploy-utils"
-
 .PHONY: build
 build: stop
 	$(DOCKER_COMPOSE) build
