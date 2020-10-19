@@ -7,15 +7,21 @@ update_configs:
     default_reviewers:
     - tomas-stefano
     - brenetic
+    - mattempty
+    - njseeto
   - package_manager: "docker"
     directory: "/docker/api"
     update_schedule: "daily"
     default_reviewers:
     - tomas-stefano
     - brenetic
+    - mattempty
+    - njseeto
   - package_manager: "docker"
     directory: "/docker/workers"
     update_schedule: "daily"
     default_reviewers:
     - tomas-stefano
     - brenetic
+    - mattempty
+    - njseeto
