@@ -26,7 +26,11 @@ describe Adapters::PdfApi do
   end
 
   let(:expected_headers) do
-    { 'x-access-token-v2' => 'some-token' }
+    {
+      'x-access-token-v2' => 'some-token',
+      'Accept' => 'application/json',
+      'Content-Type' => 'application/json'
+    }
   end
 
   before do
