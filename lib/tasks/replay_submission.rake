@@ -1,9 +1,9 @@
-namespace :replay_submission do
+namespace :replay_submissions do
   desc "
   Replay submissions
   For more than one submission ID use space separated IDs
   Usage
-  rake replay_submission:process[<submission_ids>]
+  rake replay_submissions:process[<submission_ids>]
   "
   task :process, [:submission_ids] => :environment do |_t, args|
     if args[:submission_ids].nil?
@@ -26,7 +26,7 @@ namespace :replay_submission do
   Replay submissions with attachments
   For more than one submission ID use space separated IDs
   Usage
-  rake replay_submission:with_attachments[<submission_id>,<jwt_skew_override>]
+  rake replay_submissions:with_attachments[<submission_ids>,<jwt_skew_override>]
   "
   task :with_attachments, [:submission_ids, :jwt_skew_override] => :environment do |_t, args|
     if args[:submission_ids].nil? || args[:jwt_skew_override].nil?
@@ -51,6 +51,32 @@ namespace :replay_submission do
           old_job.destroy!
           puts "Destroyed previous delayed job #{old_job.id}"
         end
+      end
+    end
+  end
+end
+
+namespace :replay_hmcts_adapter_submissions do
+  desc "
+  Replay failed HMCTS submissions
+  For more than one submission ID use space separated IDs
+  Usage
+  rake replay_hmcts_adapter_submissions:process[<submission_ids>]
+  "
+  task :process, [:submission_ids] => :environment do |_t, args|
+    if args[:submission_ids].nil?
+      puts 'At least one Submission ID is required'
+    else
+      payload_submission_ids = args[:submission_ids].split(' ')
+      submissions = Submission.all.select do |s|
+        s.decrypted_payload['meta']['submission_id'].in?(payload_submission_ids)
+      end
+
+      submissions.each do |submission|
+        Delayed::Job.enqueue(
+          ProcessSubmissionService.new(submission_id: submission.id)
+        )
+        puts "Queued new job for submission ID #{submission.id}"
       end
     end
   end
