@@ -5,7 +5,7 @@ ruby File.read('.ruby-version').strip
 gem 'aws-sdk-ses', '~> 1.36.0'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem 'daemons'
-gem 'delayed_job_active_record', '~> 4.1.4'
+gem 'delayed_job_active_record', '~> 4.1.5'
 gem 'jwe', '~> 0.4.0'
 gem 'jwt'
 gem 'metrics_adapter', '0.2.0'
