@@ -1,0 +1,25 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: MoJ Forms Submitter API Documentation
+  termsOfService: 'https://example.com/terms/'
+  contact:
+    email: form-builder-developers@digital.justice.gov.uk
+    url: 'https://moj-forms.service.justice.gov.uk'
+  x-logo:
+    url: 'https://raw.githubusercontent.com/ministryofjustice/fb-editor-console-electron/63a0d9a4cda23f361a1d52aa7af9400db29621ee/assets/images/govuk-crown.png'
+  description: >
+    # Introduction
+
+    This is the MoJ Forms Submitter API documentation
+paths:
+  /v2/submissions:
+    $ref: paths/submissions.yaml
+components:
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - jwt: []

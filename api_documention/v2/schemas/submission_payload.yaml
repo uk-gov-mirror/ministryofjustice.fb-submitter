@@ -1,0 +1,76 @@
+type: object
+properties:
+  service:
+    type: object
+    description: The service details
+    properties:
+      slug:
+        type: string
+      name:
+        type: string
+  meta:
+    type: object
+    description: Meta properties for the submission
+    properties:
+      pdf_heading:
+        type: string
+      pdf_subheading:
+        type: string
+  actions:
+    type: array
+    description: The actions to be done on the submission
+    items:
+      $ref: '#/definitions/action'
+  user_answers:
+    type: array
+    description: All the user answers
+    items:
+      $ref: '#/definitions/user_answer'
+required:
+  - service
+  - meta
+  - actions
+  - user_answers
+additionalProperties: false
+definitions:
+  action:
+    type: object
+    description: An individual action for a submission
+    properties:
+      kind:
+        type: string
+        enum:
+          - email
+          - json
+      to:
+        type: string
+      from:
+        type: string
+      subject:
+        type: string
+      email_body:
+        type: string
+      include_pdf:
+        type: boolean
+        default: true
+    required:
+      - to
+      - from
+      - include_pdf
+    additionalProperties: false
+  user_answer:
+    type: object
+    description: The user answer and field name
+    properties:
+      field:
+        type: string
+      answer:
+        oneOf:
+          - type: string
+          - type: array
+            items:
+              type: string
+    required:
+      - field
+      - answer
+    additionalProperties: false
