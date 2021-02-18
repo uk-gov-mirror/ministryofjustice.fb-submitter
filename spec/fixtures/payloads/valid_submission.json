@@ -1,0 +1,33 @@
+{
+  "service": {
+    "service_id": "fd5ef840-5f0f-4c1f-997e-5d6d89adf04f",
+    "slug": "mos-eisley",
+    "name": "Mos Eisley"
+  },
+  "meta": {
+    "pdf_heading":"Complain about working conditions on the star destroyer",
+    "pdf_subheading":"A copy of your complaint about working on a star destroyer"
+  },
+  "actions": [
+    {
+      "kind":"email",
+      "to": "captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com",
+      "from":"\"Email Output Acceptance Test Service\" <moj-online@digital.justice.gov.uk>",
+      "subject":"Email Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032",
+      "email_body":"Please find an application attached",
+      "include_pdf":true
+    }
+  ],
+  "user_answers": [
+    {
+      "field_id": "name_text_1",
+      "field": "Full name",
+      "answer": "Captain Needa"
+    },
+    {
+      "field_id": "burgers_checkboxes_1",
+      "field": "What would you like on your burger?",
+      "answer": ["Beef, cheese, tomato"]
+    }
+  ]
+}
