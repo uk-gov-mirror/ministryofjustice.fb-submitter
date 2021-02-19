@@ -17,8 +17,8 @@ stop:
 spec: build
 	$(DOCKER_COMPOSE) run --rm app bundle exec rspec
 
-.PHONY: build
-unit: build
+.PHONY: unit
+unit:
 	$(DOCKER_COMPOSE) run --rm app bundle exec rspec spec/requests/v2/submissions_spec.rb
 
 .PHONY: shell

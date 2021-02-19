@@ -16,6 +16,7 @@ describe 'V2 Submissions endpoint', type: :request do
     let(:pdf_file_content) { 'apology accepted, captain needa' }
     let(:post_request) { post url, params: params.to_json, headers: headers }
     let(:submission_decryption_key) { SecureRandom.uuid[0..31] }
+    let(:response_body) { JSON.parse(response.body) }
 
     before do
       Delayed::Worker.delay_jobs = false
@@ -94,22 +95,80 @@ describe 'V2 Submissions endpoint', type: :request do
 
       context 'with invalid submission payload' do
         context 'missing encrypted_submission' do
+          let(:params) { {} }
+
+          before do
+            post_request
+          end
+
           it 'validates the submission payload against the schema' do
+            expect(response.status).to be(422)
+          end
+
+          it 'expect response body to include JSON validator error' do
+            expect(response_body).to eq(
+              { 'message' => ['Encrypted Submission is missing'] }
+            )
           end
         end
 
         context 'additional properties in payload' do
+          #e.g
+          {
+            encrypted_submission: 'ddslkdjfls',
+            foo: 'bar'
+          }
         end
 
-        context 'invalid encrypted submission' do
-          it 'validates the submission payload against the schema' do
+        context 'invalid encrypted submission payload' do
+          let(:params) do
+            {
+              encrypted_submission: SubmissionEncryption.new(
+                key: submission_decryption_key
+              ).encrypt({})
+            }
+          end
+
+          before do
+            post_request
+          end
+
+          it 'returns unprocessable_entity status code' do
+            expect(response.status).to be(422)
+          end
+
+          it 'returns the error message in the response body' do
+            expect(response_body).to eq(
+              "message" => ["The property '#/' did not contain a required property of 'service'"]
+            )
+          end
+        end
+
+        context 'badly encrypted payload' do
+          let(:params) do
+            {
+              encrypted_submission: 'faramir cannot read maps'
+            }
+          end
+
+          before do
+            post_request
+          end
+
+          it 'returns unprocessable entity status code' do
+            expect(response.status).to eq(422)
+          end
+
+          it 'returns the error message in the response body' do
+            expect(response_body).to eq(
+              "message" => ["Unable to decrypt submission payload"]
+            )
           end
         end
       end
     end
 
     context 'with invalid token' do
-      let(:response_body) { JSON.parse(response.body) }
       let(:params) { {} }
 
       context 'when token not present' do

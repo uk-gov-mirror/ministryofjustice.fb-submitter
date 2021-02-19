@@ -18,7 +18,7 @@ class PdfPayloadTranslator
             heading: '',
             summary_heading: '',
             questions: [{
-              label: user_answer[:field],
+              label: user_answer[:field_name],
               human_value: user_answer[:answer].is_a?(Array) ? user_answer[:answer].join("\n") : user_answer[:answer]
             }]
           }

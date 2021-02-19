@@ -21,12 +21,12 @@
   "user_answers": [
     {
       "field_id": "name_text_1",
-      "field": "Full name",
+      "field_name": "Full name",
       "answer": "Captain Needa"
     },
     {
       "field_id": "burgers_checkboxes_1",
-      "field": "What would you like on your burger?",
+      "field_name": "What would you like on your burger?",
       "answer": ["Beef, cheese, tomato"]
     }
   ]

@@ -3,12 +3,10 @@ module V2
     include Concerns::ContentNegotiation
     include Concerns::V2ErrorHandling
     before_action ::Filters::AuthenticateApplication
+    before_action ::Filters::ValidateEncryptedSubmission
+    before_action ::Filters::ValidateSchema
 
     def create
-      decrypted_submission = SubmissionEncryption.new.decrypt(
-        submission_params[:encrypted_submission]
-      )
-
       @submission = Submission.create!(
         payload: SubmissionEncryption.new.encrypt(decrypted_submission),
         access_token: access_token
@@ -27,6 +25,13 @@ module V2
 
     def access_token
       request.authorization.to_s.gsub(/^Bearer /, '')
+    end
+
+    def decrypted_submission
+      @decrypted_submission ||=
+        SubmissionEncryption.new.decrypt(
+          submission_params[:encrypted_submission]
+        )
     end
   end
 end
