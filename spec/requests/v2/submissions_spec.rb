@@ -65,6 +65,7 @@ describe 'V2 Submissions endpoint', type: :request do
 
         it 'returns status 201' do
           post_request
+          expect(response_body).to eq({})
           expect(response).to have_http_status(:created)
         end
 

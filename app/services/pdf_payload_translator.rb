@@ -13,14 +13,16 @@ class PdfPayloadTranslator
         submission_id: decrypted_submission[:submission_id],
         pdf_heading: meta[:pdf_heading],
         pdf_subheading: meta[:pdf_subheading],
-        sections: decrypted_submission[:user_answers].map do |user_answer|
+        sections: decrypted_submission[:pages].map do |page|
           {
-            heading: '',
+            heading: page[:heading],
             summary_heading: '',
-            questions: [{
-              label: user_answer[:field_name],
-              human_value: user_answer[:answer].is_a?(Array) ? user_answer[:answer].join("\n") : user_answer[:answer]
-            }]
+            questions: page[:answers].map do |user_answer|
+              {
+                label: user_answer[:field_name],
+                human_value: human_value(user_answer[:answer])
+              }
+            end
           }
         end
       }
@@ -31,6 +33,10 @@ class PdfPayloadTranslator
 
   def meta
     decrypted_submission[:meta]
+  end
+
+  def human_value(answer)
+    answer.is_a?(Array) ? answer.join("\n\n") : answer
   end
 
   def service

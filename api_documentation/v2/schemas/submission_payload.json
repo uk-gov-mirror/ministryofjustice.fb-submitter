@@ -38,17 +38,17 @@
       "description": "The actions to be done on the submission",
       "items": { "$ref": "#/definitions/action" }
     },
-    "user_answers": {
+    "pages": {
       "type": "array",
-      "description": "All the user answers",
-      "items": { "$ref": "#/definitions/user_answer" }
+      "description": "All the pages and answers of the form",
+      "items": { "$ref": "#/definitions/page" }
     }
   },
   "required": [
     "service",
     "meta",
     "actions",
-    "user_answers"
+    "pages"
   ],
   "additionalProperties": false,
   "definitions": {
@@ -87,34 +87,49 @@
       ],
       "additionalProperties": false
     },
-    "user_answer": {
+    "page": {
       "type": "object",
-      "description": "The user answer and field name",
+      "description": "The question pages of the form",
       "properties": {
-        "field_id": {
-          "type": "string",
-          "description": "The answer field ID"
+        "heading": {
+          "type": "string"
         },
-        "field_name": {
-          "type": "string",
-          "description": "The humanised label name for the user answer"
+        "answers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field_id": {
+                "type": "string",
+                "description": "The answer field ID"
+              },
+              "field_name": {
+                "type": "string",
+                "description": "The humanised label name for the user answer"
+              },
+              "answer": {
+                "description": "The user answer",
+                "oneOf": [
+                  { "type": "string" },
+                  {
+                    "type": "array",
+                    "items": { "type": "string" }
+                  }
+                ]
+              }
+            },
+            "required": [
+              "field_id",
+              "field_name",
+              "answer"
+            ]
+          }
         },
-        "answer": {
-          "description": "The user answer",
-          "oneOf": [
-            { "type": "string" },
-            {
-              "type": "array",
-              "items": { "type": "string" }
-            }
-          ]
-        }
+        "required": [
+          "heading",
+          "answers"
+        ]
       },
-      "required": [
-        "field_id",
-        "field_name",
-        "answer"
-      ],
       "additionalProperties": false
     }
   }

@@ -18,16 +18,46 @@
       "include_pdf":true
     }
   ],
-  "user_answers": [
+  "pages": [
     {
-      "field_id": "name_text_1",
-      "field_name": "Full name",
-      "answer": "Captain Needa"
+      "heading": "",
+      "answers": [
+        {
+          "field_id": "name_text_1",
+          "field_name": "Full name",
+          "answer": "Captain Needa"
+        }
+      ]
     },
     {
-      "field_id": "burgers_checkboxes_1",
-      "field_name": "What would you like on your burger?",
-      "answer": ["Beef, cheese, tomato"]
+      "heading": "",
+      "answers": [
+        {
+          "field_id": "burgers_checkboxes_1",
+          "field_name": "What would you like on your burger?",
+          "answer": ["Beef, cheese, tomato", "Mozzarella, cheddar, feta"]
+        }
+      ]
+    },
+    {
+      "heading": "Your favourite droid",
+      "answers": [
+        {
+          "field_id": "multiple_question_1",
+          "field_name": "Multiple Question 1",
+          "answer": "C3P0"
+        },
+        {
+          "field_id": "multiple_question_2",
+          "field_name": "Multiple Question 2",
+          "answer": "R2D2"
+        },
+        {
+          "field_id": "multiple_question_3",
+          "field_name": "Multiple Question 3",
+          "answer": "BB8"
+        }
+      ]
     }
   ]
 }
