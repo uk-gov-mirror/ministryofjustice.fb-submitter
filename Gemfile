@@ -7,6 +7,7 @@ gem 'bootsnap', '>= 1.1.0', require: false
 gem 'daemons'
 gem 'delayed_job_active_record', '~> 4.1.5'
 gem 'fb-jwt-auth', '~> 0.5.0'
+gem 'json-schema', '>= 2.8.1'
 gem 'jwe', '~> 0.4.0'
 gem 'jwt'
 gem 'metrics_adapter', '0.2.0'
