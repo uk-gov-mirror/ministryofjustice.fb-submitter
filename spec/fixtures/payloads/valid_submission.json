@@ -1,6 +1,6 @@
 {
   "service": {
-    "service_id": "fd5ef840-5f0f-4c1f-997e-5d6d89adf04f",
+    "id": "fd5ef840-5f0f-4c1f-997e-5d6d89adf04f",
     "slug": "mos-eisley",
     "name": "Mos Eisley"
   },

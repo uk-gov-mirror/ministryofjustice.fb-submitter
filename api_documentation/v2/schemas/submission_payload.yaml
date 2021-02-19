@@ -4,10 +4,16 @@ properties:
     type: object
     description: The service details
     properties:
+      id:
+        type: string
       slug:
         type: string
       name:
         type: string
+    required:
+      - id
+      - slug
+      - name
   meta:
     type: object
     description: Meta properties for the submission

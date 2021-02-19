@@ -5,13 +5,21 @@
       "description": "The service details",
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string"
+        },
         "slug": {
           "type": "string"
         },
         "name": {
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "id",
+        "slug",
+        "name"
+      ]
     },
     "meta": {
       "description": "Meta properties for the submission",
