@@ -1,7 +1,0 @@
-type: object
-properties:
-  encrypted_submission:
-    type: string
-  required:
-    - encrypted_submission
-  additionalProperties: false
