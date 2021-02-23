@@ -3,6 +3,7 @@ require 'webmock/rspec'
 
 describe 'V2 Submissions endpoint', type: :request do
   describe 'a POST request' do
+    let(:fb_jwt_auth) { instance_double(Fb::Jwt::Auth, verify!: true) }
     let(:access_token) { 'an-jwt-access-token' }
     let(:headers) do
       {
@@ -19,6 +20,7 @@ describe 'V2 Submissions endpoint', type: :request do
     let(:response_body) { JSON.parse(response.body) }
 
     before do
+      allow(Fb::Jwt::Auth).to receive(:new).and_return(fb_jwt_auth)
       Delayed::Worker.delay_jobs = false
 
       stub_request(
@@ -42,16 +44,16 @@ describe 'V2 Submissions endpoint', type: :request do
     include_context 'when a JSON-only API', :post, '/v2/submissions'
 
     context 'with a valid token' do
-      before do
-        allow_any_instance_of(Fb::Jwt::Auth).to receive(:verify!).and_return(true)
-      end
-
       let(:valid_submission_payload) do
         JSON.parse(
           File.read(
-            Rails.root.join('spec', 'fixtures', 'payloads', 'valid_submission.json')
+            Rails.root.join('spec/fixtures/payloads/valid_submission.json')
           )
         )
+      end
+
+      before do
+        allow(fb_jwt_auth).to receive(:verify!).and_return(true)
       end
 
       context 'with valid submission payload' do
@@ -76,10 +78,8 @@ describe 'V2 Submissions endpoint', type: :request do
         it 'encrypts the submission in the database' do
           post_request
           submission = Submission.last
-          expect(submission.try(:payload)).to_not be_nil
-          expect(submission.decrypted_submission).to eq(
-            valid_submission_payload
-          )
+          expect(submission.try(:payload)).not_to be_nil
+          expect(submission.decrypted_submission).to eq(valid_submission_payload)
         end
 
         it 'saves the submission access token' do
@@ -89,13 +89,14 @@ describe 'V2 Submissions endpoint', type: :request do
         end
 
         it 'creates a V2 Job to be processed asynchronously' do
-          expect(V2::ProcessSubmissionJob).to receive(:perform_later)
+          process_submission_job = class_spy(V2::ProcessSubmissionJob).as_stubbed_const
           post_request
+          expect(process_submission_job).to have_received(:perform_later)
         end
       end
 
       context 'with invalid submission payload' do
-        context 'missing encrypted_submission' do
+        context 'when missing encrypted_submission' do
           let(:params) { {} }
 
           before do
@@ -113,15 +114,35 @@ describe 'V2 Submissions endpoint', type: :request do
           end
         end
 
-        context 'additional properties in payload' do
-          #e.g
-          {
-            encrypted_submission: 'ddslkdjfls',
-            foo: 'bar'
-          }
+        context 'when additional properties in payload' do
+          let(:params) do
+            {
+              encrypted_submission: SubmissionEncryption.new(
+                key: submission_decryption_key
+              ).encrypt(
+                valid_submission_payload.merge(good_movie: 'Rogue one')
+              )
+            }
+          end
+
+          before do
+            post_request
+          end
+
+          it 'returns unprocessable_entity status code' do
+            expect(response.status).to be(422)
+          end
+
+          it 'returns the error message in the response body' do
+            expect(response_body).to eq(
+              'message' => [
+                "The property '#/' contains additional properties [\"good_movie\"] outside of the schema when none are allowed"
+              ]
+            )
+          end
         end
 
-        context 'invalid encrypted submission payload' do
+        context 'when invalid encrypted submission payload' do
           let(:params) do
             {
               encrypted_submission: SubmissionEncryption.new(
@@ -140,12 +161,12 @@ describe 'V2 Submissions endpoint', type: :request do
 
           it 'returns the error message in the response body' do
             expect(response_body).to eq(
-              "message" => ["The property '#/' did not contain a required property of 'service'"]
+              'message' => ["The property '#/' did not contain a required property of 'service'"]
             )
           end
         end
 
-        context 'badly encrypted payload' do
+        context 'when badly encrypted payload' do
           let(:params) do
             {
               encrypted_submission: 'faramir cannot read maps'
@@ -162,7 +183,7 @@ describe 'V2 Submissions endpoint', type: :request do
 
           it 'returns the error message in the response body' do
             expect(response_body).to eq(
-              "message" => ["Unable to decrypt submission payload"]
+              'message' => ['Unable to decrypt submission payload']
             )
           end
         end
@@ -174,7 +195,7 @@ describe 'V2 Submissions endpoint', type: :request do
 
       context 'when token not present' do
         before do
-          allow_any_instance_of(Fb::Jwt::Auth).to receive(:verify!).and_raise(
+          allow(fb_jwt_auth).to receive(:verify!).and_raise(
             Fb::Jwt::Auth::TokenNotPresentError, 'Token is not present'
           )
           post_request
@@ -191,7 +212,7 @@ describe 'V2 Submissions endpoint', type: :request do
 
       context 'when application not present ' do
         before do
-          allow_any_instance_of(Fb::Jwt::Auth).to receive(:verify!).and_raise(
+          allow(fb_jwt_auth).to receive(:verify!).and_raise(
             Fb::Jwt::Auth::IssuerNotPresentError, 'Issuer is not present'
           )
           post_request
@@ -208,7 +229,7 @@ describe 'V2 Submissions endpoint', type: :request do
 
       context 'when namespace not present' do
         before do
-          allow_any_instance_of(Fb::Jwt::Auth).to receive(:verify!).and_raise(
+          allow(fb_jwt_auth).to receive(:verify!).and_raise(
             Fb::Jwt::Auth::NamespaceNotPresentError, 'Namespace is not present'
           )
           post_request
@@ -225,7 +246,7 @@ describe 'V2 Submissions endpoint', type: :request do
 
       context 'when token is not valid' do
         before do
-          allow_any_instance_of(Fb::Jwt::Auth).to receive(:verify!).and_raise(
+          allow(fb_jwt_auth).to receive(:verify!).and_raise(
             Fb::Jwt::Auth::TokenNotValidError, 'Token is not valid'
           )
           post_request
@@ -242,7 +263,7 @@ describe 'V2 Submissions endpoint', type: :request do
 
       context 'when token is expired' do
         before do
-          allow_any_instance_of(Fb::Jwt::Auth).to receive(:verify!).and_raise(
+          allow(fb_jwt_auth).to receive(:verify!).and_raise(
             Fb::Jwt::Auth::TokenExpiredError, 'Token has expired'
           )
           post_request

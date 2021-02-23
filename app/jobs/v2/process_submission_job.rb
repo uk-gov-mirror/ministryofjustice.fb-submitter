@@ -18,19 +18,19 @@ module V2
       ).execute
 
       decrypted_submission['actions'].each do |action|
-        if action['kind'] == 'email'
-          EmailOutputService.new(
-            emailer: EmailService,
-            attachment_generator: AttachmentGenerator.new,
-            encryption_service: EncryptionService.new,
-            submission_id: submission.id,
-            payload_submission_id: submission.id
-          ).execute(
-            action: action.symbolize_keys,
-            attachments: [],
-            pdf_attachment: pdf_attachment
-          )
-        end
+        next unless action['kind'] == 'email'
+
+        EmailOutputService.new(
+          emailer: EmailService,
+          attachment_generator: AttachmentGenerator.new,
+          encryption_service: EncryptionService.new,
+          submission_id: submission.id,
+          payload_submission_id: submission.id
+        ).execute(
+          action: action.symbolize_keys,
+          attachments: [],
+          pdf_attachment: pdf_attachment
+        )
       end
     end
   end

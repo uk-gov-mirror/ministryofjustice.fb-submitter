@@ -8,7 +8,7 @@ module Filters
       else
         begin
           controller.decrypted_submission
-        rescue StandardError => e
+        rescue StandardError => _e
           controller.render json: {
             message: ['Unable to decrypt submission payload']
           }, status: :unprocessable_entity

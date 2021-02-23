@@ -1,7 +1,7 @@
 module Filters
   class ValidateSchema
     SUBMISSION_PAYLOAD_SCHEMA_FILE = Rails.root.join(
-      'api_documentation', 'v2', 'schemas', 'submission_payload.json'
+      'api_documentation/v2/schemas/submission_payload.json'
     ).freeze
     SUBMISSION_PAYLOAD_SCHEMA = JSON.parse(
       File.read(SUBMISSION_PAYLOAD_SCHEMA_FILE)

@@ -12,7 +12,7 @@ module Concerns
     end
 
     def enforce_json_only
-      unless request.format.json? # rubocop:disable Style/GuardClause
+      unless request.format.json?
         render json: { error: 'Format not acceptable' }, status: :not_acceptable
       end
     end

@@ -9,16 +9,16 @@ RSpec.describe PdfPayloadTranslator do
       let(:decrypted_submission) do
         JSON.parse(
           File.read(
-            Rails.root.join('spec', 'fixtures', 'payloads', 'valid_submission.json')
+            Rails.root.join('spec/fixtures/payloads/valid_submission.json')
           )
         ).merge(submission_id: submission_id)
       end
       let(:expected_payload) do
         {
           submission: JSON.parse(File.read(
-            Rails.root.join('spec', 'fixtures', 'payloads', 'pdf_generator.json')
-          )).merge('submission_id' => submission_id)
-          }.deep_symbolize_keys
+                                   Rails.root.join('spec/fixtures/payloads/pdf_generator.json')
+                                 )).merge('submission_id' => submission_id)
+        }.deep_symbolize_keys
       end
 
       it 'creates the correct pdf payload' do

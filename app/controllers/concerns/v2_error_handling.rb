@@ -2,7 +2,7 @@ module Concerns
   module V2ErrorHandling
     extend ActiveSupport::Concern
 
-    included do |base|
+    included do |_base|
       fb_jwt_exceptions = [
         Fb::Jwt::Auth::TokenNotPresentError,
         Fb::Jwt::Auth::TokenNotValidError,
