@@ -1,0 +1,139 @@
+{
+  "$id": "http://gov.uk/schema/v1.0.0/submission_payload",
+  "properties": {
+    "service": {
+      "description": "The service details",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "slug": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "slug",
+        "name"
+      ]
+    },
+    "meta": {
+      "description": "Meta properties for the submission",
+      "type": "object",
+      "properties": {
+        "pdf_heading": {
+          "type": "string"
+        },
+        "pdf_subheading": {
+          "type": "string"
+        }
+      }
+    },
+    "actions": {
+      "type": "array",
+      "description": "The actions to be done on the submission",
+      "items": { "$ref": "#/definitions/action" }
+    },
+    "pages": {
+      "type": "array",
+      "description": "All the pages and answers of the form",
+      "items": { "$ref": "#/definitions/page" }
+    }
+  },
+  "required": [
+    "service",
+    "meta",
+    "actions",
+    "pages"
+  ],
+  "additionalProperties": false,
+  "definitions": {
+    "action": {
+      "type": "object",
+      "description": "The individual action for a submission",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "email",
+            "json"
+          ]
+        },
+        "to": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "subject": {
+          "type": "string"
+        },
+        "email_body": {
+          "type": "string"
+        },
+        "include_pdf": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "required": [
+        "to",
+        "from",
+        "include_pdf"
+      ],
+      "additionalProperties": false
+    },
+    "page": {
+      "type": "object",
+      "description": "The question pages of the form",
+      "properties": {
+        "heading": {
+          "type": "string"
+        },
+        "answers": {
+          "type": "array",
+          "description": "All the user answers",
+          "items": { "$ref": "#/definitions/user_answer" }
+        }
+      },
+      "required": [
+        "heading",
+        "answers"
+      ],
+      "additionalProperties": false
+    },
+    "user_answer": {
+      "type": "object",
+      "properties": {
+        "field_id": {
+          "type": "string",
+          "description": "The answer field ID"
+        },
+        "field_name": {
+          "type": "string",
+          "description": "The humanised label name for the user answer"
+        },
+        "answer": {
+          "description": "The user answer",
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          ]
+        }
+      },
+      "required": [
+        "field_id",
+        "field_name",
+        "answer"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

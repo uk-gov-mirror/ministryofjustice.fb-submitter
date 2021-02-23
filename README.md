@@ -18,3 +18,16 @@ Continuous Integration (CI) is enabled on this project via CircleCI.
 
 On merge to master tests are executed and if green deployed to the test environment.
 This build can then be promoted to production
+
+
+## Submission Payload Schema
+
+`schemas/submission_payload.json` is the schema for the decrypted submission. The request object should take the form:
+
+```
+{
+  encrypted_submission: 'WTq8zYcZfaWVvMncigHqwQ=='
+}
+```
+
+Once decrypted the submission is validated against the schema before being re-encrypted and saved in the DB.
