@@ -48,6 +48,11 @@ RSpec.describe V2::ProcessSubmissionJob do
       expect(email_output_service).to have_received(:execute) do |args|
         pdf_contents = File.open(args[:pdf_attachment].path).read
         expect(pdf_contents).to eq(generated_pdf_content)
+
+        expect(args[:action]).to include({
+          subject: "Email Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032",
+          to: 'captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com'
+        })
       end
     end
   end

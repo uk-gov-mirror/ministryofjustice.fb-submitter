@@ -26,7 +26,7 @@ module V2
             submission_id: submission.id,
             payload_submission_id: submission.id
           ).execute(
-            action: action,
+            action: action.symbolize_keys,
             attachments: [],
             pdf_attachment: pdf_attachment
           )
