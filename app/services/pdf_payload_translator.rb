@@ -1,0 +1,45 @@
+class PdfPayloadTranslator
+  attr_reader :decrypted_submission
+
+  def initialize(decrypted_submission)
+    @decrypted_submission = ActiveSupport::HashWithIndifferentAccess.new(
+      decrypted_submission
+    )
+  end
+
+  def to_h
+    {
+      submission: {
+        submission_id: decrypted_submission[:submission_id],
+        pdf_heading: meta[:pdf_heading],
+        pdf_subheading: meta[:pdf_subheading],
+        sections: decrypted_submission[:pages].map do |page|
+          {
+            heading: page[:heading],
+            summary_heading: '',
+            questions: page[:answers].map do |user_answer|
+              {
+                label: user_answer[:field_name],
+                human_value: human_value(user_answer[:answer])
+              }
+            end
+          }
+        end
+      }
+    }
+  end
+
+  private
+
+  def meta
+    decrypted_submission[:meta]
+  end
+
+  def human_value(answer)
+    answer.is_a?(Array) ? answer.join("\n\n") : answer
+  end
+
+  def service
+    decrypted_submission[:service]
+  end
+end
