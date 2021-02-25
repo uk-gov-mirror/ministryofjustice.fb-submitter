@@ -105,7 +105,7 @@ GEM
       railties (>= 5.0.0)
     faraday (1.0.1)
       multipart-post (>= 1.2, < 3)
-    fb-jwt-auth (0.5.0)
+    fb-jwt-auth (0.6.0)
       activesupport
       json
       jwt
@@ -164,7 +164,7 @@ GEM
     mimemagic (0.3.5)
     mini_mime (1.0.2)
     mini_portile2 (2.5.0)
-    minitest (5.14.3)
+    minitest (5.14.4)
     mixpanel-ruby (2.2.2)
     msgpack (1.4.2)
     multi_json (1.15.0)
@@ -325,7 +325,7 @@ DEPENDENCIES
   database_cleaner
   delayed_job_active_record (~> 4.1.5)
   factory_bot_rails (~> 6.1)
-  fb-jwt-auth (~> 0.5.0)
+  fb-jwt-auth (~> 0.6.0)
   guard-rspec
   guard-shell
   json-schema (>= 2.8.1)
