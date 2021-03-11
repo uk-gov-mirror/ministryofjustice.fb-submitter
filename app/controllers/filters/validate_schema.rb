@@ -13,7 +13,9 @@ module Filters
         controller.decrypted_submission
       )
     rescue StandardError => e
-      Rails.logger(controller.decrypted_submission)
+      Rails.logger.info('#################################')
+      Rails.logger.info(controller.decrypted_submission)
+      Rails.logger.info('#################################')
       controller.render json: {
         message: [e.message]
       }, status: :unprocessable_entity
