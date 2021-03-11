@@ -126,32 +126,32 @@ workflows:
   version: 2
   test_and_build:
     jobs:
-      - test
+      # - test
       - build_and_deploy_to_test:
-          requires:
-            - test
+      #     requires:
+            # - test
           filters:
             branches:
               only:
-                - master
-      - acceptance_tests:
-          requires:
-            - build_and_deploy_to_test
-          filters:
-            branches:
-              only: master
-      - slack/approval-notification:
-          message: ":portalorangeparrot:  Deployment to Live pending approval  :portalblueparrot:"
-          include_job_number_field: false
-          requires:
-            - acceptance_tests
-      - confirm_live_deploy:
-          type: approval
-          requires:
-            - acceptance_tests
-      - build_and_deploy_to_live:
-          requires:
-            - confirm_live_deploy
-      - smoke_tests:
-          requires:
-            - build_and_deploy_to_live
+                - test-email-submission
+      # - acceptance_tests:
+      #     requires:
+      #       - build_and_deploy_to_test
+      #     filters:
+      #       branches:
+      #         only: master
+      # - slack/approval-notification:
+      #     message: ":portalorangeparrot:  Deployment to Live pending approval  :portalblueparrot:"
+      #     include_job_number_field: false
+      #     requires:
+      #       - acceptance_tests
+      # - confirm_live_deploy:
+      #     type: approval
+      #     requires:
+      #       - acceptance_tests
+      # - build_and_deploy_to_live:
+      #     requires:
+      #       - confirm_live_deploy
+      # - smoke_tests:
+      #     requires:
+      #       - build_and_deploy_to_live
