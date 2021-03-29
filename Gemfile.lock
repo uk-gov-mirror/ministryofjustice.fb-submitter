@@ -90,7 +90,7 @@ GEM
     database_cleaner (1.8.5)
     delayed_job (4.1.9)
       activesupport (>= 3.0, < 6.2)
-    delayed_job_active_record (4.1.5)
+    delayed_job_active_record (4.1.6)
       activerecord (>= 3.0, < 6.2)
       delayed_job (>= 3.0, < 5)
     diff-lcs (1.4.4)
@@ -321,7 +321,7 @@ DEPENDENCIES
   byebug
   daemons
   database_cleaner
-  delayed_job_active_record (~> 4.1.5)
+  delayed_job_active_record (~> 4.1.6)
   factory_bot_rails (~> 6.1)
   fb-jwt-auth (~> 0.6.0)
   guard-rspec
