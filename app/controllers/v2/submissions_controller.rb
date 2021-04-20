@@ -9,7 +9,8 @@ module V2
     def create
       @submission = Submission.create!(
         payload: SubmissionEncryption.new.encrypt(decrypted_submission),
-        access_token: access_token
+        access_token: access_token,
+        service_slug: submission_params[:service_slug]
       )
 
       V2::ProcessSubmissionJob.perform_later(
@@ -20,7 +21,10 @@ module V2
     end
 
     def submission_params
-      params.permit(:encrypted_submission)
+      params.slice(
+        :encrypted_submission,
+        :service_slug
+      ).permit!
     end
 
     def access_token

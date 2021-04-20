@@ -61,7 +61,8 @@ describe 'V2 Submissions endpoint', type: :request do
           {
             encrypted_submission: SubmissionEncryption.new(
               key: submission_decryption_key
-            ).encrypt(valid_submission_payload)
+            ).encrypt(valid_submission_payload),
+            service_slug: service_slug
           }
         end
 
@@ -82,10 +83,12 @@ describe 'V2 Submissions endpoint', type: :request do
           expect(submission.decrypted_submission).to eq(valid_submission_payload)
         end
 
-        it 'saves the submission access token' do
+        it 'saves the submission attributes' do
           post_request
           submission = Submission.last
-          expect(submission.try(:access_token)).to eq(access_token)
+          expect(submission).not_to be_nil
+          expect(submission.access_token).to eq(access_token)
+          expect(submission.service_slug).to eq(service_slug)
         end
 
         it 'creates a V2 Job to be processed asynchronously' do
