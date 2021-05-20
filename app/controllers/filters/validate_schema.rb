@@ -13,7 +13,7 @@ module Filters
         controller.decrypted_submission
       )
     rescue StandardError => e
-      Raven.capture_message(
+      Sentry.capture_message(
         "#{e.message}\nService Slug -> #{controller.submission_params[:service_slug]}"
       )
       controller.render json: {

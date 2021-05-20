@@ -13,6 +13,6 @@ class Metrics
     client.track(object.id, event_name, properties)
     logger.info("Tracking event: '#{event_name}': #{properties}")
   rescue StandardError => e
-    Raven.capture_exception(e)
+    Sentry.capture_exception(e)
   end
 end

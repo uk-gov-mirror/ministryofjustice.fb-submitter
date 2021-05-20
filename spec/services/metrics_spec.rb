@@ -42,9 +42,9 @@ describe Metrics do
       it 'sends exception to sentry' do
         allow(client).to receive(:can_track?).and_return(true)
         allow(client).to receive(:track).and_raise(StandardError)
-        allow(Raven).to receive(:capture_exception)
+        allow(Sentry).to receive(:capture_exception)
         metrics.track(event_name, properties)
-        expect(Raven).to have_received(:capture_exception)
+        expect(Sentry).to have_received(:capture_exception)
       end
     end
   end

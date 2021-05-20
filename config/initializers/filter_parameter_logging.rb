@@ -10,5 +10,6 @@ Rails.application.config.filter_parameters += [
   :password,
   :encrypted_user_id_and_token,
   :to,
-  :subject
+  :subject,
+  'X-Access-Token'
 ]
