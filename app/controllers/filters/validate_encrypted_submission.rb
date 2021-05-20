@@ -9,7 +9,7 @@ module Filters
         begin
           controller.decrypted_submission
         rescue StandardError => e
-          Raven.capture_exception(e)
+          Sentry.capture_exception(e)
           controller.render json: {
             message: ['Unable to decrypt submission payload']
           }, status: :unprocessable_entity
