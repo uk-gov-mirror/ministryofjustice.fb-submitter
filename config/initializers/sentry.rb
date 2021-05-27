@@ -1,4 +1,4 @@
-EXCLUDE_PATHS = %w[/health].freeze
+EXCLUDE_PATHS = %w[/health /metrics].freeze
 
 Sentry.init do |config|
   config.breadcrumbs_logger = [:active_support_logger, :http_logger]
