@@ -7,6 +7,11 @@ metadata:
   namespace: formbuilder-platform-{{ .Values.environmentName }}
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
   selector:
     matchLabels:
       app: "fb-submitter-api-{{ .Values.environmentName }}"
@@ -98,6 +103,11 @@ metadata:
   namespace: formbuilder-platform-{{ .Values.environmentName }}
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 50%
   selector:
     matchLabels:
       app: "fb-submitter-workers-{{ .Values.environmentName }}"
