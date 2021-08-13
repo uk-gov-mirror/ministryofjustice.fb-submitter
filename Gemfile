@@ -19,7 +19,7 @@ gem 'puma', '~> 5.4'
 gem 'rails', '~> 6.1.4'
 gem 'sentry-delayed_job', '~> 4.6.4'
 gem 'sentry-rails', '~> 4.6.4'
-gem 'sentry-ruby', '~> 4.6.4'
+gem 'sentry-ruby', '~> 4.6.5'
 gem 'typhoeus'
 gem 'tzinfo-data'
 
