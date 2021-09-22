@@ -41,13 +41,13 @@ module V2
     end
 
     def download_attachments(attachments, encrypted_user_id_and_token, access_token)
-      DownloadService.new(
+      DownloadAttachments.new(
         attachments: attachments,
-        token: encrypted_user_id_and_token,
+        encrypted_user_id_and_token: encrypted_user_id_and_token,
         access_token: access_token,
         jwt_skew_override: nil,
         target_dir: nil
-      ).download_in_parallel
+      ).download
     end
   end
 end

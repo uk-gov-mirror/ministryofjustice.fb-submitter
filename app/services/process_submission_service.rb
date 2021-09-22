@@ -52,14 +52,14 @@ class ProcessSubmissionService
 
   attr_reader :jwt_skew_override
 
-  def download_attachments(attachments_payload, token, access_token)
-    DownloadService.new(
+  def download_attachments(attachments_payload, encrypted_user_id_and_token, access_token)
+    DownloadAttachments.new(
       attachments: attachments_payload,
       target_dir: nil,
-      token: token,
+      encrypted_user_id_and_token: encrypted_user_id_and_token,
       access_token: access_token,
       jwt_skew_override: jwt_skew_override
-    ).download_in_parallel
+    ).download
   end
 
   def generate_pdf(pdf_detail, _payload_submission_id)
