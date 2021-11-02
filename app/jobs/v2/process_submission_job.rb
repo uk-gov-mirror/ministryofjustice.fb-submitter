@@ -2,8 +2,9 @@ module V2
   class ProcessSubmissionJob < ApplicationJob
     queue_as :default
 
-    def perform(submission_id:)
+    def perform(submission_id:, jwt_skew_override: nil)
       submission = Submission.find(submission_id)
+
       decrypted_submission = submission.decrypted_submission.merge(
         'submission_id' => submission.id
       )
@@ -23,7 +24,8 @@ module V2
         attachments = download_attachments(
           decrypted_submission['attachments'],
           submission.encrypted_user_id_and_token,
-          submission.access_token
+          submission.access_token,
+          jwt_skew_override
         )
 
         EmailOutputService.new(
@@ -40,12 +42,12 @@ module V2
       end
     end
 
-    def download_attachments(attachments, encrypted_user_id_and_token, access_token)
+    def download_attachments(attachments, encrypted_user_id_and_token, access_token, jwt_skew_override)
       DownloadAttachments.new(
         attachments: attachments,
         encrypted_user_id_and_token: encrypted_user_id_and_token,
         access_token: access_token,
-        jwt_skew_override: nil,
+        jwt_skew_override: jwt_skew_override,
         target_dir: nil
       ).download
     end
