@@ -24,6 +24,8 @@ namespace :replay_submission do
   rake replay_submission:with_attachments[<submission_id>,<jwt_skew_override>]
   "
   task :with_attachments, [:submission_id, :jwt_skew_override] => :environment do |_t, args|
+    submission = Submission.find(args[:submission_id])
+
     if args[:submission_id].nil? || args[:jwt_skew_override].nil?
       puts 'Submission ID is required' if args[:submission_id].nil?
       puts 'JWT skew override is required' if args[:jwt_skew_override].nil?
@@ -33,12 +35,20 @@ namespace :replay_submission do
       if old_job.nil?
         puts "No job for submission ID #{args[:submission_id]}"
       else
-        Delayed::Job.enqueue(
-          ProcessSubmissionService.new(
-            submission_id: args[:submission_id],
+        if submission.v2?
+          V2::ProcessSubmissionJob.perform_later(
+            submission_id: submission.id,
             jwt_skew_override: args[:jwt_skew_override]
           )
-        )
+        else
+          Delayed::Job.enqueue(
+            ProcessSubmissionService.new(
+              submission_id: args[:submission_id],
+              jwt_skew_override: args[:jwt_skew_override]
+            )
+          )
+        end
+
         puts "Queued new job for submission ID #{args[:submission_id]}"
 
         old_job.destroy!
