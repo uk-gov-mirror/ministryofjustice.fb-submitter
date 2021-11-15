@@ -66,6 +66,22 @@ jobs:
             DEPLOYMENT_ENV: production
             K8S_NAMESPACE: formbuilder-platform-test-production
           command: './deploy-scripts/bin/deploy'
+      - run:
+          name: deploy to test dev (EKS cluster)
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: test
+            DEPLOYMENT_ENV: dev
+            K8S_NAMESPACE: formbuilder-platform-test-dev
+          command: './deploy-scripts/bin/deploy-eks'
+      - run:
+          name: deploy to test production (EKS cluster)
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: test
+            DEPLOYMENT_ENV: production
+            K8S_NAMESPACE: formbuilder-platform-test-production
+          command: './deploy-scripts/bin/deploy-eks'
       - slack/status: *slack_status
   build_and_deploy_to_live:
     working_directory: ~/circle/git/fb-submitter
