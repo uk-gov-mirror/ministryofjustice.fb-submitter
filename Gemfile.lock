@@ -65,14 +65,14 @@ GEM
     ansi (1.5.0)
     ast (2.4.1)
     aws-eventstream (1.2.0)
-    aws-partitions (1.537.0)
-    aws-sdk-core (3.124.0)
+    aws-partitions (1.543.0)
+    aws-sdk-core (3.125.0)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.525.0)
       aws-sigv4 (~> 1.1)
       jmespath (~> 1.0)
-    aws-sdk-ses (1.44.0)
-      aws-sdk-core (~> 3, >= 3.122.0)
+    aws-sdk-ses (1.45.0)
+      aws-sdk-core (~> 3, >= 3.125.0)
       aws-sigv4 (~> 1.1)
     aws-sigv4 (1.4.0)
       aws-eventstream (~> 1, >= 1.0.2)
@@ -346,7 +346,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  aws-sdk-ses (~> 1.44.0)
+  aws-sdk-ses (~> 1.45.0)
   bootsnap (>= 1.1.0)
   brakeman
   byebug
