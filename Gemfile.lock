@@ -124,7 +124,7 @@ GEM
     faraday-rack (1.0.0)
     faraday_middleware (1.2.0)
       faraday (~> 1.0)
-    fb-jwt-auth (0.7.0)
+    fb-jwt-auth (0.8.0)
       activesupport
       json
       jwt
@@ -153,7 +153,7 @@ GEM
     i18n (1.8.11)
       concurrent-ruby (~> 1.0)
     jmespath (1.4.0)
-    json (2.5.1)
+    json (2.6.1)
     json-schema (2.8.1)
       addressable (>= 2.4)
     jwe (0.4.0)
@@ -356,7 +356,7 @@ DEPENDENCIES
   factory_bot_rails (~> 6.2)
   faraday
   faraday_middleware
-  fb-jwt-auth (~> 0.7.0)
+  fb-jwt-auth (~> 0.8.0)
   guard-rspec
   guard-shell
   json-schema (>= 2.8.1)
@@ -384,7 +384,7 @@ DEPENDENCIES
   webmock
 
 RUBY VERSION
-   ruby 2.7.3p183
+   ruby 2.7.5p203
 
 BUNDLED WITH
    2.1.4
