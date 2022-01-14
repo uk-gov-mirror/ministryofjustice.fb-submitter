@@ -295,9 +295,9 @@ GEM
       rubocop (>= 0.87.0)
     ruby-progressbar (1.10.1)
     ruby2_keywords (0.0.5)
-    sentry-delayed_job (4.8.1)
+    sentry-delayed_job (4.8.3)
       delayed_job (>= 4.0)
-      sentry-ruby-core (~> 4.8.1)
+      sentry-ruby-core (~> 4.8.3)
     sentry-rails (4.8.3)
       railties (>= 5.0)
       sentry-ruby-core (~> 4.8.3)
@@ -377,7 +377,7 @@ DEPENDENCIES
   rspec-rails (>= 3.8.0)
   rubocop (~> 0.87.1)
   rubocop-govuk
-  sentry-delayed_job (~> 4.8.1)
+  sentry-delayed_job (~> 4.8.3)
   sentry-rails (~> 4.8.3)
   sentry-ruby (~> 4.8.3)
   simplecov
