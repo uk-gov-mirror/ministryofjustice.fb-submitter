@@ -5,7 +5,7 @@ ruby File.read('.ruby-version').strip
 gem 'aws-sdk-ses', '~> 1.45.0'
 gem 'bootsnap', '>= 1.1.0', require: false
 gem 'daemons'
-gem 'delayed_job_active_record', '~> 4.1.6'
+gem 'delayed_job_active_record', '~> 4.1.7'
 gem 'faraday'
 gem 'faraday_middleware'
 gem 'fb-jwt-auth', '~> 0.8.0'
