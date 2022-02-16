@@ -113,6 +113,22 @@ jobs:
             DEPLOYMENT_ENV: production
             K8S_NAMESPACE: formbuilder-platform-live-production
           command: './deploy-scripts/bin/deploy'
+      - run:
+          name: deploy to live dev (eks)
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: live
+            DEPLOYMENT_ENV: dev
+            K8S_NAMESPACE: formbuilder-platform-live-dev
+          command: './deploy-scripts/bin/deploy-eks'
+      - run:
+          name: deploy to live production (eks)
+          environment:
+            APPLICATION_NAME: fb-submitter
+            PLATFORM_ENV: live
+            DEPLOYMENT_ENV: production
+            K8S_NAMESPACE: formbuilder-platform-live-production
+          command: './deploy-scripts/bin/deploy-eks'
       - slack/status:
           only_for_branches: master
           success_message: ":rocket:  Successfully deployed to Live  :guitar:"
