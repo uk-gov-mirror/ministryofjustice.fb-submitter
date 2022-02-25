@@ -1,30 +1,53 @@
 version: 2.1
 orbs:
   slack: circleci/slack@3.4.2
+  ruby: circleci/ruby@1.4.0
 
 jobs:
-  test:
-    working_directory: ~/circle
-    docker:
-      - image: cimg/ruby:2.7.5
+  build:
+    docker: &ruby_image
+      - image: 'cimg/ruby:2.7.5'
     steps:
       - checkout
-      - setup_remote_docker
-      - run:
-          name: lint
-          command: docker-compose run --rm app bundle exec rubocop
-      - run:
-          name: security
-          command: docker-compose run --rm app bundle exec brakeman -q --no-pager
-      - run:
-          name: test
-          command: docker-compose run --rm app bundle exec rspec
+      - ruby/install-deps
       - slack/status: &slack_status
           fail_only: true
           only_for_branches: master
           failure_message: ":facepalm:  Failed job $CIRCLE_JOB  :homer-disappear:"
           include_job_number_field: false
-  build_and_deploy_to_test:
+  test:
+    working_directory: ~/circle
+    docker: *ruby_image
+    steps:
+      - checkout
+      - setup_remote_docker: &remote_docker
+          version: 20.10.11
+          docker_layer_caching: true
+      - run:
+          name: test
+          command: docker-compose run --rm app bundle exec rspec
+      - slack/status: *slack_status
+  lint:
+    working_directory: ~/circle
+    docker: *ruby_image
+    steps:
+      - checkout
+      - ruby/install-deps
+      - run:
+          name: lint
+          command: bundle exec rubocop
+      - slack/status: *slack_status
+  security:
+    working_directory: ~/circle
+    docker: *ruby_image
+    steps:
+      - checkout
+      - ruby/install-deps
+      - run:
+          name: security
+          command: bundle exec brakeman -q --no-pager
+      - slack/status: *slack_status
+  build_and_push_image:
     working_directory: ~/circle/git/fb-submitter
     docker: &ecr_image
       - image: $AWS_BUILD_IMAGE_ECR_ACCOUNT_URL
@@ -33,10 +56,7 @@ jobs:
           aws_secret_access_key: $AWS_BUILD_IMAGE_SECRET_ACCESS_KEY
     steps:
       - checkout
-      - setup_remote_docker
-      - add_ssh_keys: &ssh_keys
-          fingerprints:
-            - "5d:c8:80:1b:1a:82:af:e0:30:26:d1:62:37:7e:c9:c1"
+      - setup_remote_docker: *remote_docker
       - run: &base_environment_variables
           name: Setup base environment variable
           command: |
@@ -50,22 +70,18 @@ jobs:
           environment:
             ENVIRONMENT_NAME: test
           command: './deploy-scripts/bin/build'
-      - run:
-          name: deploy to test dev
-          environment:
-            APPLICATION_NAME: fb-submitter
-            PLATFORM_ENV: test
-            DEPLOYMENT_ENV: dev
-            K8S_NAMESPACE: formbuilder-platform-test-dev
-          command: './deploy-scripts/bin/deploy'
-      - run:
-          name: deploy to test production
-          environment:
-            APPLICATION_NAME: fb-submitter
-            PLATFORM_ENV: test
-            DEPLOYMENT_ENV: production
-            K8S_NAMESPACE: formbuilder-platform-test-production
-          command: './deploy-scripts/bin/deploy'
+      - slack/status: *slack_status
+  deploy_to_test_dev:
+    working_directory: ~/circle/git/fb-submitter
+    docker: *ecr_image
+    steps:
+      - checkout
+      - setup_remote_docker: *remote_docker
+      - add_ssh_keys: &ssh_keys
+          fingerprints:
+            - "5d:c8:80:1b:1a:82:af:e0:30:26:d1:62:37:7e:c9:c1"
+      - run: *base_environment_variables
+      - run: *deploy_scripts
       - run:
           name: deploy to test dev (EKS cluster)
           environment:
@@ -74,6 +90,16 @@ jobs:
             DEPLOYMENT_ENV: dev
             K8S_NAMESPACE: formbuilder-platform-test-dev
           command: './deploy-scripts/bin/deploy-eks'
+      - slack/status: *slack_status
+  deploy_to_test_production:
+    working_directory: ~/circle/git/fb-submitter
+    docker: *ecr_image
+    steps:
+      - checkout
+      - setup_remote_docker: *remote_docker
+      - add_ssh_keys: *ssh_keys
+      - run: *base_environment_variables
+      - run: *deploy_scripts
       - run:
           name: deploy to test production (EKS cluster)
           environment:
@@ -83,36 +109,15 @@ jobs:
             K8S_NAMESPACE: formbuilder-platform-test-production
           command: './deploy-scripts/bin/deploy-eks'
       - slack/status: *slack_status
-  build_and_deploy_to_live:
+  deploy_to_live_dev:
     working_directory: ~/circle/git/fb-submitter
     docker: *ecr_image
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker: *remote_docker
       - add_ssh_keys: *ssh_keys
       - run: *base_environment_variables
       - run: *deploy_scripts
-      - run:
-          name: build and push docker images
-          environment:
-            ENVIRONMENT_NAME: live
-          command: './deploy-scripts/bin/build'
-      - run:
-          name: deploy to live dev
-          environment:
-            APPLICATION_NAME: fb-submitter
-            PLATFORM_ENV: live
-            DEPLOYMENT_ENV: dev
-            K8S_NAMESPACE: formbuilder-platform-live-dev
-          command: './deploy-scripts/bin/deploy'
-      - run:
-          name: deploy to live production
-          environment:
-            APPLICATION_NAME: fb-submitter
-            PLATFORM_ENV: live
-            DEPLOYMENT_ENV: production
-            K8S_NAMESPACE: formbuilder-platform-live-production
-          command: './deploy-scripts/bin/deploy'
       - run:
           name: deploy to live dev (eks)
           environment:
@@ -121,6 +126,20 @@ jobs:
             DEPLOYMENT_ENV: dev
             K8S_NAMESPACE: formbuilder-platform-live-dev
           command: './deploy-scripts/bin/deploy-eks'
+      - slack/status:
+          only_for_branches: master
+          success_message: ":rocket:  Successfully deployed to Live Dev  :guitar:"
+          failure_message: ":alert:  Failed to deploy to Live Dev  :try_not_to_cry:"
+          include_job_number_field: false
+  deploy_to_live_production:
+    working_directory: ~/circle/git/fb-submitter
+    docker: *ecr_image
+    steps:
+      - checkout
+      - setup_remote_docker: *remote_docker
+      - add_ssh_keys: *ssh_keys
+      - run: *base_environment_variables
+      - run: *deploy_scripts
       - run:
           name: deploy to live production (eks)
           environment:
@@ -131,14 +150,14 @@ jobs:
           command: './deploy-scripts/bin/deploy-eks'
       - slack/status:
           only_for_branches: master
-          success_message: ":rocket:  Successfully deployed to Live  :guitar:"
-          failure_message: ":alert:  Failed to deploy to Live  :try_not_to_cry:"
+          success_message: ":rocket:  Successfully deployed to Live Production  :guitar:"
+          failure_message: ":alert:  Failed to deploy to Live Production  :try_not_to_cry:"
           include_job_number_field: false
   acceptance_tests:
     docker: *ecr_image
     resource_class: large
     steps:
-      - setup_remote_docker
+      - setup_remote_docker: *remote_docker
       - run: *deploy_scripts
       - run:
           name: Run acceptance tests
@@ -147,7 +166,7 @@ jobs:
   smoke_tests:
     docker: *ecr_image
     steps:
-      - setup_remote_docker
+      - setup_remote_docker: *remote_docker
       - run: *deploy_scripts
       - run:
           name: Run smoke tests
@@ -159,22 +178,39 @@ workflows:
   test_and_build:
     jobs:
       - test
-      - build_and_deploy_to_test:
+      - build
+      - lint:
+          requires:
+            -  build
+      - security:
+          requires:
+            -  build
+      - build_and_push_image:
           requires:
             - test
+            - lint
+            - security
           filters:
             branches:
               only:
                 - master
+      - deploy_to_test_dev:
+          requires:
+            - build_and_push_image
+      - deploy_to_test_production:
+          requires:
+            - build_and_push_image
       - acceptance_tests:
           requires:
-            - build_and_deploy_to_test
-          filters:
-            branches:
-              only: master
-      - build_and_deploy_to_live:
+            - deploy_to_test_dev
+            - deploy_to_test_production
+      - deploy_to_live_dev:
+          requires:
+            - acceptance_tests
+      - deploy_to_live_production:
           requires:
             - acceptance_tests
       - smoke_tests:
           requires:
-            - build_and_deploy_to_live
+            - deploy_to_live_dev
+            - deploy_to_live_production
