@@ -6,7 +6,12 @@ metadata:
   name: "fb-submitter-api-{{ .Values.environmentName }}"
   namespace: formbuilder-platform-{{ .Values.environmentName }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicas.api }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.strategy.api.maxSurge }}
+      maxUnavailable: {{ .Values.strategy.api.maxUnavailable }}
   selector:
     matchLabels:
       app: "fb-submitter-api-{{ .Values.environmentName }}"
@@ -26,15 +31,26 @@ spec:
         securityContext:
           runAsUser: 1001
         imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sleep", "10"]
         ports:
           - containerPort: 3000
-        readinessProbe:
+        livenessProbe:
           httpGet:
             path: /health
             port: 3000
-          initialDelaySeconds: 15
-          periodSeconds: 5
-          successThreshold: 1
+          initialDelaySeconds: {{ .Values.livenessProbe.api.initialDelaySeconds }}
+          periodSeconds: {{ .Values.livenessProbe.api.periodSeconds }}
+          successThreshold: {{ .Values.livenessProbe.api.successThreshold }}
+        readinessProbe:
+          httpGet:
+            path: /readiness
+            port: 3000
+          initialDelaySeconds: {{ .Values.readinessProbe.api.initialDelaySeconds }}
+          periodSeconds: {{ .Values.readinessProbe.api.periodSeconds }}
+          successThreshold: {{ .Values.readinessProbe.api.successThreshold }}
         # non-secret env vars
         # defined in config_map.yaml
         envFrom:
@@ -97,7 +113,7 @@ metadata:
   name: "fb-submitter-workers-{{ .Values.environmentName }}"
   namespace: formbuilder-platform-{{ .Values.environmentName }}
 spec:
-  replicas: 2
+  replicas: {{ .Values.replicas.workers }}
   selector:
     matchLabels:
       app: "fb-submitter-workers-{{ .Values.environmentName }}"
@@ -113,6 +129,10 @@ spec:
       - name: "fb-submitter-workers"
         image: "754256621582.dkr.ecr.eu-west-2.amazonaws.com/formbuilder/fb-submitter-workers:{{ .Values.circleSha1 }}"
         imagePullPolicy: Always
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sleep", "10"]
         volumeMounts:
         - mountPath: /tmp
           name: tmp-files
