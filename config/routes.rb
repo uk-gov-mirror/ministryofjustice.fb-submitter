@@ -1,5 +1,6 @@
 Rails.application.routes.draw do
   get '/health', to: 'health#show'
+  get '/readiness', to: 'health#readiness'
   post '/submission', to: 'submission#create'
 
   namespace 'v2' do
