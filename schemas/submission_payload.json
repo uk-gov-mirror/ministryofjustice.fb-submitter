@@ -30,6 +30,9 @@
         },
         "pdf_subheading": {
           "type": "string"
+        },
+        "submission_at": {
+          "type": "string"
         }
       }
     },
@@ -64,6 +67,7 @@
         "kind": {
           "type": "string",
           "enum": [
+            "csv",
             "email",
             "json"
           ]

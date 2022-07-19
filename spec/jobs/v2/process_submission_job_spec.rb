@@ -13,12 +13,8 @@ RSpec.describe V2::ProcessSubmissionJob do
     let(:submission) do
       create(:submission, payload: encrypted_payload, access_token: access_token)
     end
-    let(:encrypted_payload) do
-      SubmissionEncryption.new(key: key).encrypt(JSON.parse(
-                                                   File.read(
-                                                     Rails.root.join('spec/fixtures/payloads/valid_submission.json')
-                                                   )
-                                                 ))
+    let(:payload_fixture) do
+      JSON.parse(File.read(Rails.root.join('spec/fixtures/payloads/valid_submission.json')))
     end
     let(:access_token) do
       'jar-jar-binks'
@@ -32,49 +28,86 @@ RSpec.describe V2::ProcessSubmissionJob do
     let(:generated_pdf_content) do
       "I'm one with the Force. The Force is with me.\n"
     end
-    let(:expected_action) do
-      {
-        subject: 'Email Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032',
-        to: 'captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com'
-      }
-    end
 
     before do
       allow(ENV).to receive(:[])
       allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(key)
       allow(EmailOutputService).to receive(:new).and_return(email_output_service)
-
-      stub_request(:post, 'http://pdf-generator.com/v1/pdfs')
-        .with(body: expected_pdf_request_body)
-        .to_return(status: 200, body: generated_pdf_content, headers: {})
-
-      stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/dog-contest/user/1/123')
-        .to_return(status: 200, body: 'image', headers: {})
     end
 
-    it 'sends the email with pdf attachment' do
-      perform_job
+    context 'when email action' do
+      let(:encrypted_payload) do
+        fixture = payload_fixture
+        fixture['actions'] = fixture['actions'].select { |action| action['kind'] == 'email' }
+        SubmissionEncryption.new(key: key).encrypt(fixture)
+      end
+      let(:expected_action) do
+        {
+          subject: 'Email Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032',
+          to: 'captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com'
+        }
+      end
 
-      expect(email_output_service).to have_received(:execute) do |args|
-        pdf_contents = File.open(args[:pdf_attachment].path).read
-        expect(pdf_contents).to eq(generated_pdf_content)
+      before do
+        stub_request(:post, 'http://pdf-generator.com/v1/pdfs')
+          .with(body: expected_pdf_request_body)
+          .to_return(status: 200, body: generated_pdf_content, headers: {})
+
+        stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/dog-contest/user/1/123')
+          .to_return(status: 200, body: 'image', headers: {})
+      end
+
+      it 'sends the email with pdf attachment' do
+        perform_job
+
+        expect(email_output_service).to have_received(:execute) do |args|
+          pdf_contents = File.open(args[:pdf_attachment].path).read
+          expect(pdf_contents).to eq(generated_pdf_content)
+        end
+      end
+
+      it 'sends email with attachments' do
+        perform_job
+
+        expect(email_output_service).to have_received(:execute) do |args|
+          expect(args[:attachments].length).to eq(1)
+          expect(args[:attachments].first.filename).to match(/basset-hound-dog-picture.png/)
+        end
+      end
+
+      it 'sends the email with subject' do
+        perform_job
+
+        expect(email_output_service).to have_received(:execute) do |args|
+          expect(args[:action]).to include(expected_action)
+        end
       end
     end
 
-    it 'sends email with attachments' do
-      perform_job
-
-      expect(email_output_service).to have_received(:execute) do |args|
-        expect(args[:attachments].length).to eq(1)
-        expect(args[:attachments].first.filename).to match(/basset-hound-dog-picture.png/)
+    context 'when csv action' do
+      let(:encrypted_payload) do
+        fixture = payload_fixture
+        fixture['actions'] = fixture['actions'].select { |action| action['kind'] == 'csv' }
+        SubmissionEncryption.new(key: key).encrypt(fixture)
       end
-    end
+      let(:expected_action) do
+        {
+          kind: 'csv',
+          subject: 'CSV Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032',
+          to: 'captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com',
+          from: '"Email Output Acceptance Test Service" <moj-online@digital.justice.gov.uk>',
+          email_body: '',
+          include_attachments: false,
+          include_pdf: true
+        }
+      end
 
-    it 'sends the email with subject' do
-      perform_job
+      it 'sends an email with a csv attachement' do
+        perform_job
 
-      expect(email_output_service).to have_received(:execute) do |args|
-        expect(args[:action]).to include(expected_action)
+        expect(email_output_service).to have_received(:execute) do |args|
+          expect(args[:action]).to include(expected_action)
+        end
       end
     end
   end
