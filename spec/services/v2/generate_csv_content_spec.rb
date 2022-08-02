@@ -34,6 +34,15 @@ RSpec.describe V2::GenerateCsvContent do
               'answer' => 'fb-acceptance-tests@digital.justice.gov.uk'
             }
           ]
+        },
+        {
+          'heading' => 'Your life history',
+          'answers' => [
+            {
+              'field_id' => 'life-history_textarea_1',
+              'answer' => "Zombie ipsum reversus ab viral inferno, nam rick grimes malum cerebro.\n\r\nDe carne lumbering animata corpora quaeritis.\n\r\nSummus brains sit, morbo vel maleficia?"
+            }
+          ]
         }
       ]
     }
@@ -47,6 +56,7 @@ RSpec.describe V2::GenerateCsvContent do
         name_text_1
         name_text_2
         your-email-address_text_1
+        life-history_textarea_1
       ]
     end
     let(:expected_column_1) do
@@ -55,7 +65,8 @@ RSpec.describe V2::GenerateCsvContent do
         submission_at,
         'Stormtrooper',
         'FN-some-last-name',
-        'fb-acceptance-tests@digital.justice.gov.uk'
+        'fb-acceptance-tests@digital.justice.gov.uk',
+        'Zombie ipsum reversus ab viral inferno, nam rick grimes malum cerebro. De carne lumbering animata corpora quaeritis. Summus brains sit, morbo vel maleficia?'
       ]
     end
 

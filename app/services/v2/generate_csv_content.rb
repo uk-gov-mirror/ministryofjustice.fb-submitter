@@ -40,7 +40,7 @@ module V2
 
     def answer_values
       payload_service.user_answers.values.map do |value|
-        value.is_a?(Hash) || value.is_a?(Array) ? DATA_UNAVAILABLE : value
+        value.is_a?(Hash) || value.is_a?(Array) ? DATA_UNAVAILABLE : value.gsub(/\R+/, ' ')
       end
     end
 
