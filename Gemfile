@@ -21,7 +21,7 @@ gem 'puma', '~> 5.6'
 gem 'rails', '~> 6.1.6.1', '< 7.0.0.0'
 gem 'sentry-delayed_job', '~> 5.4.1'
 gem 'sentry-rails', '~> 5.4.1'
-gem 'sentry-ruby', '~> 5.4.1'
+gem 'sentry-ruby', '~> 5.4.2'
 gem 'typhoeus'
 gem 'tzinfo-data'
 
