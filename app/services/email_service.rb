@@ -6,7 +6,7 @@ class EmailService
   def self.sanitised_params(opts = {})
     override_params = {}
     override_params[:to] = ENV['OVERRIDE_EMAIL_TO'] if ENV['OVERRIDE_EMAIL_TO'].present?
-    override_params[:raw_message] = RawMessage.new(opts.merge(override_params))
+    override_params[:raw_message] = opts[:raw_message].new(opts.merge(override_params))
 
     opts.merge(override_params)
   end
