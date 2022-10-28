@@ -75,7 +75,7 @@ spec:
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
-                name: rds-instance-formbuilder-submitter-{{ .Values.environmentName }}
+                name: rds-instance-formbuilder-submitter-2-{{ .Values.environmentName }}
                 key: url
           - name: SENTRY_DSN
             valueFrom:
@@ -171,7 +171,7 @@ spec:
           - name: DATABASE_URL
             valueFrom:
               secretKeyRef:
-                name: rds-instance-formbuilder-submitter-{{ .Values.environmentName }}
+                name: rds-instance-formbuilder-submitter-2-{{ .Values.environmentName }}
                 key: url
           - name: NOTIFY_API_KEY
             valueFrom:
