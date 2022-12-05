@@ -3,7 +3,6 @@ require 'tempfile'
 
 module V2
   class GenerateCsvContent
-    FIXED_HEADERS = %w[submission_id submission_at].freeze
     DATA_UNAVAILABLE = 'Data not available in CSV format'.freeze
 
     def initialize(payload_service:)
@@ -47,7 +46,7 @@ module V2
     def csv_data
       data = []
 
-      data << payload_service.submission_id
+      data << submission_reference
       data << payload_service.submission_at.iso8601(3)
       data.concat(answer_values)
 
@@ -55,16 +54,25 @@ module V2
     end
 
     def csv_headers
-      FIXED_HEADERS + payload_service.user_answers.keys
+      [first_heading, 'submission_at'] + payload_service.user_answers.keys
     end
 
     def generate_attachment_object(tmp_csv)
       attachment = Attachment.new(
-        filename: "#{payload_service.submission_id}-answers.csv",
+        filename: "#{submission_reference}-answers.csv",
         mimetype: 'text/csv'
       )
       attachment.file = tmp_csv
       attachment
+    end
+
+    def first_heading
+      payload_service.reference_number.present? ? 'reference_number' : 'submission_id'
+    end
+
+    def submission_reference
+      @submission_reference ||=
+        payload_service.reference_number || payload_service.submission_id
     end
   end
 end

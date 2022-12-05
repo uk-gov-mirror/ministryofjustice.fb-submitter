@@ -7,11 +7,14 @@ RSpec.describe V2::GenerateCsvContent do
     V2::SubmissionPayloadService.new(payload)
   end
   let(:submission_at) { Time.zone.now.iso8601(3) }
+  let(:submission_id) { SecureRandom.uuid }
 
+  let(:meta) do
+    { 'meta' => { 'submission_at' => submission_at } }
+  end
   let(:payload) do
     {
-      'meta' => { 'submission_at' => submission_at },
-      'service' => { 'id' => SecureRandom.uuid },
+      'service' => { 'id' => submission_id },
       'pages' => [
         {
           'heading' => 'Your name',
@@ -45,7 +48,7 @@ RSpec.describe V2::GenerateCsvContent do
           ]
         }
       ]
-    }
+    }.merge(meta)
   end
 
   context 'when requesting a csv with a submission' do
@@ -75,7 +78,7 @@ RSpec.describe V2::GenerateCsvContent do
       expect(result.class).to eq(Attachment)
     end
 
-    it 'creates the correct file name and type' do
+    it 'uses the submission id in the file name' do
       result = generate_csv_content.execute
 
       expect(result.filename).to eq("#{payload_service.submission_id}-answers.csv")
@@ -89,6 +92,41 @@ RSpec.describe V2::GenerateCsvContent do
 
       expect(csv[0]).to eq(expected_column_0)
       expect(csv[1]).to eq(expected_column_1)
+    end
+  end
+
+  context 'when reference number is present' do
+    let(:reference_number) { 'some-reference-number' }
+    let(:meta) do
+      { 'meta' => {
+        'submission_at' => submission_at,
+        'reference_number' => reference_number
+      } }
+    end
+
+    it 'does not add the submission id' do
+      result = generate_csv_content.execute
+      file_contents = File.open(result.path).read
+      csv = CSV.new(file_contents).read
+
+      expect(csv[0]).not_to include('submission_id')
+      expect(csv[1]).not_to include(submission_id)
+    end
+
+    it 'adds the reference number' do
+      result = generate_csv_content.execute
+      file_contents = File.open(result.path).read
+      csv = CSV.new(file_contents).read
+
+      expect(csv[0]).to include('reference_number')
+      expect(csv[1]).to include(reference_number)
+    end
+
+    it 'uses the reference number in the file name' do
+      result = generate_csv_content.execute
+
+      expect(result.filename).to eq("#{reference_number}-answers.csv")
+      expect(result.mimetype).to eq('text/csv')
     end
   end
 end

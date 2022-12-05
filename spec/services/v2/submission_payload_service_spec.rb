@@ -102,4 +102,23 @@ RSpec.describe V2::SubmissionPayloadService do
       expect(payload_service.user_answers).to eq(expected_user_answers)
     end
   end
+
+  describe '#reference_number' do
+    context 'when reference number does not exists in the payload' do
+      it 'returns nil' do
+        expect(payload_service.reference_number).to be_nil
+      end
+    end
+
+    context 'when reference number exists in the payload' do
+      let(:reference_number) { 'some-reference-number' }
+      let(:payload) do
+        { 'meta' => { 'reference_number' => reference_number } }
+      end
+
+      it 'returns the reference number' do
+        expect(payload_service.reference_number).to eq(reference_number)
+      end
+    end
+  end
 end
