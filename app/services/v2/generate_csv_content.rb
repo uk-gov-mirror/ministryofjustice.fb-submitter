@@ -46,7 +46,7 @@ module V2
     def csv_data
       data = []
 
-      data << payload_service.reference_number || payload_service.submission_id
+      data << submission_reference
       data << payload_service.submission_at.iso8601(3)
       data.concat(answer_values)
 
@@ -59,7 +59,7 @@ module V2
 
     def generate_attachment_object(tmp_csv)
       attachment = Attachment.new(
-        filename: "#{payload_service.submission_id}-answers.csv",
+        filename: "#{submission_reference}-answers.csv",
         mimetype: 'text/csv'
       )
       attachment.file = tmp_csv
@@ -68,6 +68,11 @@ module V2
 
     def first_heading
       payload_service.reference_number.present? ? 'reference_number' : 'submission_id'
+    end
+
+    def submission_reference
+      @submission_reference ||=
+        payload_service.reference_number || payload_service.submission_id
     end
   end
 end
