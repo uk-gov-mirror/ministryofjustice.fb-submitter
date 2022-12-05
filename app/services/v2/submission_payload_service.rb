@@ -17,6 +17,10 @@ module V2
       Time.zone.parse(date_string)
     end
 
+    def reference_number
+      payload.dig('meta', 'reference_number')
+    end
+
     def user_answers
       payload['pages'].each_with_object({}) do |page, hash|
         page['answers'].each do |answer|
