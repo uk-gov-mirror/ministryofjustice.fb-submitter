@@ -4,7 +4,8 @@ describe GeneratePdfContent do
   subject(:pdf_service) { described_class.new(pdf_api_gateway: gateway, payload: payload) }
 
   let(:gateway) { instance_spy('Adapters::PdfApi', generate_pdf: 'some pdf contents') }
-  let(:pdf_data) { { some: 'payload', submission_id: '123' } }
+  let(:submission_id) { 'some-submission-id' }
+  let(:pdf_data) { { some: 'payload', submission_id: submission_id } }
   let(:payload) { { submission: pdf_data } }
 
   context 'when requesting a pdf with a submission' do
@@ -20,9 +21,27 @@ describe GeneratePdfContent do
 
     it 'assigns the correct info the the Attachment object' do
       result = pdf_service.execute
-      expect(result.filename).to eq('123-answers.pdf')
       expect(result.mimetype).to eq('application/pdf')
       expect(File.open(result.path).read).to eq('some pdf contents')
+    end
+
+    context 'when there is no reference number present' do
+      it 'uses the submission id in the file name' do
+        result = pdf_service.execute
+        expect(result.filename).to eq("#{submission_id}-answers.pdf")
+      end
+    end
+
+    context 'when there is a reference number present' do
+      let(:reference_number) { 'some-reference-number' }
+      let(:pdf_data) do
+        { some: 'payload', submission_id: submission_id, reference_number: reference_number }
+      end
+
+      it 'uses the reference number in the file name' do
+        result = pdf_service.execute
+        expect(result.filename).to eq("#{reference_number}-answers.pdf")
+      end
     end
   end
 end

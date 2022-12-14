@@ -31,11 +31,15 @@ class GeneratePdfContent
 
   def generate_attachment_object(tmp_pdf)
     attachment = Attachment.new(
-      filename: "#{payload[:submission][:submission_id]}-answers.pdf",
+      filename: "#{submission_reference}-answers.pdf",
       mimetype: 'application/pdf'
     )
     attachment.file = tmp_pdf
     attachment
+  end
+
+  def submission_reference
+    payload[:submission][:reference_number] || payload[:submission][:submission_id]
   end
 
   attr_reader :pdf_api_gateway, :payload

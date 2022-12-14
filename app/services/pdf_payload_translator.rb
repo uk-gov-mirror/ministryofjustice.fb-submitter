@@ -11,6 +11,7 @@ class PdfPayloadTranslator
     {
       submission: {
         submission_id: decrypted_submission[:submission_id],
+        reference_number: meta[:reference_number],
         pdf_heading: meta[:pdf_heading],
         pdf_subheading: meta[:pdf_subheading],
         sections: decrypted_submission[:pages].map do |page|
@@ -25,7 +26,7 @@ class PdfPayloadTranslator
             end
           }
         end
-      }
+      }.compact
     }
   end
 
