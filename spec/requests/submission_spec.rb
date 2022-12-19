@@ -5,7 +5,7 @@ describe 'UserData API', type: :request do
   describe 'a POST request' do
     let(:headers) { { 'Content-type' => 'application/json' } }
     let(:service_slug) { 'my-service' }
-    let(:stub_aws) { Aws::SES::Client.new(region: 'eu-west-1', stub_responses: true) }
+    let(:stub_aws) { Aws::SESV2::Client.new(region: 'eu-west-1', stub_responses: true) }
     let(:pdf_file_content) { 'pdf binary goes here' }
     let(:url) { '/submission' }
     let(:post_request) { post url, params: params.to_json, headers: headers }
@@ -17,7 +17,7 @@ describe 'UserData API', type: :request do
       stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-aaa59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e1187aaa').to_return(status: 200, body: '', headers: {})
       stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/ioj/user/a239313d-4d2d-4a16-b5ef-69d6e8e53e86/28d-dae59621acecd4b1596dd0e96968c6cec3fae7927613a12c357e7a62e11877d8').to_return(status: 200, body: '', headers: {})
 
-      allow(Aws::SES::Client).to receive(:new).with(region: 'eu-west-1').and_return(stub_aws)
+      allow(Aws::SESV2::Client).to receive(:new).with(region: 'eu-west-1').and_return(stub_aws)
 
       # PDF Generator stubs
       stub_request(:get, 'http://fake_service_token_cache_root_url/service/my-service').to_return(status: 200, body: { token: '123' }.to_json)
@@ -128,7 +128,7 @@ describe 'UserData API', type: :request do
         context 'when the request is successful' do
           let(:raw_messages) do
             stub_aws.api_requests.map do |request|
-              request[:params][:raw_message][:data]
+              request[:params][:content][:raw][:data]
             end
           end
 

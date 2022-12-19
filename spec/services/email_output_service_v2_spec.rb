@@ -1,10 +1,10 @@
 require 'rails_helper'
-require_relative '../../app/services/email_output_service'
+require_relative '../../app/services/email_output_service_v2'
 require_relative '../../app/services/email_service'
 require_relative '../../app/services/attachment_generator'
 require_relative '../../app/value_objects/attachment'
 
-describe EmailOutputService do
+RSpec.describe EmailOutputServiceV2 do
   def match_payload(email_payloads, to, expected_filenames)
     expect(
       email_payloads.any? do |payload|
@@ -28,7 +28,7 @@ describe EmailOutputService do
   let(:payload_submission_id) { 'an-id-2323' }
 
   let(:email_service_mock) { class_double(EmailService) }
-  let(:raw_message_mock) { class_double(RawMessage) }
+  let(:raw_message_mock) { class_double(V2::RawMessage) }
   let(:attachment_generator) { AttachmentGenerator.new }
   let(:encryption_service) { EncryptionService.new }
 
@@ -71,10 +71,11 @@ describe EmailOutputService do
       from: 'form-builder@digital.justice.gov.uk',
       subject: 'Complain about a court or tribunal submission {an-id-2323} [1/1]',
       body_parts: {
-        'text/plain': 'Please find an application attached'
+        'text/plain': 'Please find an application attached',
+        'text/html': 'Please find an application attached'
       },
       attachments: [],
-      raw_message: RawMessage
+      raw_message: V2::RawMessage
     }
   end
 
@@ -88,7 +89,7 @@ describe EmailOutputService do
   context 'when email sending succeeds' do
     before do
       allow(email_service_mock).to receive(:send_mail)
-      subject.execute(**execution_payload)
+      service.execute(**execution_payload)
     end
 
     it 'execute sends an email' do
@@ -171,7 +172,7 @@ describe EmailOutputService do
       allow(email_service_mock).to receive(:send_mail).with(first_payload)
       allow(email_service_mock).to receive(:send_mail).with(second_payload).and_raise(Aws::SESV2::Errors::MessageRejected.new({}, 'it was the day my grandmother exploded'))
 
-      expect { subject.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
+      expect { service.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -184,7 +185,7 @@ describe EmailOutputService do
       allow(email_service_mock).to receive(:send_mail)
       expect(email_service_mock).not_to receive(:send_mail).with(first_payload) # rubocop:disable  RSpec/MessageSpies
 
-      subject.execute(**execution_payload)
+      service.execute(**execution_payload)
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -198,10 +199,10 @@ describe EmailOutputService do
     it 'does not care about the ordering of the attachments when retrying' do
       allow(email_service_mock).to receive(:send_mail).with(first_payload).and_raise(Aws::SESV2::Errors::MessageRejected.new({}, 'all children, except one, grow up'))
       allow(email_service_mock).to receive(:send_mail).with(second_payload)
-      expect { subject.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
+      expect { service.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
 
       allow(email_service_mock).to receive(:send_mail)
-      subject.execute(**execution_payload.merge(attachments: [upload3, upload2, upload1]))
+      service.execute(**execution_payload.merge(attachments: [upload3, upload2, upload1]))
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
