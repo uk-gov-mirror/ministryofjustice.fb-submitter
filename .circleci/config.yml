@@ -6,7 +6,7 @@ orbs:
 jobs:
   build:
     docker: &ruby_image
-      - image: 'cimg/ruby:2.7.5'
+      - image: 'cimg/ruby:2.7.7'
     steps:
       - checkout
       - ruby/install-deps
