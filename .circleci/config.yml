@@ -60,7 +60,7 @@ jobs:
           name: Setup base environment variable
           command: |
             echo "export BUILD_SHA=$CIRCLE_SHA1" >> $BASH_ENV
-            echo "export SSH_FILE_FOR_SECRETS=~/.ssh/id_rsa_5dc8801b1a82afe03026d162377ec9c1" >> $BASH_ENV
+            echo "export SSH_FILE_FOR_SECRETS=~/.ssh/id_rsa_f6b5f3b9d67ed45b0557fb62cc124dad" >> $BASH_ENV
       - run: &deploy_scripts
           name: cloning deploy scripts
           command: 'git clone git@github.com:ministryofjustice/fb-deploy.git deploy-scripts'
@@ -78,7 +78,7 @@ jobs:
       - setup_remote_docker: *remote_docker
       - add_ssh_keys: &ssh_keys
           fingerprints:
-            - "5d:c8:80:1b:1a:82:af:e0:30:26:d1:62:37:7e:c9:c1"
+            - "f6:b5:f3:b9:d6:7e:d4:5b:05:57:fb:62:cc:12:4d:ad"
       - run: *base_environment_variables
       - run: *deploy_scripts
       - run:
@@ -185,6 +185,9 @@ workflows:
           requires:
             -  build
       - build_and_push_image:
+          context: &context
+            - moj-forms
+            - moj-forms-platform-apps
           requires:
             - test
             - lint
@@ -194,22 +197,28 @@ workflows:
               only:
                 - master
       - deploy_to_test_dev:
+          context: *context
           requires:
             - build_and_push_image
       - deploy_to_test_production:
+          context: *context
           requires:
             - build_and_push_image
       - acceptance_tests:
+          context: *context
           requires:
             - deploy_to_test_dev
             - deploy_to_test_production
       - deploy_to_live_dev:
+          context: *context
           requires:
             - acceptance_tests
       - deploy_to_live_production:
+          context: *context
           requires:
             - acceptance_tests
       - smoke_tests:
+          context: *context
           requires:
             - deploy_to_live_dev
             - deploy_to_live_production
