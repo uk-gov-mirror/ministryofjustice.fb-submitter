@@ -44,7 +44,7 @@ jobs:
       - ruby/install-deps
       - run:
           name: security
-          command: bundle exec brakeman -q --no-pager
+          command: bundle exec brakeman -q --no-pager -i brakeman.ignore
       - slack/status: *slack_status
   build_and_push_image:
     working_directory: ~/circle/git/fb-submitter
