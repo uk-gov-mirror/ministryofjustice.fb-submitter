@@ -1,7 +1,7 @@
 class DownloadService
   attr_reader :attachments, :target_dir, :token, :access_token
 
-  def initialize(attachments:, target_dir: nil, token:, access_token:, jwt_skew_override:)
+  def initialize(attachments:, token:, access_token:, jwt_skew_override:, target_dir: nil)
     @attachments = attachments
     @target_dir = target_dir
     @token = token

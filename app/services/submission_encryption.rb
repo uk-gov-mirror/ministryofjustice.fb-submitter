@@ -2,7 +2,7 @@ class SubmissionEncryption
   attr_reader :encrypted_submission, :cipher, :key, :iv
 
   def initialize(key: ENV['SUBMISSION_DECRYPTION_KEY'])
-    @cipher = OpenSSL::Cipher::AES.new(256, :CTR)
+    @cipher = OpenSSL::Cipher.new('aes-256-ctr')
     @key = key
     @iv = @key[0..15]
   end

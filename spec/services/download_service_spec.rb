@@ -39,7 +39,7 @@ describe DownloadService do
       allow(mock_hydra).to receive(:queue).and_return('queue result')
       allow(downloader).to receive(:construct_request).and_return(mock_request)
       allow(mock_request).to receive(:run).and_return('run result')
-      allow(downloader).to receive(:file_path_for_download).and_return(path + '/file.ext')
+      allow(downloader).to receive(:file_path_for_download).and_return("#{path}/file.ext")
     end
 
     context 'when no target_dir is given' do
@@ -110,6 +110,7 @@ describe DownloadService do
         allow(downloader).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers: headers).and_return(mock_request_2)
       end
 
+      # rubocop:disable RSpec/StubbedMock
       describe 'for each url' do
         it 'gets the file_path_for_download' do
           expect(downloader).to receive(:file_path_for_download).with(url: url1, target_dir: path).and_return('/tmp/file1')
@@ -145,6 +146,7 @@ describe DownloadService do
           downloader.download_in_parallel
         end
       end
+      # rubocop:enable RSpec/StubbedMock
 
       it 'runs the request batch' do
         expect(mock_hydra).to receive(:run)
