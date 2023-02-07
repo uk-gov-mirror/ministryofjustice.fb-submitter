@@ -28,7 +28,7 @@ describe EmailService do
       end
 
       it 'has all the keys from the given opts' do
-        opts.keys.each do |key|
+        opts.each_key do |key|
           expect(return_value.keys).to include(key)
         end
       end

@@ -33,3 +33,6 @@ Style/TrailingCommaInArrayLiteral:
 
 Metrics/BlockLength:
   ExcludedMethods: ['describe', 'context', 'let']
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false

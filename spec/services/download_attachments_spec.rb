@@ -36,6 +36,7 @@ describe DownloadAttachments do
       .to_return(status: 200, body: 'THAT IS NOT A KNIFE', headers: {})
   end
 
+  # rubocop:disable RSpec/StubbedMock
   describe '#download' do
     context 'when no target_dir is given' do
       let(:target_dir) { nil }
@@ -188,6 +189,7 @@ describe DownloadAttachments do
       end
     end
   end
+  # rubocop:enable RSpec/StubbedMock
 
   context 'when the network request is unsuccessful' do
     subject(:downloader) do

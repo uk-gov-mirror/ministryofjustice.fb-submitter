@@ -4,7 +4,7 @@ class DownloadAttachments
   OPEN_TIMEOUT = 30
   attr_reader :attachments, :target_dir, :encrypted_user_id_and_token, :access_token
 
-  def initialize(attachments:, target_dir: nil, encrypted_user_id_and_token:, access_token:, jwt_skew_override:)
+  def initialize(attachments:, encrypted_user_id_and_token:, access_token:, jwt_skew_override:, target_dir: nil)
     @attachments = attachments
     @target_dir = target_dir || Dir.mktmpdir
     @encrypted_user_id_and_token = encrypted_user_id_and_token
