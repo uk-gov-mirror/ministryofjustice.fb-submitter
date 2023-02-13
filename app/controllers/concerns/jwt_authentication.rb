@@ -34,8 +34,10 @@ module Concerns
           token,
           hmac_secret,
           true,
-          exp_leeway: leeway,
-          algorithm: 'RS256'
+          {
+            exp_leeway: leeway,
+            algorithm: 'RS256'
+          }
         )
 
         # NOTE: verify_iat used to be in the JWT gem, but was removed in v2.2
