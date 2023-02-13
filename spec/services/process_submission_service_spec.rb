@@ -25,7 +25,7 @@ describe ProcessSubmissionService do
       ]
     end
 
-    let(:submission) { create(:submission, :csv, actions: actions, attachments: []) }
+    let(:submission) { create(:submission, :csv, actions:, attachments: []) }
     let(:submission_service_spy) { instance_spy(EmailOutputService) }
 
     before do
@@ -87,7 +87,7 @@ describe ProcessSubmissionService do
     end
 
     context 'with one attachment' do
-      let(:submission) { create(:submission, :email, actions: actions, attachments: attachments) }
+      let(:submission) { create(:submission, :email, actions:, attachments:) }
 
       before do
         service.perform
@@ -132,7 +132,7 @@ describe ProcessSubmissionService do
           }
         ]
       end
-      let(:submission) { create(:submission, :email, actions: actions, attachments: attachments) }
+      let(:submission) { create(:submission, :email, actions:, attachments:) }
 
       before do
         service.perform
@@ -163,7 +163,7 @@ describe ProcessSubmissionService do
         }
       ]
     end
-    let(:submission) { create(:submission, actions: actions) }
+    let(:submission) { create(:submission, actions:) }
     let(:json_webhook_service_spy) { instance_spy(JsonWebhookService) }
 
     before do
@@ -207,7 +207,7 @@ describe ProcessSubmissionService do
         }
       ]
     end
-    let(:submission) { create(:submission, actions: actions) }
+    let(:submission) { create(:submission, actions:) }
 
     it 'logs a warning' do
       expect(Rails.logger).to receive(:warn).with("Unknown action type 'unknown' for submission id #{submission.id}")

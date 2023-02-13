@@ -32,10 +32,10 @@ class ProcessSubmissionService
                                            submission.encrypted_user_id_and_token,
                                            submission.access_token)
 
-        send_email(action: action, attachments: attachments, pdf_attachment: pdf)
+        send_email(action:, attachments:, pdf_attachment: pdf)
       when 'csv'
         csv_attachment = generate_csv(payload_service)
-        send_email(action: action, attachments: [csv_attachment])
+        send_email(action:, attachments: [csv_attachment])
       else
         Rails.logger.warn "Unknown action type '#{action.fetch(:type)}' for submission id #{submission.id}"
       end
@@ -51,9 +51,9 @@ class ProcessSubmissionService
     DownloadAttachments.new(
       attachments: attachments_payload,
       target_dir: nil,
-      encrypted_user_id_and_token: encrypted_user_id_and_token,
-      access_token: access_token,
-      jwt_skew_override: jwt_skew_override
+      encrypted_user_id_and_token:,
+      access_token:,
+      jwt_skew_override:
     ).download
   end
 
@@ -65,7 +65,7 @@ class ProcessSubmissionService
   end
 
   def generate_csv(payload_service)
-    GenerateCsvContent.new(payload_service: payload_service).execute
+    GenerateCsvContent.new(payload_service:).execute
   end
 
   def pdf_gateway
@@ -88,12 +88,12 @@ class ProcessSubmissionService
       emailer: EmailService,
       attachment_generator: AttachmentGenerator.new,
       encryption_service: EncryptionService.new,
-      submission_id: submission_id,
+      submission_id:,
       payload_submission_id: payload_service.submission_id
     ).execute(
-      action: action,
-      attachments: attachments,
-      pdf_attachment: pdf_attachment
+      action:,
+      attachments:,
+      pdf_attachment:
     )
   end
 end

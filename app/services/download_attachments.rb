@@ -19,9 +19,9 @@ class DownloadAttachments
       url = attachment.fetch('url')
       filename = attachment.fetch('filename')
       mimetype = attachment.fetch('mimetype')
-      tmp_path = file_path_for_download(url: url)
-      request(url: url, file_path: tmp_path, headers: headers)
-      results << Attachment.new(url: url, path: tmp_path, filename: filename, mimetype: mimetype)
+      tmp_path = file_path_for_download(url:)
+      request(url:, file_path: tmp_path, headers:)
+      results << Attachment.new(url:, path: tmp_path, filename:, mimetype:)
     end
 
     results

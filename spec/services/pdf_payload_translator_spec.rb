@@ -15,7 +15,7 @@ RSpec.describe PdfPayloadTranslator do
 
       context 'when there is no reference number present' do
         let(:decrypted_submission) do
-          valid_submission.merge(submission_id: submission_id)
+          valid_submission.merge(submission_id:)
         end
         let(:expected_payload) do
           {
@@ -31,7 +31,7 @@ RSpec.describe PdfPayloadTranslator do
       context 'when there is a reference number present' do
         let(:reference_number) { 'some-reference-number' }
         let(:decrypted_submission) do
-          sub = valid_submission.merge(submission_id: submission_id)
+          sub = valid_submission.merge(submission_id:)
           sub['meta']['reference_number'] = reference_number
           sub
         end

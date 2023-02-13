@@ -4,7 +4,7 @@ require 'jwe'
 
 describe Adapters::JweWebhookDestination do
   subject(:adapter) do
-    described_class.new(url: expected_url, key: key)
+    described_class.new(url: expected_url, key:)
   end
 
   let(:payload) do

@@ -16,7 +16,7 @@ class Sms
 
   def personalisation
     hash = {
-      body: body
+      body:
     }
 
     hash.reverse_merge!(extra_personalisation)

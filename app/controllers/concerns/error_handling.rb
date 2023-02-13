@@ -28,13 +28,13 @@ module Concerns
 
       error = {
         title: I18n.t(:title, scope: [:error_messages, error_code]),
-        status: status
+        status:
       }.merge(extra)
 
       detail = I18n.t(:detail, scope: [:error_messages, error_code], default: '')
       error[:detail] = detail unless detail.empty?
 
-      render json: { errors: [error] }, status: status
+      render json: { errors: [error] }, status:
     end
   end
 end

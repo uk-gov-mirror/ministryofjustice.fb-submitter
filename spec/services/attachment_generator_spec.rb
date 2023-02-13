@@ -25,7 +25,7 @@ describe AttachmentGenerator do
   # rubocop:disable RSpec/ExampleLength
   context 'when no attachments or pdfs are required' do
     it 'will not sort any attachments' do
-      subject.execute(action: {}, attachments: [upload1, upload2], pdf_attachment: pdf_attachment)
+      subject.execute(action: {}, attachments: [upload1, upload2], pdf_attachment:)
       expect(subject.sorted_attachments).to be_empty
     end
   end
@@ -63,7 +63,7 @@ describe AttachmentGenerator do
       subject.execute(
         action: { include_pdf: true },
         attachments: nil,
-        pdf_attachment: pdf_attachment
+        pdf_attachment:
       )
 
       expect(subject.sorted_attachments).to eq([[pdf_attachment]])
@@ -75,7 +75,7 @@ describe AttachmentGenerator do
       subject.execute(
         action: { include_attachments: true, include_pdf: true },
         attachments: [upload1, upload2],
-        pdf_attachment: pdf_attachment
+        pdf_attachment:
       )
 
       expect(subject.sorted_attachments).to eq([[pdf_attachment, upload2, upload1]])
@@ -85,7 +85,7 @@ describe AttachmentGenerator do
       subject.execute(
         action: { include_attachments: true, include_pdf: true },
         attachments: [upload1, upload2, upload3, upload4, upload5, upload6],
-        pdf_attachment: pdf_attachment
+        pdf_attachment:
       )
 
       expect(subject.sorted_attachments).to eq(

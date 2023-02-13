@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe V2::GenerateCsvContent do
-  subject(:generate_csv_content) { described_class.new(payload_service: payload_service) }
+  subject(:generate_csv_content) { described_class.new(payload_service:) }
 
   let(:payload_service) do
     V2::SubmissionPayloadService.new(payload)

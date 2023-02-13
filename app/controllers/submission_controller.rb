@@ -3,7 +3,7 @@ class SubmissionController < ApplicationController
     @submission = Submission.create!(
       submission_params.merge(
         payload: EncryptionService.new.encrypt(payload),
-        access_token: access_token
+        access_token:
       )
     )
 

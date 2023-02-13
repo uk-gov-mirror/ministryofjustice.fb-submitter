@@ -23,10 +23,10 @@ describe DownloadService do
 
   describe '#download_in_parallel' do
     subject(:downloader) do
-      described_class.new(attachments: attachments,
-                          target_dir: target_dir,
-                          token: token,
-                          access_token: access_token,
+      described_class.new(attachments:,
+                          target_dir:,
+                          token:,
+                          access_token:,
                           jwt_skew_override: nil)
     end
 
@@ -57,10 +57,10 @@ describe DownloadService do
 
     context 'when a target_dir is given' do
       subject(:downloader) do
-        described_class.new(attachments: attachments,
-                            target_dir: target_dir,
-                            token: token,
-                            access_token: access_token,
+        described_class.new(attachments:,
+                            target_dir:,
+                            token:,
+                            access_token:,
                             jwt_skew_override: nil)
       end
 
@@ -74,10 +74,10 @@ describe DownloadService do
 
     context 'with an array of urls' do
       subject(:downloader) do
-        described_class.new(attachments: attachments,
+        described_class.new(attachments:,
                             target_dir: path,
-                            token: token,
-                            access_token: access_token,
+                            token:,
+                            access_token:,
                             jwt_skew_override: nil)
       end
 
@@ -106,8 +106,8 @@ describe DownloadService do
       before do
         allow(downloader).to receive(:file_path_for_download).with(url: url1, target_dir: path).and_return('/tmp/file1')
         allow(downloader).to receive(:file_path_for_download).with(url: url2, target_dir: path).and_return('/tmp/file2')
-        allow(downloader).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1', headers: headers).and_return(mock_request_1)
-        allow(downloader).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers: headers).and_return(mock_request_2)
+        allow(downloader).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1', headers:).and_return(mock_request_1)
+        allow(downloader).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers:).and_return(mock_request_2)
       end
 
       # rubocop:disable RSpec/StubbedMock
@@ -119,8 +119,8 @@ describe DownloadService do
         end
 
         it 'constructs a request, passing the url and file path for download' do
-          expect(downloader).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1', headers: headers)
-          expect(downloader).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers: headers)
+          expect(downloader).to receive(:construct_request).with(url: url1, file_path: '/tmp/file1', headers:)
+          expect(downloader).to receive(:construct_request).with(url: url2, file_path: '/tmp/file2', headers:)
           downloader.download_in_parallel
         end
 
@@ -133,8 +133,8 @@ describe DownloadService do
             expected_url1 = 'https://example.com/service/some-service/user/some-user/fingerprint'
             expected_url2 = 'https://another.domain/some/otherfile.ext'
 
-            expect(Typhoeus::Request).to receive(:new).with(expected_url1, followlocation: true, headers: headers).and_return(double.as_null_object)
-            expect(Typhoeus::Request).to receive(:new).with(expected_url2, followlocation: true, headers: headers).and_return(double.as_null_object)
+            expect(Typhoeus::Request).to receive(:new).with(expected_url1, followlocation: true, headers:).and_return(double.as_null_object)
+            expect(Typhoeus::Request).to receive(:new).with(expected_url2, followlocation: true, headers:).and_return(double.as_null_object)
 
             downloader.download_in_parallel
           end
@@ -190,10 +190,10 @@ describe DownloadService do
 
       context 'when a jwt skew override is supplied' do
         subject(:downloader) do
-          described_class.new(attachments: attachments,
-                              target_dir: target_dir,
-                              token: token,
-                              access_token: access_token,
+          described_class.new(attachments:,
+                              target_dir:,
+                              token:,
+                              access_token:,
                               jwt_skew_override: '600')
         end
 
@@ -209,10 +209,10 @@ describe DownloadService do
 
   context 'when the network request is unsuccessful' do
     subject(:downloader) do
-      described_class.new(attachments: attachments,
-                          target_dir: target_dir,
-                          token: token,
-                          access_token: access_token,
+      described_class.new(attachments:,
+                          target_dir:,
+                          token:,
+                          access_token:,
                           jwt_skew_override: nil)
     end
 

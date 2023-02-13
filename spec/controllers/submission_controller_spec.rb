@@ -20,7 +20,7 @@ RSpec.describe SubmissionController, type: :controller do
     {
       service_slug: 'service-slug',
       encrypted_user_id_and_token: 'encrypted-token',
-      encrypted_submission: encrypted_submission
+      encrypted_submission:
     }
   end
   let(:headers) do

@@ -1,11 +1,11 @@
 require_relative '../../app/services/generate_pdf_content'
 
 describe GeneratePdfContent do
-  subject(:pdf_service) { described_class.new(pdf_api_gateway: gateway, payload: payload) }
+  subject(:pdf_service) { described_class.new(pdf_api_gateway: gateway, payload:) }
 
   let(:gateway) { instance_spy('Adapters::PdfApi', generate_pdf: 'some pdf contents') }
   let(:submission_id) { 'some-submission-id' }
-  let(:pdf_data) { { some: 'payload', submission_id: submission_id } }
+  let(:pdf_data) { { some: 'payload', submission_id: } }
   let(:payload) { { submission: pdf_data } }
 
   context 'when requesting a pdf with a submission' do
@@ -35,7 +35,7 @@ describe GeneratePdfContent do
     context 'when there is a reference number present' do
       let(:reference_number) { 'some-reference-number' }
       let(:pdf_data) do
-        { some: 'payload', submission_id: submission_id, reference_number: reference_number }
+        { some: 'payload', submission_id:, reference_number: }
       end
 
       it 'uses the reference number in the file name' do

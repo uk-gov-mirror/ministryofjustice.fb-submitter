@@ -1,5 +1,5 @@
 describe Adapters::UserFileStore do
-  subject(:adaptor) { described_class.new(key: key) }
+  subject(:adaptor) { described_class.new(key:) }
 
   before do
     stub_request(:post, requested_url).to_return(body: { url: 'foo', encryption_key: 'bar', encryption_iv: 'baz' }.to_json)

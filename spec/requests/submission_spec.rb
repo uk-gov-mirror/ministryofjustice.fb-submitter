@@ -8,7 +8,7 @@ describe 'UserData API', type: :request do
     let(:stub_aws) { Aws::SESV2::Client.new(region: 'eu-west-1', stub_responses: true) }
     let(:pdf_file_content) { 'pdf binary goes here' }
     let(:url) { '/submission' }
-    let(:post_request) { post url, params: params.to_json, headers: headers }
+    let(:post_request) { post url, params: params.to_json, headers: }
     let(:submission_decryption_key) { SecureRandom.uuid[0..31] }
 
     before do
@@ -104,12 +104,12 @@ describe 'UserData API', type: :request do
         let(:payload) do
           {
             meta: {
-              submission_id: submission_id,
+              submission_id:,
               submission_at: '2019-12-18T13:19:29.626Z'
             },
-            actions: actions,
-            submission: submission,
-            attachments: attachments
+            actions:,
+            submission:,
+            attachments:
           }
         end
         let(:encrypted_submission) do
@@ -119,9 +119,9 @@ describe 'UserData API', type: :request do
         end
         let(:params) do
           {
-            service_slug: service_slug,
-            encrypted_user_id_and_token: encrypted_user_id_and_token,
-            encrypted_submission: encrypted_submission
+            service_slug:,
+            encrypted_user_id_and_token:,
+            encrypted_submission:
           }
         end
 

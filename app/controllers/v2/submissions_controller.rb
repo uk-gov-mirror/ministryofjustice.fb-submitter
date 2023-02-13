@@ -9,7 +9,7 @@ module V2
     def create
       @submission = Submission.create!(
         payload: SubmissionEncryption.new.encrypt(decrypted_submission),
-        access_token: access_token,
+        access_token:,
         service_slug: submission_params[:service_slug],
         encrypted_user_id_and_token: submission_params[:encrypted_user_id_and_token]
       )

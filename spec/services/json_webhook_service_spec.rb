@@ -3,8 +3,8 @@ require 'rails_helper'
 describe JsonWebhookService do
   subject(:service) do
     described_class.new(
-      webhook_attachment_fetcher: webhook_attachment_fetcher,
-      webhook_destination_adapter: webhook_destination_adapter
+      webhook_attachment_fetcher:,
+      webhook_destination_adapter:
     )
   end
 
@@ -41,7 +41,7 @@ describe JsonWebhookService do
       serviceSlug: submission.service_slug,
       submissionId: submission.decrypted_payload[:submission]['submission_id'],
       submissionAnswers: user_answers,
-      attachments: attachments
+      attachments:
     }.to_json
   end
 
@@ -49,7 +49,7 @@ describe JsonWebhookService do
     allow(webhook_destination_adapter).to receive(:send_webhook)
     allow(webhook_attachment_fetcher).to receive(:execute).and_return(attachments)
     service.execute(
-      user_answers: user_answers, service_slug: submission.service_slug, payload_submission_id: submission.decrypted_payload[:submission]['submission_id']
+      user_answers:, service_slug: submission.service_slug, payload_submission_id: submission.decrypted_payload[:submission]['submission_id']
     )
   end
 

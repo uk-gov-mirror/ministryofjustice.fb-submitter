@@ -16,7 +16,7 @@ describe 'V2 Submissions endpoint', type: :request do
     let(:encrypted_user_id_and_token) { '4df5ab180993404877562a03601a1137' }
     let(:url) { '/v2/submissions' }
     let(:pdf_file_content) { 'apology accepted, captain needa' }
-    let(:post_request) { post url, params: params.to_json, headers: headers }
+    let(:post_request) { post url, params: params.to_json, headers: }
     let(:submission_decryption_key) { SecureRandom.uuid[0..31] }
     let(:response_body) { JSON.parse(response.body) }
 
@@ -63,8 +63,8 @@ describe 'V2 Submissions endpoint', type: :request do
             encrypted_submission: SubmissionEncryption.new(
               key: submission_decryption_key
             ).encrypt(valid_submission_payload),
-            service_slug: service_slug,
-            encrypted_user_id_and_token: encrypted_user_id_and_token
+            service_slug:,
+            encrypted_user_id_and_token:
           }
         end
 

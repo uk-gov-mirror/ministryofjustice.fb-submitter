@@ -61,12 +61,12 @@ module Concerns
     end
 
     def service_token(service_slug)
-      service = ServiceTokenService.new(service_slug: service_slug)
+      service = ServiceTokenService.new(service_slug:)
       service.get
     end
 
     def public_key(service_slug)
-      service = ServiceTokenService.new(service_slug: service_slug)
+      service = ServiceTokenService.new(service_slug:)
       public_key = service.public_key
 
       OpenSSL::PKey::RSA.new(public_key)

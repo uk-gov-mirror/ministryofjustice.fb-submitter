@@ -19,9 +19,9 @@ class DownloadService
       url = attachment.fetch('url')
       filename = attachment.fetch('filename')
       mimetype = attachment.fetch('mimetype')
-      tmp_path = file_path_for_download(url: url, target_dir: actual_dir)
-      request = construct_request(url: url, file_path: tmp_path, headers: headers)
-      results << Attachment.new(url: url, path: tmp_path, filename: filename, mimetype: mimetype)
+      tmp_path = file_path_for_download(url:, target_dir: actual_dir)
+      request = construct_request(url:, file_path: tmp_path, headers:)
+      results << Attachment.new(url:, path: tmp_path, filename:, mimetype:)
 
       hydra.queue(request)
     end
@@ -42,7 +42,7 @@ class DownloadService
   end
 
   def construct_request(url:, file_path:, headers: {})
-    request = Typhoeus::Request.new(url, followlocation: true, headers: headers)
+    request = Typhoeus::Request.new(url, followlocation: true, headers:)
     request.on_headers do |response|
       if response.code != 200
         raise "Request failed (#{response.code}: #{response.return_code} #{request.url})"

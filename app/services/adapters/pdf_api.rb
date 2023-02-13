@@ -10,7 +10,7 @@ module Adapters
 
     def generate_pdf(submission:)
       url = URI.join(root_url, '/v1/pdfs')
-      response = Typhoeus.post(url, body: submission.to_json, headers: headers)
+      response = Typhoeus.post(url, body: submission.to_json, headers:)
 
       raise ClientRequestError, "request for #{url} returned response status of: #{response.code}" unless response.success?
 

@@ -132,12 +132,12 @@ describe 'Submits JSON given a JSON submission type', type: :request do
   let(:payload) do
     {
       meta: {
-        submission_id: submission_id,
+        submission_id:,
         submission_at: '2019-12-18T13:19:29.626Z'
       },
-      attachments: attachments,
-      actions: actions,
-      submission: submission
+      attachments:,
+      actions:,
+      submission:
     }
   end
   let(:encrypted_submission) do
@@ -145,9 +145,9 @@ describe 'Submits JSON given a JSON submission type', type: :request do
   end
   let(:params) do
     {
-      service_slug: service_slug,
-      encrypted_user_id_and_token: encrypted_user_id_and_token,
-      encrypted_submission: encrypted_submission
+      service_slug:,
+      encrypted_user_id_and_token:,
+      encrypted_submission:
     }.to_json
   end
 
@@ -169,12 +169,12 @@ describe 'Submits JSON given a JSON submission type', type: :request do
   end
 
   it 'calls the user file store to get a public signed url' do
-    post '/submission', params: params, headers: headers
+    post('/submission', params:, headers:)
     expect(WebMock).to have_requested(:post, "#{attachment_url}/presigned-s3-url").once
   end
 
   it 'sends the correct JSON to the external endpoint' do
-    post '/submission', params: params, headers: headers
+    post('/submission', params:, headers:)
     json_submission_payload = JWE.decrypt(WebMock.last_request.body, encryption_key)
     expect(json_submission_payload).to eq(expected_json_payload)
   end
