@@ -17,10 +17,10 @@ describe EmailOutputService do
   subject(:service) do
     described_class.new(
       emailer: email_service_mock,
-      attachment_generator: attachment_generator,
-      encryption_service: encryption_service,
-      submission_id: submission_id,
-      payload_submission_id: payload_submission_id
+      attachment_generator:,
+      encryption_service:,
+      submission_id:,
+      payload_submission_id:
     )
   end
 
@@ -40,8 +40,8 @@ describe EmailOutputService do
       to: 'bob.admin@digital.justice.gov.uk',
       subject: 'Complain about a court or tribunal submission',
       email_body: 'Please find an application attached',
-      include_pdf: include_pdf,
-      include_attachments: include_attachments
+      include_pdf:,
+      include_attachments:
     }
   end
 
@@ -61,8 +61,8 @@ describe EmailOutputService do
   let(:execution_payload) do
     {
       action: email_action,
-      attachments: attachments,
-      pdf_attachment: pdf_attachment
+      attachments:,
+      pdf_attachment:
     }
   end
   let(:send_email_payload) do
@@ -218,18 +218,18 @@ describe EmailOutputService do
       described_class.new(
         emailer: email_service_mock,
         attachment_generator: AttachmentGenerator.new,
-        encryption_service: encryption_service,
-        submission_id: submission_id,
-        payload_submission_id: payload_submission_id
+        encryption_service:,
+        submission_id:,
+        payload_submission_id:
       )
     end
     let(:second_service) do
       described_class.new(
         emailer: email_service_mock,
         attachment_generator: AttachmentGenerator.new,
-        encryption_service: encryption_service,
-        submission_id: submission_id,
-        payload_submission_id: payload_submission_id
+        encryption_service:,
+        submission_id:,
+        payload_submission_id:
       )
     end
     let(:first_email_attachments) { [pdf_attachment, upload1, upload2] }
@@ -269,18 +269,18 @@ describe EmailOutputService do
         described_class.new(
           emailer: email_service_mock,
           attachment_generator: AttachmentGenerator.new,
-          encryption_service: encryption_service,
-          submission_id: submission_id,
-          payload_submission_id: payload_submission_id
+          encryption_service:,
+          submission_id:,
+          payload_submission_id:
         )
       end
       let(:fourth_service) do
         described_class.new(
           emailer: email_service_mock,
           attachment_generator: AttachmentGenerator.new,
-          encryption_service: encryption_service,
-          submission_id: submission_id,
-          payload_submission_id: payload_submission_id
+          encryption_service:,
+          submission_id:,
+          payload_submission_id:
         )
       end
       let(:first_payload) do

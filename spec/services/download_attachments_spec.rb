@@ -4,10 +4,10 @@ require 'webmock/rspec'
 describe DownloadAttachments do
   subject(:downloader) do
     described_class.new(
-      attachments: attachments,
-      target_dir: target_dir,
-      encrypted_user_id_and_token: encrypted_user_id_and_token,
-      access_token: access_token,
+      attachments:,
+      target_dir:,
+      encrypted_user_id_and_token:,
+      access_token:,
       jwt_skew_override: nil
     )
   end
@@ -32,7 +32,7 @@ describe DownloadAttachments do
   let(:target_dir) { '/my/target/dir' }
 
   before do
-    stub_request(:get, url).with(headers: headers)
+    stub_request(:get, url).with(headers:)
       .to_return(status: 200, body: 'THAT IS NOT A KNIFE', headers: {})
   end
 
@@ -86,9 +86,9 @@ describe DownloadAttachments do
         allow(downloader).to receive(:file_path_for_download)
           .with(url: url2).and_return('/tmp/file2')
         allow(downloader).to receive(:request)
-          .with(url: url1, file_path: '/tmp/file1', headers: headers)
+          .with(url: url1, file_path: '/tmp/file1', headers:)
         allow(downloader).to receive(:request)
-          .with(url: url2, file_path: '/tmp/file2', headers: headers)
+          .with(url: url2, file_path: '/tmp/file2', headers:)
       end
 
       describe 'for each url' do
@@ -102,9 +102,9 @@ describe DownloadAttachments do
 
         it 'constructs a request, passing the url and file path for download' do
           expect(downloader).to receive(:request)
-            .with(url: url1, file_path: '/tmp/file1', headers: headers)
+            .with(url: url1, file_path: '/tmp/file1', headers:)
           expect(downloader).to receive(:request)
-            .with(url: url2, file_path: '/tmp/file2', headers: headers)
+            .with(url: url2, file_path: '/tmp/file2', headers:)
           downloader.download
         end
 
@@ -162,10 +162,10 @@ describe DownloadAttachments do
 
       context 'when a jwt skew override is supplied' do
         subject(:downloader) do
-          described_class.new(attachments: attachments,
-                              target_dir: target_dir,
-                              encrypted_user_id_and_token: encrypted_user_id_and_token,
-                              access_token: access_token,
+          described_class.new(attachments:,
+                              target_dir:,
+                              encrypted_user_id_and_token:,
+                              access_token:,
                               jwt_skew_override: '600')
         end
 
@@ -193,10 +193,10 @@ describe DownloadAttachments do
 
   context 'when the network request is unsuccessful' do
     subject(:downloader) do
-      described_class.new(attachments: attachments,
-                          target_dir: target_dir,
-                          encrypted_user_id_and_token: encrypted_user_id_and_token,
-                          access_token: access_token,
+      described_class.new(attachments:,
+                          target_dir:,
+                          encrypted_user_id_and_token:,
+                          access_token:,
                           jwt_skew_override: nil)
     end
 

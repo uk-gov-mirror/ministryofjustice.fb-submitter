@@ -11,7 +11,7 @@ RSpec.describe V2::ProcessSubmissionJob do
 
     let(:key) { SecureRandom.uuid[0..31] }
     let(:submission) do
-      create(:submission, payload: encrypted_payload, access_token: access_token)
+      create(:submission, payload: encrypted_payload, access_token:)
     end
     let(:payload_fixture) do
       JSON.parse(File.read(Rails.root.join('spec/fixtures/payloads/valid_submission.json')))
@@ -39,7 +39,7 @@ RSpec.describe V2::ProcessSubmissionJob do
       let(:encrypted_payload) do
         fixture = payload_fixture
         fixture['actions'] = fixture['actions'].select { |action| action['kind'] == 'email' }
-        SubmissionEncryption.new(key: key).encrypt(fixture)
+        SubmissionEncryption.new(key:).encrypt(fixture)
       end
       let(:expected_action) do
         {
@@ -88,7 +88,7 @@ RSpec.describe V2::ProcessSubmissionJob do
       let(:encrypted_payload) do
         fixture = payload_fixture
         fixture['actions'] = fixture['actions'].select { |action| action['kind'] == 'csv' }
-        SubmissionEncryption.new(key: key).encrypt(fixture)
+        SubmissionEncryption.new(key:).encrypt(fixture)
       end
       let(:expected_action) do
         {

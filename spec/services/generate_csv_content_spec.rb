@@ -4,7 +4,7 @@ require_relative '../../app/services/generate_csv_content'
 require_relative '../../app/services/submission_payload_service'
 
 describe GenerateCsvContent do
-  subject { described_class.new(payload_service: payload_service) }
+  subject { described_class.new(payload_service:) }
 
   let(:payload_service) do
     SubmissionPayloadService.new(payload)

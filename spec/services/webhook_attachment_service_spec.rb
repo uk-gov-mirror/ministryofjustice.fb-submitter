@@ -1,5 +1,5 @@
 describe WebhookAttachmentService do
-  subject(:service) { described_class.new(attachment_parser: attachment_parser, user_file_store_gateway: user_file_store_gateway) }
+  subject(:service) { described_class.new(attachment_parser:, user_file_store_gateway:) }
 
   before do
     allow(user_file_store_gateway).to receive(:get_presigned_url).with(attachment_1).and_return(user_file_store_gateway_return[0])

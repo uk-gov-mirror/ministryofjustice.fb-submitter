@@ -15,9 +15,9 @@ describe EmailJob do
     let(:body) { 'saved form at https://example.com' }
     let(:message) do
       {
-        to: to,
+        to:,
         subject: email_subject,
-        body: body,
+        body:,
         template_name: 'email.generic'
       }
     end
@@ -26,25 +26,25 @@ describe EmailJob do
     let(:expected_email_args) do
       {
         email_address: to,
-        template_id: template_id,
+        template_id:,
         personalisation: {
           subject: email_subject,
-          body: body
+          body:
         }
       }
     end
 
     it 'sends email' do
-      job.perform(message: message)
+      job.perform(message:)
       expect(mock_client).to have_received(:send_email).with(expected_email_args)
     end
 
     context 'when extra personalisation' do
       let(:message) do
         {
-          to: to,
+          to:,
           subject: email_subject,
-          body: body,
+          body:,
           template_name: 'email.generic',
           extra_personalisation: {
             token: 'my-token'
@@ -55,17 +55,17 @@ describe EmailJob do
       let(:expected_email_args) do
         {
           email_address: to,
-          template_id: template_id,
+          template_id:,
           personalisation: {
             subject: email_subject,
-            body: body,
+            body:,
             token: 'my-token'
           }
         }
       end
 
       it 'hands over data' do
-        job.perform(message: message)
+        job.perform(message:)
         expect(mock_client).to have_received(:send_email).with(expected_email_args)
       end
     end

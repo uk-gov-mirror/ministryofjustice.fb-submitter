@@ -8,11 +8,14 @@ gem 'daemons'
 gem 'delayed_job_active_record', '~> 4.1.7'
 gem 'faraday'
 gem 'faraday_middleware'
-gem 'fb-jwt-auth', '~> 0.8.0'
+gem 'fb-jwt-auth', '~> 0.10.0'
 gem 'json-schema', '>= 2.8.1'
 gem 'jwe', '~> 0.4.0'
 gem 'jwt'
 gem 'mime-types'
+gem 'net-imap', require: false
+gem 'net-pop', require: false
+gem 'net-smtp', require: false
 gem 'notifications-ruby-client'
 gem 'pg', '>= 0.18', '< 2.0'
 gem 'puma', '~> 6.0'

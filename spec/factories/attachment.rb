@@ -6,6 +6,6 @@ FactoryBot.define do
     mimetype { 'image/jpeg' }
     path {}
 
-    initialize_with { new(filename: filename, mimetype: mimetype) }
+    initialize_with { new(filename:, mimetype:) }
   end
 end

@@ -29,7 +29,7 @@ class MetricsController < ActionController::Base
       { name: :submissions,
         type: 'counter',
         docstring: 'Number of submissions',
-        filter: { form: form },
+        filter: { form: },
         value: count }
     end
   end

@@ -21,10 +21,10 @@ RSpec.describe 'Concerns::JWTAuthentication' do
   end
 
   before do
-    allow(ServiceTokenService).to receive(:new).with(service_slug: service_slug).and_return(fake_client)
+    allow(ServiceTokenService).to receive(:new).with({ service_slug: }).and_return(fake_client)
 
     request.headers.merge!(headers)
-    get :index, params: { service_slug: service_slug }
+    get :index, params: { service_slug: }
   end
 
   context 'with no x-access-token-v2 header' do
@@ -60,7 +60,7 @@ RSpec.describe 'Concerns::JWTAuthentication' do
     context 'when valid' do
       let(:iat) { Time.zone.now.to_i }
       let(:token) do
-        JWT.encode payload.merge(iat: iat), private_key, algorithm
+        JWT.encode payload.merge({ iat: }), private_key, algorithm
       end
 
       it 'does not respond with an unauthorized or forbidden status' do
@@ -73,7 +73,7 @@ RSpec.describe 'Concerns::JWTAuthentication' do
       context 'when the timestamp is older than MAX_IAT_SKEW_SECONDS' do
         let(:iat) { Time.zone.now.to_i - 1.year }
         let(:token) do
-          JWT.encode payload.merge(iat: iat), service_token, algorithm
+          JWT.encode payload.merge({ iat: }), service_token, algorithm
         end
         let(:algorithm) { 'HS256' }
 

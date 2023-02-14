@@ -16,8 +16,8 @@ class Email
 
   def personalisation
     hash = {
-      subject: subject,
-      body: body
+      subject:,
+      body:
     }
 
     hash.reverse_merge!(extra_personalisation)

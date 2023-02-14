@@ -3,7 +3,7 @@ require 'webmock/rspec'
 
 describe Adapters::PdfApi do
   subject(:adapter) do
-    described_class.new(root_url: root_url, token: 'some-token')
+    described_class.new(root_url:, token: 'some-token')
   end
 
   let(:submission) do
@@ -38,12 +38,12 @@ describe Adapters::PdfApi do
   end
 
   it 'requests a generated PDF' do
-    adapter.generate_pdf(submission: submission)
+    adapter.generate_pdf(submission:)
     expect(WebMock).to have_requested(:post, expected_url).with(headers: expected_headers).once
   end
 
   it 'returns the pdf file from the response' do
-    expect(adapter.generate_pdf(submission: submission)).to eq(response)
+    expect(adapter.generate_pdf(submission:)).to eq(response)
   end
 
   context 'when a 500 is returned' do

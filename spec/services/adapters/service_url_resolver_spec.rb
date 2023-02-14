@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 describe Adapters::ServiceUrlResolver do
-  subject { described_class.new(service_slug: service_slug, environment_slug: environment_slug) }
+  subject { described_class.new(service_slug:, environment_slug:) }
 
   let(:service_slug) { 'my-service' }
   let(:environment_slug) { 'dev' }

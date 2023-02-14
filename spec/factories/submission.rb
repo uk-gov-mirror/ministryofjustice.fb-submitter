@@ -159,7 +159,7 @@ FactoryBot.define do
 
     payload do
       EncryptionService.new.encrypt(
-        meta: meta, actions: actions, submission: submission, attachments: attachments
+        meta:, actions:, submission:, attachments:
       )
     end
 

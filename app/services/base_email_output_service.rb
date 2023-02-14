@@ -12,14 +12,14 @@ class BaseEmailOutputService
 
   def execute(action:, attachments:, pdf_attachment:)
     attachment_generator.execute(
-      action: action,
-      attachments: attachments,
-      pdf_attachment: pdf_attachment
+      action:,
+      attachments:,
+      pdf_attachment:
     )
 
     if attachment_generator.sorted_attachments.empty?
       send_single_email(
-        action: action,
+        action:,
         subject: subject(subject: action.fetch(:subject))
       )
     else
@@ -35,8 +35,8 @@ class BaseEmailOutputService
   def send_emails_with_attachments(action, email_attachments)
     email_attachments.each_with_index do |attachments, index|
       send_single_email(
-        action: action,
-        attachments: attachments,
+        action:,
+        attachments:,
         subject: subject(
           subject: action.fetch(:subject),
           current_email: index + 1,
@@ -53,11 +53,11 @@ class BaseEmailOutputService
     if email_payload.succeeded_at.nil?
       emailer.send_mail(
         from: action.fetch(:from),
-        to: to,
-        subject: subject,
+        to:,
+        subject:,
         body_parts: email_body_parts(action.fetch(:email_body)),
-        attachments: attachments,
-        raw_message: raw_message
+        attachments:,
+        raw_message:
       )
 
       email_payload.update!(succeeded_at: Time.zone.now)
@@ -70,13 +70,13 @@ class BaseEmailOutputService
 
   def find_or_create_email_payload(to, attachments)
     filenames = attachments.map(&:filename).sort
-    email_payload = EmailPayload.where(submission_id: submission_id)
+    email_payload = EmailPayload.where(submission_id:)
                                 .find do |payload|
                                   payload.decrypted_to == to &&
                                     payload.decrypted_attachments == filenames
                                 end
 
-    email_payload || EmailPayload.create!(submission_id: submission_id,
+    email_payload || EmailPayload.create!(submission_id:,
                                           to: encryption_service.encrypt(to),
                                           attachments: encryption_service.encrypt(filenames))
   end

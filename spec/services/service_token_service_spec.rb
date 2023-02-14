@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe ServiceTokenService do
   subject do
-    described_class.new(service_slug: service_slug)
+    described_class.new(service_slug:)
   end
 
   let(:service_slug) { 'some-service' }

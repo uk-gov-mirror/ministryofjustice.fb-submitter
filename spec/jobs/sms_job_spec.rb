@@ -13,8 +13,8 @@ describe SmsJob do
     let(:body) { 'Your code is 12345' }
     let(:message) do
       {
-        to: to,
-        body: body,
+        to:,
+        body:,
         template_name: 'sms.generic'
       }
     end
@@ -23,23 +23,23 @@ describe SmsJob do
     let(:expected_sms_args) do
       {
         phone_number: to,
-        template_id: template_id,
+        template_id:,
         personalisation: {
-          body: body
+          body:
         }
       }
     end
 
     it 'sends sms' do
-      job.perform(message: message)
+      job.perform(message:)
       expect(mock_client).to have_received(:send_sms).with(expected_sms_args)
     end
 
     context 'when extra personalisation' do
       let(:message) do
         {
-          to: to,
-          body: body,
+          to:,
+          body:,
           template_name: 'sms.generic',
           extra_personalisation: {
             token: 'my-token'
@@ -50,16 +50,16 @@ describe SmsJob do
       let(:expected_sms_args) do
         {
           phone_number: to,
-          template_id: template_id,
+          template_id:,
           personalisation: {
-            body: body,
+            body:,
             token: 'my-token'
           }
         }
       end
 
       it 'hands over data' do
-        job.perform(message: message)
+        job.perform(message:)
         expect(mock_client).to have_received(:send_sms).with(expected_sms_args)
       end
     end
