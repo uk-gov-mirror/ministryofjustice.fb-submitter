@@ -9,6 +9,7 @@ describe Adapters::AmazonSESAdapter do
     Aws::SESV2::Client.new(region: 'eu-west-1', stub_responses: true)
   end
   let(:default_from_address) { Adapters::AmazonSESAdapter::DEFAULT_FROM_ADDRESS }
+  let(:expected_from_email_address) { "Some Service <#{default_from_address}>" }
 
   it 'returns the response given the correct params' do
     expect(described_class.send_mail(to: '', raw_message: '', from: '').to_h).to eq(message_id: 'OutboundMessageId')
@@ -18,7 +19,6 @@ describe Adapters::AmazonSESAdapter do
     let(:to_address) { 'some_to_address@example.com' }
     let(:supplied_from_address) { 'Some Service <some_from_address@example.com>' }
     let(:email_body) { 'email body' }
-    let(:expected_from_email_address) { "Some Service <#{default_from_address}>" }
     let(:opts) do
       {
         to: to_address,
@@ -44,7 +44,6 @@ describe Adapters::AmazonSESAdapter do
     # rubocop:disable RSpec/MessageSpies
     context 'when the supplied from address is different to moj forms default address' do
       let(:expected_reply_to_addresses) { [supplied_from_address] }
-      let(:expected_from_email_address) { supplied_from_address }
 
       it 'uses the supplied from address as the reply to address' do
         expect(stub_aws).to receive(:send_email).with(expected_payload)
@@ -64,7 +63,6 @@ describe Adapters::AmazonSESAdapter do
 
     context 'when from address and reply to have been configured' do
       let(:expected_reply_to_addresses) { [supplied_from_address] }
-      let(:expected_from_email_address) { supplied_from_address }
 
       it 'uses the supplied from email address as the from and reply to address' do
         expect(stub_aws).to receive(:send_email).with(expected_payload)

@@ -9,7 +9,7 @@ module Adapters
       service_name = opts[:from].split('<')[0]
 
       client.send_email(
-        from_email_address: opts[:from],
+        from_email_address: "#{service_name}<#{DEFAULT_FROM_ADDRESS}>",
         destination: {
           to_addresses: [opts[:to]]
         },
