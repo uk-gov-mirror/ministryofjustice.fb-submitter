@@ -20,8 +20,8 @@ RSpec.describe RawMessage do
   let(:attachment) do
     build(
       :attachment,
-      filename: 'some-file-name.jpg',
-      mimetype: 'application/pdf',
+      filename:,
+      mimetype:,
       path: file_fixture('hello_world.txt')
     )
   end
@@ -46,7 +46,7 @@ RSpec.describe RawMessage do
 
       --NextPart
       Content-Type: application/pdf
-      Content-Disposition: attachment; filename="some-file-name.pdf"
+      Content-Disposition: attachment; filename="#{expected_filename}"
       Content-Transfer-Encoding: base64
 
       aGVsbG8gd29ybGQK
@@ -55,13 +55,30 @@ RSpec.describe RawMessage do
 
     EMAIL
   end
+  let(:filename) { 'some-file-name.jpg' }
+  let(:mimetype) { 'application/pdf' }
+  let(:expected_filename) { 'some-file-name.pdf' }
 
   it 'uses correct filename and extension' do
-    expect(subject.to_s).to include('some-file-name.pdf')
+    expect(subject.to_s).to include(expected_filename)
   end
 
   it 'creates the expected raw message' do
     expect(subject.to_s).to eq(expected_email)
+  end
+
+  context 'when filename has multiple fullstops' do
+    let(:filename) { 'Screenshot 2023-04-04 at 16.02.20.png' }
+    let(:mimetype) { 'application/pdf' }
+    let(:expected_filename) { 'Screenshot 2023-04-04 at 16.02.20.pdf' }
+
+    it 'uses maintains the filename' do
+      expect(subject.to_s).to include(expected_filename)
+    end
+
+    it 'creates the expected raw message' do
+      expect(subject.to_s).to eq(expected_email)
+    end
   end
 
   context 'when filename does not have extension' do

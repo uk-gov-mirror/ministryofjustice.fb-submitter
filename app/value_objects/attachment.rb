@@ -15,8 +15,8 @@ class Attachment
   end
 
   def filename_with_extension
-    head, *tail = filename.split('.').reverse
-    raw_filename = tail.reverse.join.presence || head
+    head, *tail = filename.rpartition('.').reverse
+    raw_filename = tail.last.presence || head
     ext = MIME::Types[@mimetype][0].preferred_extension
 
     "#{raw_filename}.#{ext}"
