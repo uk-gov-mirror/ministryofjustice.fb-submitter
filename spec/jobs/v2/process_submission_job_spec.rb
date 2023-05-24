@@ -110,5 +110,41 @@ RSpec.describe V2::ProcessSubmissionJob do
         end
       end
     end
+
+    context 'when JSON API action' do
+      let(:encrypted_payload) do
+        fixture = payload_fixture
+        fixture['actions'] = fixture['actions'].select { |action| action['kind'] == 'json' }
+        SubmissionEncryption.new(key:).encrypt(fixture)
+      end
+
+      let(:json_webhook_service_spy) { instance_spy(JsonWebhookService) }
+
+      before do
+        allow(JsonWebhookService).to receive(:new).and_return(json_webhook_service_spy)
+        perform_job
+      end
+
+      it 'passes the correct collaborators to the JsonWebhookService' do
+        expect(JsonWebhookService).to have_received(:new) do |args|
+          expect(args[:webhook_attachment_fetcher]).to be_an_instance_of(WebhookAttachmentService)
+          expect(args[:webhook_destination_adapter]).to be_an_instance_of(Adapters::JweWebhookDestination)
+        end
+      end
+
+      it 'passes the correct user_answers payload as an argument' do
+        decrypted_payload = SubmissionEncryption.new(key:).decrypt(submission[:payload])
+        user_answers = V2::SubmissionPayloadService.new(decrypted_payload).user_answers
+        expect(json_webhook_service_spy).to have_received(:execute) do |args|
+          expect(args[:user_answers]).to eq(user_answers)
+        end
+      end
+
+      it 'passes the correct service_slug as an argument' do
+        expect(json_webhook_service_spy).to have_received(:execute) do |args|
+          expect(args[:service_slug]).to eq(submission.service_slug)
+        end
+      end
+    end
   end
 end

@@ -36,6 +36,11 @@ RSpec.describe V2::SubmissionPayloadService do
           'email_body' => '',
           'include_pdf' => true,
           'include_attachments' => false
+        },
+        {
+          'kind' => 'json',
+          'url' => 'http://api-endpoint.com',
+          'key': 'fb730a667840d79c'
         }
       ],
       'pages' => [
@@ -119,6 +124,22 @@ RSpec.describe V2::SubmissionPayloadService do
       it 'returns the reference number' do
         expect(payload_service.reference_number).to eq(reference_number)
       end
+    end
+  end
+
+  describe '#attachments' do
+    let(:expected_attachments) do
+      [
+        {
+          'url ' => 'http://the-filestore-url-for-attachment',
+          'filename' => 'hello_world.txt',
+          'mimetype' => 'text/plain'
+        }
+      ]
+    end
+
+    it 'returns a array of attachments objects' do
+      expect(payload_service.attachments).to eq(expected_attachments)
     end
   end
 end

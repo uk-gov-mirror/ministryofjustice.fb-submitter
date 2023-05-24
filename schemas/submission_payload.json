@@ -91,12 +91,31 @@
         "include_attachments": {
           "type": "boolean",
           "default": true
+        },
+        "url": {
+          "type": "string"
+        },
+        "key": {
+          "type": "string"
         }
       },
+      "anyOf":[
+        {
+          "required":[
+            "url",
+            "key"
+          ]
+        },
+        {
+          "required": [
+            "to",
+            "from",
+            "include_pdf"
+          ]
+        }
+      ],
       "required": [
-        "to",
-        "from",
-        "include_pdf"
+        "kind"
       ],
       "additionalProperties": false
     },

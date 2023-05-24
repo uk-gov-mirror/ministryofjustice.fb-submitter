@@ -26,6 +26,12 @@
       "email_body":"",
       "include_pdf":true,
       "include_attachments": false
+    },
+    {
+      "kind":"json",
+      "url": "http://api-endpoint.com",
+      "key": "fb730a667840d79c",
+      "include_attachments": false
     }
   ],
   "pages": [

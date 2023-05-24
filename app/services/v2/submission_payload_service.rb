@@ -28,5 +28,9 @@ module V2
         end
       end
     end
+
+    def attachments
+      payload['attachments']
+    end
   end
 end
