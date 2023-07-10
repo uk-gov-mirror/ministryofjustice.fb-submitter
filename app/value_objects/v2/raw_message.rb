@@ -81,7 +81,7 @@ module V2
                                                     text-decoration: none;
                                                     vertical-align:top;
                                                     display: inline-block;
-                                                    ">GOV.UK</span>
+                                                    ">#{service_name}</span>
                                                 </td>
                                             </tr>
                                         </table>
@@ -189,6 +189,12 @@ module V2
 
         #{Base64.encode64(File.open(attachment.path, 'rb', &:read))}
       RAW_ATTACHMENT
+    end
+
+    def service_name
+      # now that we allow special chars, we need to get the last occurence of <
+      index_of_left_angle_bracket = @from.rindex('<')
+      @from.slice(0..index_of_left_angle_bracket - 1).strip
     end
   end
 end
