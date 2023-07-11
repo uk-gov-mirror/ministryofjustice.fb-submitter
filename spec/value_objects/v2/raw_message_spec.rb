@@ -43,7 +43,6 @@ RSpec.describe V2::RawMessage do
                       <table role="presentation" width="100%" style="border-collapse: collapse;max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
                           <tr>
                               <td width="70" bgcolor="#0b0c0c" valign="middle">
-                                  <a href="https://www.gov.uk" title="Go to the GOV.UK homepage" style="text-decoration: none;">
                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
                                           <tr>
                                               <td style="padding-left: 10px">
