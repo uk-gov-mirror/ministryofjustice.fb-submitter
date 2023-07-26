@@ -61,7 +61,6 @@ module V2
                         <table role="presentation" width="100%" style="border-collapse: collapse;max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
                             <tr>
                                 <td width="70" bgcolor="#0b0c0c" valign="middle">
-                                    <a href="https://www.gov.uk" title="Go to the GOV.UK homepage" style="text-decoration: none;">
                                         <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
                                             <tr>
                                                 <td style="padding-left: 10px">
@@ -81,7 +80,7 @@ module V2
                                                     text-decoration: none;
                                                     vertical-align:top;
                                                     display: inline-block;
-                                                    ">GOV.UK</span>
+                                                    ">#{service_name}</span>
                                                 </td>
                                             </tr>
                                         </table>
@@ -189,6 +188,12 @@ module V2
 
         #{Base64.encode64(File.open(attachment.path, 'rb', &:read))}
       RAW_ATTACHMENT
+    end
+
+    def service_name
+      # now that we allow special chars, we need to get the last occurence of <
+      index_of_left_angle_bracket = @from.rindex('<')
+      @from.slice(0..index_of_left_angle_bracket - 1).strip
     end
   end
 end

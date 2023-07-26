@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe V2::RawMessage do
   subject(:raw_message) do
     described_class.new(
-      from: 'sender@example.com',
+      from: 'Service name <sender@example.com>',
       to: 'reciver@example.com',
       subject: 'test email',
       body_parts: {
@@ -43,7 +43,6 @@ RSpec.describe V2::RawMessage do
                       <table role="presentation" width="100%" style="border-collapse: collapse;max-width: 580px;" cellpadding="0" cellspacing="0" border="0" align="center">
                           <tr>
                               <td width="70" bgcolor="#0b0c0c" valign="middle">
-                                  <a href="https://www.gov.uk" title="Go to the GOV.UK homepage" style="text-decoration: none;">
                                       <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="border-collapse: collapse;">
                                           <tr>
                                               <td style="padding-left: 10px">
@@ -63,7 +62,7 @@ RSpec.describe V2::RawMessage do
                                                   text-decoration: none;
                                                   vertical-align:top;
                                                   display: inline-block;
-                                                  ">GOV.UK</span>
+                                                  ">Service name</span>
                                               </td>
                                           </tr>
                                       </table>
@@ -155,7 +154,7 @@ RSpec.describe V2::RawMessage do
   end
   let(:expected_email) do
     <<~RAW_MESSAGE
-      From: sender@example.com
+      From: Service name <sender@example.com>
       To: reciver@example.com
       Subject: test email
       Content-Type: multipart/mixed; boundary="NextPart"
