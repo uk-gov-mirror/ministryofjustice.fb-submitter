@@ -81,6 +81,7 @@ jobs:
       - run: &workspace_envs
           command: |
             cat bash.env >> $BASH_ENV
+            echo "export BUILD_WORKER=false" >> $BASH_ENV
       - run: &base_environment_variables
           name: Setup base environment variable
           command: |
@@ -111,6 +112,7 @@ jobs:
           command: |
             echo "export WEB_ECR_REPOSITORY=$ECR_REPOSITORY" >> $BASH_ENV
             echo "export ECR_REPOSITORY=$WORKERS_ECR_REPOSITORY" >> $BASH_ENV
+            echo "export BUILD_WORKER=true" >> $BASH_ENV
       - run:
           name: build and push docker images
           environment:
@@ -120,6 +122,7 @@ jobs:
           name: Restore env
           command: |
             echo "export ECR_REPOSITORY=$WEB_ECR_REPOSITORY" >> $BASH_ENV
+            echo "export BUILD_WORKER=false" >> $BASH_ENV
       - slack/status: *slack_status
   deploy_to_test_dev:
     working_directory: ~/circle/git/fb-submitter
@@ -256,17 +259,17 @@ workflows:
               only:
                 - master
                 - ecr-migration
-      # - build_and_push_worker_image:
-      #     context: *context
-      #     requires:
-      #       - test
-      #       - lint
-      #       - security
-      #     filters:
-      #       branches:
-      #         only:
-      #           - master
-      #           - ecr-migration
+      - build_and_push_worker_image:
+          context: *context
+          requires:
+            - test
+            - lint
+            - security
+          filters:
+            branches:
+              only:
+                - master
+                - ecr-migration
       - deploy_to_test_dev:
           context: *context
           requires:
