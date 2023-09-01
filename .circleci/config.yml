@@ -2,8 +2,28 @@ version: 2.1
 orbs:
   slack: circleci/slack@3.4.2
   ruby: circleci/ruby@1.4.0
+  aws-cli: circleci/aws-cli@4.0.0
 
 jobs:
+  login-to-aws:
+    docker: &docker_image
+      - image: 'cimg/ruby:3.1.3-node'
+    steps:
+      - checkout
+      - aws-cli/setup:
+          role_arn: $ECR_ROLE_TO_ASSUME # this will use the env var
+          region: $ECR_REGION # this will use the env var
+      - run: &ecr_login
+          name: Login to ecr
+          command: |
+            aws ecr get-login-password --region $ECR_REGION | docker login --username AWS --password-stdin ${AWS_ECR_REGISTRY_ID}.dkr.ecr.${ECR_REGION}.amazonaws.com
+            aws configure export-credentials --format env
+      - run: |
+          cp $BASH_ENV bash.env
+      - persist_to_workspace:
+          root: .
+          paths:
+            - bash.env
   build:
     docker: &ruby_image
       - image: 'cimg/ruby:3.1.3'
@@ -49,13 +69,18 @@ jobs:
   build_and_push_image:
     working_directory: ~/circle/git/fb-submitter
     docker: &ecr_image
-      - image: $AWS_BUILD_IMAGE_ECR_ACCOUNT_URL
-        aws_auth:
-          aws_access_key_id: $AWS_BUILD_IMAGE_ACCESS_KEY_ID
-          aws_secret_access_key: $AWS_BUILD_IMAGE_SECRET_ACCESS_KEY
+      - image: docker.io/ministryofjustice/fb-builder:latest
+        auth:
+          username: $DOCKER_LOGIN
+          password: $DOCKER_PASSWORD
     steps:
       - checkout
       - setup_remote_docker: *remote_docker
+      - attach_workspace:
+          at: .
+      - run: &workspace_envs
+          command: |
+            cat bash.env >> $BASH_ENV
       - run: &base_environment_variables
           name: Setup base environment variable
           command: |
@@ -63,12 +88,41 @@ jobs:
             echo "export SSH_FILE_FOR_SECRETS=~/.ssh/id_rsa_f6b5f3b9d67ed45b0557fb62cc124dad" >> $BASH_ENV
       - run: &deploy_scripts
           name: cloning deploy scripts
-          command: 'git clone git@github.com:ministryofjustice/fb-deploy.git deploy-scripts'
+          command: 'git clone --branch temporary-ecr-creds git@github.com:ministryofjustice/fb-deploy.git deploy-scripts'
       - run:
           name: build and push docker images
           environment:
             ENVIRONMENT_NAME: test
           command: './deploy-scripts/bin/build'
+      - slack/status: *slack_status
+  build_and_push_worker_image:
+    working_directory: ~/circle/git/fb-submitter
+    docker: *ecr_image
+    steps:
+      - checkout
+      - setup_remote_docker: *remote_docker
+      - attach_workspace:
+          at: .
+      - run: *workspace_envs
+      - run: *base_environment_variables
+      - run: *deploy_scripts
+      - aws-cli/setup:
+          role_arn: $WORKERS_ECR_ROLE_TO_ASSUME # this will use the env var
+          region: $ECR_REGION # this will use the env var
+      - run:
+          name: Swap to workers env
+          command: |
+            echo "export WEB_ECR_REPOSITORY=$ECR_REPOSITORY" >> $BASH_ENV
+            echo "export ECR_REPOSITORY=$WORKERS_ECR_REPOSITORY" >> $BASH_ENV
+      - run:
+          name: build and push docker images
+          environment:
+            ENVIRONMENT_NAME: test
+          command: './deploy-scripts/bin/build'
+      - run:
+          name: Restore env
+          command: |
+            echo "export ECR_REPOSITORY=$WEB_ECR_REPOSITORY" >> $BASH_ENV
       - slack/status: *slack_status
   deploy_to_test_dev:
     working_directory: ~/circle/git/fb-submitter
@@ -178,8 +232,16 @@ workflows:
   version: 2
   test_and_build:
     jobs:
-      - test
-      - build
+      - login-to-aws:
+          context: &context
+            - moj-forms
+            - moj-forms-platform-apps
+      - test:
+          requires:
+            -  build
+      - build:
+          requires:
+            -  login-to-aws
       - lint:
           requires:
             -  build
@@ -187,9 +249,7 @@ workflows:
           requires:
             -  build
       - build_and_push_image:
-          context: &context
-            - moj-forms
-            - moj-forms-platform-apps
+          context: *context
           requires:
             - test
             - lint
@@ -198,6 +258,18 @@ workflows:
             branches:
               only:
                 - master
+                - ecr-migration
+      - build_and_push_workers_image:
+          context: *context
+          requires:
+            - test
+            - lint
+            - security
+          filters:
+            branches:
+              only:
+                - master
+                - ecr-migration
       - deploy_to_test_dev:
           context: *context
           requires:
@@ -211,16 +283,16 @@ workflows:
           requires:
             - deploy_to_test_dev
             - deploy_to_test_production
-      - deploy_to_live_dev:
-          context: *context
-          requires:
-            - acceptance_tests
-      - deploy_to_live_production:
-          context: *context
-          requires:
-            - acceptance_tests
-      - smoke_tests:
-          context: *context
-          requires:
-            - deploy_to_live_dev
-            - deploy_to_live_production
+      # - deploy_to_live_dev:
+      #     context: *context
+      #     requires:
+      #       - acceptance_tests
+      # - deploy_to_live_production:
+      #     context: *context
+      #     requires:
+      #       - acceptance_tests
+      # - smoke_tests:
+      #     context: *context
+      #     requires:
+      #       - deploy_to_live_dev
+      #       - deploy_to_live_production
