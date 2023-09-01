@@ -259,7 +259,7 @@ workflows:
               only:
                 - master
                 - ecr-migration
-      - build_and_push_workers_image:
+      - build_and_push_worker_image:
           context: *context
           requires:
             - test
