@@ -101,9 +101,6 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker: *remote_docker
-      - attach_workspace:
-          at: .
-      - run: *workspace_envs
       - run: *base_environment_variables
       - run: *deploy_scripts
       - aws-cli/setup:
