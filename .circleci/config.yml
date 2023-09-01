@@ -256,17 +256,17 @@ workflows:
               only:
                 - master
                 - ecr-migration
-      - build_and_push_worker_image:
-          context: *context
-          requires:
-            - test
-            - lint
-            - security
-          filters:
-            branches:
-              only:
-                - master
-                - ecr-migration
+      # - build_and_push_worker_image:
+      #     context: *context
+      #     requires:
+      #       - test
+      #       - lint
+      #       - security
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      #           - ecr-migration
       - deploy_to_test_dev:
           context: *context
           requires:
