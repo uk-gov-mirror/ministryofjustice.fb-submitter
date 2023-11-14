@@ -287,10 +287,18 @@ workflows:
           context: *context
           requires:
             - acceptance_tests
+          filters:
+            branches:
+              only:
+                - master
       - deploy_to_live_production:
           context: *context
           requires:
             - acceptance_tests
+          filters:
+            branches:
+              only:
+                - master
       - smoke_tests:
           context: *context
           requires:

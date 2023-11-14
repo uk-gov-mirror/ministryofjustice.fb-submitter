@@ -2,7 +2,12 @@ module V2
   class ProcessSubmissionJob < ApplicationJob
     queue_as :default
 
-    def perform(submission_id:, jwt_skew_override: nil)
+    attr_reader :request_id, :jwt_skew_override
+
+    def perform(submission_id:, **options)
+      @request_id = options[:request_id]
+      @jwt_skew_override = options[:jwt_skew_override]
+
       submission = Submission.find(submission_id)
       decrypted_submission = submission.decrypted_submission.merge('submission_id' => submission.id)
       payload_service = V2::SubmissionPayloadService.new(decrypted_submission)
@@ -27,7 +32,8 @@ module V2
         when 'email'
           pdf_api_gateway = Adapters::PdfApi.new(
             root_url: ENV.fetch('PDF_GENERATOR_ROOT_URL'),
-            token: submission.access_token
+            token: submission.access_token,
+            request_id:
           )
           pdf_attachment = GeneratePdfContent.new(
             pdf_api_gateway:,
@@ -37,8 +43,7 @@ module V2
           attachments = download_attachments(
             decrypted_submission['attachments'],
             submission.encrypted_user_id_and_token,
-            submission.access_token,
-            jwt_skew_override
+            submission.access_token
           )
 
           send_email(submission:, action:, attachments:, pdf_attachment:)
@@ -52,13 +57,13 @@ module V2
       end
     end
 
-    def download_attachments(attachments, encrypted_user_id_and_token, access_token, jwt_skew_override)
+    def download_attachments(attachments, encrypted_user_id_and_token, access_token)
       DownloadAttachments.new(
         attachments:,
         encrypted_user_id_and_token:,
         access_token:,
-        jwt_skew_override:,
-        target_dir: nil
+        request_id:,
+        jwt_skew_override:
       ).download
     end
 
