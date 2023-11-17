@@ -40,11 +40,13 @@ module V2
             payload: PdfPayloadTranslator.new(decrypted_submission).to_h
           ).execute
 
-          attachments = download_attachments(
-            decrypted_submission['attachments'],
-            submission.encrypted_user_id_and_token,
-            submission.access_token
-          )
+          attachments = if action['include_attachments'] == true
+                          download_attachments(
+                            decrypted_submission['attachments'],
+                            submission.encrypted_user_id_and_token,
+                            submission.access_token
+                          )
+                        end
 
           send_email(submission:, action:, attachments:, pdf_attachment:)
         when 'csv'
