@@ -46,6 +46,8 @@ module V2
                             submission.encrypted_user_id_and_token,
                             submission.access_token
                           )
+                        else
+                          []
                         end
 
           send_email(submission:, action:, attachments:, pdf_attachment:)
