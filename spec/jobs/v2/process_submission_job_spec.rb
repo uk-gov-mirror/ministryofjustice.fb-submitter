@@ -84,6 +84,52 @@ RSpec.describe V2::ProcessSubmissionJob do
       end
     end
 
+    context 'when email action without attachments' do
+      let(:encrypted_payload) do
+        fixture = payload_fixture
+        fixture['actions'] = fixture['actions'].select { |action| action['kind'] == 'email' }
+        fixture['actions'].each { |action| action['include_attachments'] = false }
+        SubmissionEncryption.new(key:).encrypt(fixture)
+      end
+      let(:expected_action) do
+        {
+          subject: 'Email Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032',
+          to: 'captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com'
+        }
+      end
+
+      before do
+        stub_request(:post, 'http://pdf-generator.com/v1/pdfs')
+          .with(body: expected_pdf_request_body)
+          .to_return(status: 200, body: generated_pdf_content, headers: {})
+      end
+
+      it 'sends the email with pdf attachment' do
+        perform_job
+
+        expect(email_output_service).to have_received(:execute) do |args|
+          pdf_contents = File.open(args[:pdf_attachment].path).read
+          expect(pdf_contents).to eq(generated_pdf_content)
+        end
+      end
+
+      it 'sends email with no attachments' do
+        perform_job
+
+        expect(email_output_service).to have_received(:execute) do |args|
+          expect(args[:attachments]).to eq([])
+        end
+      end
+
+      it 'sends the email with subject' do
+        perform_job
+
+        expect(email_output_service).to have_received(:execute) do |args|
+          expect(args[:action]).to include(expected_action)
+        end
+      end
+    end
+
     context 'when csv action' do
       let(:encrypted_payload) do
         fixture = payload_fixture
