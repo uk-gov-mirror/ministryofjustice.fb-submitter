@@ -1,9 +1,10 @@
 require 'rails_helper'
+require_relative '../../../app/controllers/concerns/error_handling'
 
-RSpec.describe 'Concerns::ErrorHandling' do
+RSpec.describe 'Concerns::ErrorHandling', type: :controller do
   let(:parsed_body) { JSON.parse(response.body) }
 
-  controller do
+  controller ActionController::Base do
     include Concerns::ErrorHandling
 
     def standard_error
@@ -19,11 +20,10 @@ RSpec.describe 'Concerns::ErrorHandling' do
     let(:is_prod_env) { false }
 
     before do
-      routes.draw { get 'standard_error' => 'anonymous#standard_error' }
+      routes.draw { get 'standard_error', to: 'anonymous#standard_error' }
 
       allow(Rails.env).to receive(:production?).and_return(is_prod_env)
       allow(Sentry).to receive(:capture_exception)
-
       get :standard_error
     end
 

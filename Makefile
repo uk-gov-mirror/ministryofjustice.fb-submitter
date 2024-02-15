@@ -19,7 +19,7 @@ spec: build
 
 .PHONY: unit
 unit:
-	$(DOCKER_COMPOSE) run --rm app bundle exec rspec spec/controllers/concerns/error_handling_spec.rb:55
+	$(DOCKER_COMPOSE) run --rm app bundle exec rspec spec/controllers/concerns/error_handling_spec.rb
 
 .PHONY: shell
 shell: stop build
