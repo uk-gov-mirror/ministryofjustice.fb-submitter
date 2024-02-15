@@ -269,6 +269,7 @@ workflows:
             branches:
               only:
                 - main
+                - rails-7.0.8
       - deploy_to_test_dev:
           context: *context
           requires:
