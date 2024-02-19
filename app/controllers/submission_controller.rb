@@ -2,7 +2,7 @@ class SubmissionController < ApplicationController
   def create
     @submission = Submission.create!(
       submission_params.merge(
-        payload: EncryptionService.new.encrypt(payload),
+        payload: EncryptionService.new.encrypt(payload.to_h),
         access_token:
       )
     )
