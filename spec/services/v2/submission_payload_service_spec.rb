@@ -21,6 +21,7 @@ RSpec.describe V2::SubmissionPayloadService do
       'actions' => [
         {
           'kind' => 'email',
+          'variant' => 'submission',
           'to' => 'fb-acceptance-tests@digital.justice.gov.uk',
           'from' => 'moj-forms@digital.justice.gov.uk',
           'subject' => 'Submission from new-runner-acceptance-tests',
@@ -30,15 +31,17 @@ RSpec.describe V2::SubmissionPayloadService do
         },
         {
           'kind' => 'csv',
+          'variant' => nil,
           'to' => 'fb-acceptance-tests@digital.justice.gov.uk',
           'from' => 'moj-forms@digital.justice.gov.uk',
           'subject' => 'Submission from new-runner-acceptance-tests',
           'email_body' => '',
-          'include_pdf' => true,
+          'include_pdf' => false,
           'include_attachments' => false
         },
         {
           'kind' => 'json',
+          'variant' => nil,
           'url' => 'http://api-endpoint.com',
           'key': 'fb730a667840d79c'
         }
