@@ -71,12 +71,12 @@ module V2
                                         <tr>
                                             <td style="padding-left: 10px">
                                                 <img
-                                                    src="https://static.notifications.service.gov.uk/images/gov.uk_logotype_crown.png"
-                                                    alt=""
-                                                    height="32"
-                                                    border="0"
-                                                    style="Margin-top: 4px;"
-                                                    />
+                                                  src="https://static.notifications.service.gov.uk/images/govuk-logotype-tudor-crown.png"
+                                                  alt=""
+                                                  height="32"
+                                                  border="0"
+                                                  style="Margin-top: 2px;"
+                                                >
                                             </td>
                                             <td style="font-size: 28px; line-height: 1.315789474; Margin-top: 4px; padding-left: 10px;">
                                                 <span style="
