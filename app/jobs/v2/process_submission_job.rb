@@ -64,6 +64,29 @@ module V2
           csv_attachment = V2::GenerateCsvContent.new(payload_service:).execute
 
           send_email(submission:, action:, attachments: [csv_attachment])
+        when 'mslist'
+          attachments = []
+
+          if action['include_attachments'] == true
+            attachments = download_attachments(
+              decrypted_submission['attachments'],
+              submission.encrypted_user_id_and_token,
+              submission.access_token
+            )
+
+            attachments.each do |attachment|
+              send_attachment_to_drive(attachment)
+            end
+          end
+
+          # if send_to_ms_list(submission:)
+            # if action['include_attachments'] == true
+            #   attachments.each do |attachment|
+            #     send_attachments_to_drive(attachment)
+            #   end
+            # end
+          send_to_ms_list(submission:)
+          # end
         else
           Rails.logger.warn "Unknown action type '#{action}' for submission id #{submission.id}"
         end
@@ -92,6 +115,18 @@ module V2
         attachments:,
         pdf_attachment:
       )
+    end
+
+    def send_to_ms_list(submission)
+      ms_graph_adapter.post_to_ms_list(submission)
+    end
+
+    def send_attachment_to_drive(attachment)
+      ms_graph_adapter.send_attachment_to_drive(attachment)
+    end
+
+    def ms_graph_adapter
+      @ms_graph_adapter ||= V2::SendToMsGraphService.new()
     end
   end
 end
