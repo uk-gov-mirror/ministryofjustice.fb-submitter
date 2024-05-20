@@ -23,7 +23,7 @@ module V2
         when 'json'
           JsonWebhookService.new(
             webhook_attachment_fetcher: WebhookAttachmentService.new(
-              attachment_parser: AttachmentParserService.new(attachments: payload_service.attachments, v2submission: true),
+              attachment_parser: AttachmentParserService.new(attachments: payload_service.attachments),
               user_file_store_gateway: Adapters::UserFileStore.new(key: submission.encrypted_user_id_and_token, request_id:)
             ),
             webhook_destination_adapter: Adapters::JweWebhookDestination.new(
@@ -104,7 +104,7 @@ module V2
     end
 
     def send_email(submission:, action:, attachments:, pdf_attachment: nil)
-      EmailOutputServiceV2.new(
+      EmailOutputService.new(
         emailer: EmailService,
         attachment_generator: AttachmentGenerator.new,
         encryption_service: EncryptionService.new,

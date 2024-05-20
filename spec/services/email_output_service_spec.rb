@@ -4,7 +4,7 @@ require_relative '../../app/services/email_service'
 require_relative '../../app/services/attachment_generator'
 require_relative '../../app/value_objects/attachment'
 
-describe EmailOutputService do
+RSpec.describe EmailOutputService do
   def match_payload(email_payloads, to, expected_filenames)
     expect(
       email_payloads.any? do |payload|
@@ -36,10 +36,12 @@ describe EmailOutputService do
     {
       recipientType: 'team',
       type: 'email',
+      variant: 'submission',
       from: 'form-builder@digital.justice.gov.uk',
       to: 'bob.admin@digital.justice.gov.uk',
       subject: 'Complain about a court or tribunal submission',
       email_body: 'Please find an application attached',
+      user_answers: 'My answer is that I like chocolate',
       include_pdf:,
       include_attachments:
     }
@@ -71,10 +73,11 @@ describe EmailOutputService do
       from: 'form-builder@digital.justice.gov.uk',
       subject: 'Complain about a court or tribunal submission {an-id-2323} [1/1]',
       body_parts: {
-        'text/plain': 'Please find an application attached'
+        'text/plain': 'Please find an application attachedMy answer is that I like chocolate',
+        'text/html': 'Please find an application attachedMy answer is that I like chocolate'
       },
       attachments: [],
-      variant: nil,
+      variant: 'submission',
       raw_message: RawMessage
     }
   end
@@ -89,7 +92,7 @@ describe EmailOutputService do
   context 'when email sending succeeds' do
     before do
       allow(email_service_mock).to receive(:send_mail)
-      subject.execute(**execution_payload)
+      service.execute(**execution_payload)
     end
 
     it 'execute sends an email' do
@@ -158,12 +161,21 @@ describe EmailOutputService do
     let(:first_payload) do
       send_email_payload.merge(
         subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]',
+        body_parts: {
+          'text/html': 'Please find an application attachedMy answer is that I like chocolate',
+          'text/plain': 'Please find an application attachedMy answer is that I like chocolate'
+        },
         attachments: first_email_attachments
       )
     end
+
     let(:second_payload) do
       send_email_payload.merge(
         subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]',
+        body_parts: {
+          'text/html': 'Please find an application attached',
+          'text/plain': 'Please find an application attached'
+        },
         attachments: second_email_attachments
       )
     end
@@ -172,7 +184,7 @@ describe EmailOutputService do
       allow(email_service_mock).to receive(:send_mail).with(first_payload)
       allow(email_service_mock).to receive(:send_mail).with(second_payload).and_raise(Aws::SESV2::Errors::MessageRejected.new({}, 'it was the day my grandmother exploded'))
 
-      expect { subject.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
+      expect { service.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -185,7 +197,7 @@ describe EmailOutputService do
       allow(email_service_mock).to receive(:send_mail)
       expect(email_service_mock).not_to receive(:send_mail).with(first_payload) # rubocop:disable  RSpec/MessageSpies
 
-      subject.execute(**execution_payload)
+      service.execute(**execution_payload)
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -199,10 +211,10 @@ describe EmailOutputService do
     it 'does not care about the ordering of the attachments when retrying' do
       allow(email_service_mock).to receive(:send_mail).with(first_payload).and_raise(Aws::SESV2::Errors::MessageRejected.new({}, 'all children, except one, grow up'))
       allow(email_service_mock).to receive(:send_mail).with(second_payload)
-      expect { subject.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
+      expect { service.execute(**execution_payload) }.to raise_error(Aws::SESV2::Errors::MessageRejected)
 
       allow(email_service_mock).to receive(:send_mail)
-      subject.execute(**execution_payload.merge(attachments: [upload3, upload2, upload1]))
+      service.execute(**execution_payload.merge(attachments: [upload3, upload2, upload1]))
 
       email_payloads = EmailPayload.all
       expect(email_payloads.count).to eq(2)
@@ -287,12 +299,20 @@ describe EmailOutputService do
       let(:first_payload) do
         send_email_payload.merge(
           subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]',
+          body_parts: {
+            'text/html': 'Please find an application attachedMy answer is that I like chocolate',
+            'text/plain': 'Please find an application attachedMy answer is that I like chocolate'
+          },
           attachments: first_email_attachments
         )
       end
       let(:second_payload) do
         send_email_payload.merge(
           subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]',
+          body_parts: {
+            'text/html': 'Please find an application attached',
+            'text/plain': 'Please find an application attached'
+          },
           attachments: second_email_attachments
         )
       end
@@ -300,6 +320,10 @@ describe EmailOutputService do
         send_email_payload.merge(
           to: 'robert.admin@digital.justice.gov.uk',
           subject: 'Complain about a court or tribunal submission {an-id-2323} [1/2]',
+          body_parts: {
+            'text/html': 'Please find an application attachedMy answer is that I like chocolate',
+            'text/plain': 'Please find an application attachedMy answer is that I like chocolate'
+          },
           attachments: first_email_attachments
         )
       end
@@ -307,6 +331,10 @@ describe EmailOutputService do
         send_email_payload.merge(
           to: 'robert.admin@digital.justice.gov.uk',
           subject: 'Complain about a court or tribunal submission {an-id-2323} [2/2]',
+          body_parts: {
+            'text/html': 'Please find an application attached',
+            'text/plain': 'Please find an application attached'
+          },
           attachments: second_email_attachments
         )
       end
