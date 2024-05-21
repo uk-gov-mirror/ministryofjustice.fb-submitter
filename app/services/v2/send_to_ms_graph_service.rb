@@ -2,11 +2,11 @@ module V2
   class SendToMsGraphService
     attr_accessor :site_id, :list_id, :drive_id, :root_graph_url
 
-    def initialize(root_graph_url: ENV['MS_GRAPH_ROOT_URL'], site_id: ENV['MS_SITE_ID'], list_id: ENV['MS_LIST_ID'], drive_id: ENV['MS_DRIVE_ID'])
-      @root_graph_url = root_graph_url
-      @site_id = site_id
-      @list_id = list_id
-      @drive_id = drive_id
+    def initialize(action)
+      @root_graph_url = action['graph_url']
+      @site_id = action['site_id']
+      @list_id = action['list_id']
+      @drive_id = action['drive_id']
     end
 
     def post_to_ms_list(submission)
