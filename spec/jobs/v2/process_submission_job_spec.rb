@@ -24,7 +24,7 @@ RSpec.describe V2::ProcessSubmissionJob do
                    Rails.root.join('spec/fixtures/payloads/pdf_generator.json')
                  )).merge('submission_id' => submission.id)
     end
-    let(:email_output_service) { instance_spy(EmailOutputServiceV2) }
+    let(:email_output_service) { instance_spy(EmailOutputService) }
     let(:ms_graph_service) { instance_spy(V2::SendToMsGraphService) }
     let(:generated_pdf_content) do
       "I'm one with the Force. The Force is with me.\n"
@@ -33,7 +33,7 @@ RSpec.describe V2::ProcessSubmissionJob do
     before do
       allow(ENV).to receive(:[])
       allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(key)
-      allow(EmailOutputServiceV2).to receive(:new).and_return(email_output_service)
+      allow(EmailOutputService).to receive(:new).and_return(email_output_service)
       allow(V2::SendToMsGraphService).to receive(:new).and_return(ms_graph_service)
     end
 
@@ -204,7 +204,7 @@ RSpec.describe V2::ProcessSubmissionJob do
         'jar-jar-binks'
       end
       let(:action) { fixture['actions'].select { |action| action['kind'] == 'mslist' }.first }
-      let(:encrypted_payload) do      
+      let(:encrypted_payload) do
         fixture['actions'] = fixture['actions'].select { |action| action['kind'] == 'mslist' }
         SubmissionEncryption.new(key:).encrypt(fixture)
       end
@@ -221,11 +221,11 @@ RSpec.describe V2::ProcessSubmissionJob do
             .to_return(status: 200, body: 'image', headers: {})
 
           # post to graph api stub
-          stub_request(:post, "https://rooturl.graph.example.com/sites/site_id/drive/items/root:/basset-hound-dog-picture.png:/content")
+          stub_request(:post, 'https://rooturl.graph.example.com/sites/site_id/drive/items/root:/basset-hound-dog-picture.png:/content')
             .to_return(status: 200, body: response.to_json, headers: {})
 
           # post to list
-          stub_request(:post, "https://rooturl.graph.example.com/sites/site_id/lists/list_id")
+          stub_request(:post, 'https://rooturl.graph.example.com/sites/site_id/lists/list_id')
             .to_return(status: 200, body: response.to_json, headers: {})
 
           # auth url call
@@ -239,12 +239,12 @@ RSpec.describe V2::ProcessSubmissionJob do
           allow(ENV).to receive(:[]).with('MS_GRAPH_ROOT_URL').and_return('https://rooturl.graph.example.com')
           allow(ENV).to receive(:[]).with('MS_OAUTH_URL').and_return('https://authurl.example.com')
           allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(key)
-          allow(EmailOutputServiceV2).to receive(:new).and_return(email_output_service)
+          allow(EmailOutputService).to receive(:new).and_return(email_output_service)
         end
 
         it 'sends to graph api then attachments to drive api' do
           perform_job
-  
+
           expect(ms_graph_service).to have_received(:post_to_ms_list) do |args|
             expect(args[:submission]).to eq(submission)
           end
@@ -253,7 +253,6 @@ RSpec.describe V2::ProcessSubmissionJob do
             expect(args.filename).to match(/basset-hound-dog-picture.png/)
           end
         end
-
       end
     end
 

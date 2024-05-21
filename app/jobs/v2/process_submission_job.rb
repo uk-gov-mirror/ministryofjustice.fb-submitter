@@ -65,7 +65,6 @@ module V2
 
           send_email(submission:, action:, attachments: [csv_attachment])
         when 'mslist'
-          attachments = []
 
           if action['include_attachments'] == true
             attachments = download_attachments(
@@ -80,11 +79,11 @@ module V2
           end
 
           # if send_to_ms_list(submission:)
-            # if action['include_attachments'] == true
-            #   attachments.each do |attachment|
-            #     send_attachments_to_drive(attachment)
-            #   end
-            # end
+          # if action['include_attachments'] == true
+          #   attachments.each do |attachment|
+          #     send_attachments_to_drive(attachment)
+          #   end
+          # end
           send_to_ms_list(submission:)
           # end
         else
@@ -121,12 +120,10 @@ module V2
       ms_graph_adapter.post_to_ms_list(submission)
     end
 
-    def send_attachment_to_drive(attachment)
-      ms_graph_adapter.send_attachment_to_drive(attachment)
-    end
+    delegate :send_attachment_to_drive, to: :ms_graph_adapter
 
     def ms_graph_adapter
-      @ms_graph_adapter ||= V2::SendToMsGraphService.new()
+      @ms_graph_adapter ||= V2::SendToMsGraphService.new
     end
   end
 end
