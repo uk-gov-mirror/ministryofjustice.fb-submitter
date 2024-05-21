@@ -233,11 +233,11 @@ RSpec.describe V2::ProcessSubmissionJob do
             .to_return(status: 200, body: { 'access_token' => 'valid_token' }.to_json, headers: {})
 
           allow(ENV).to receive(:[])
-          allow(ENV).to receive(:[]).with('MS_SITE_ID').and_return('site_id')
-          allow(ENV).to receive(:[]).with('MS_DRIVE_ID').and_return('root')
-          allow(ENV).to receive(:[]).with('MS_LIST_ID').and_return('list_id')
-          allow(ENV).to receive(:[]).with('MS_GRAPH_ROOT_URL').and_return('https://rooturl.graph.example.com')
-          allow(ENV).to receive(:[]).with('MS_OAUTH_URL').and_return('https://authurl.example.com')
+          # allow(ENV).to receive(:[]).with('MS_SITE_ID').and_return('site_id')
+          # allow(ENV).to receive(:[]).with('MS_DRIVE_ID').and_return('root')
+          # allow(ENV).to receive(:[]).with('MS_LIST_ID').and_return('list_id')
+          # allow(ENV).to receive(:[]).with('MS_GRAPH_ROOT_URL').and_return('https://rooturl.graph.example.com')
+          # allow(ENV).to receive(:[]).with('MS_OAUTH_URL').and_return('https://authurl.example.com')
           allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(key)
           allow(EmailOutputService).to receive(:new).and_return(email_output_service)
         end
