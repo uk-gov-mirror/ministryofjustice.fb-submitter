@@ -21,7 +21,10 @@ module V2
         req.body = ms_list_payload(submission)
       end
 
-      JSON.parse(response.body)
+      parsed_response = JSON.parse(response.body)
+      Rails.logger.info(parsed_response)
+
+      parsed_response
     end
 
     def send_attachment_to_drive(attachment)
@@ -36,7 +39,10 @@ module V2
         req.body = attachment
       end
 
-      JSON.parse(response.body)
+      parsed_response = JSON.parse(response.body)
+      Rails.logger.info(parsed_response)
+
+      parsed_response
     end
 
     def get_auth_token

@@ -65,9 +65,13 @@ module V2
 
           send_email(submission:, action:, attachments: [csv_attachment])
         when 'mslist'
+          Rails.logger.info('*****************')
+          Rails.logger.info('Creating adapter')
           ms_graph_adapter(action)
 
           if action['include_attachments'] == true
+            Rails.logger.info('*****************')
+            Rails.logger.info('Posting attachments')
             attachments = download_attachments(
               decrypted_submission['attachments'],
               submission.encrypted_user_id_and_token,
@@ -85,6 +89,8 @@ module V2
           #     send_attachments_to_drive(attachment)
           #   end
           # end
+          Rails.logger.info('*****************')
+          Rails.logger.info('Sending submission')
           send_to_ms_list(submission:)
           # end
         else
