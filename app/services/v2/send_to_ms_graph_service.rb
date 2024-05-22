@@ -9,16 +9,21 @@ module V2
       @drive_id = action['drive_id']
     end
 
-    def post_to_ms_list(submission)
+    def post_to_ms_list(submission, id)
       uri = URI.parse("#{root_graph_url}/sites/#{site_id}/lists/#{list_id}")
 
       @connection ||= Faraday.new(uri) do |conn|
       end
 
+      payload = ms_list_payload(submission, id)
+      Rails.logger.info('=============')
+      Rails.logger.info('sending this payload:')
+      Rails.logger.info(payload)
+
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'application/json'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
-        req.body = ms_list_payload(submission)
+        req.body = payload
       end
 
       parsed_response = JSON.parse(response.body)
@@ -60,8 +65,33 @@ module V2
       response_body['access_token']
     end
 
-    def ms_list_payload(submission)
-      submission.to_json
+    def ms_list_payload(submission, id)
+      # submission.to_json
+
+      new_data = {
+        'fields' => {
+          'Title' => id
+        }
+      }
+
+      merge_data = []
+
+      submission['pages'].each do |page|
+        page['answers'].each do |answer|
+          keystring = answer['field_name'].to_s
+          md5name = Digest::MD5.hexdigest keystring
+          md5stripped = md5name.tr('0-9', '')
+          merge_data << { md5stripped => answer['answer'] }
+        end
+      end
+
+      result_hash = {}
+
+      merge_data.each do |hash|
+        result_hash.merge!(hash)
+      end
+
+      new_data['fields'].merge!(result_hash).to_json
     end
 
     private
