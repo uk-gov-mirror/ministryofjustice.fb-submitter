@@ -10,7 +10,7 @@ module V2
     end
 
     def post_to_ms_list(submission, id)
-      uri = URI.parse("#{root_graph_url}/sites/#{site_id}/lists/#{list_id}")
+      uri = URI.parse("#{root_graph_url}/sites/#{site_id}/lists/#{list_id}/items")
 
       @connection ||= Faraday.new(uri) do |conn|
       end
