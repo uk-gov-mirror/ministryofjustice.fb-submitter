@@ -22,7 +22,11 @@ module V2
       end
 
       parsed_response = JSON.parse(response.body)
+      Rails.logger.info('=============')
+      Rails.logger.info(response)
+      Rails.logger.info('=============')
       Rails.logger.info(parsed_response)
+      Rails.logger.info('=============')
 
       parsed_response
     end
