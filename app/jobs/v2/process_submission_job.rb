@@ -91,6 +91,11 @@ module V2
           # end
           Rails.logger.info('*****************')
           Rails.logger.info('Sending submission')
+          Rails.logger.info(submission)
+          Rails.logger.info('*****************')
+          Rails.logger.info(decrypted_submission)
+          Rails.logger.info('*****************')
+          Rails.logger.info('*****************')
           send_to_ms_list(submission:)
           # end
         else
