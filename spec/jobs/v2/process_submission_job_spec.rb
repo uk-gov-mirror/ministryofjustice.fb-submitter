@@ -245,12 +245,12 @@ RSpec.describe V2::ProcessSubmissionJob do
         it 'sends to graph api then attachments to drive api' do
           perform_job
 
-          expect(ms_graph_service).to have_received(:post_to_ms_list) do |args|
-            expect(args[:submission]).to eq(submission)
-          end
-
           expect(ms_graph_service).to have_received(:send_attachment_to_drive) do |args|
             expect(args.filename).to match(/basset-hound-dog-picture.png/)
+          end
+
+          expect(ms_graph_service).to have_received(:post_to_ms_list) do |args|
+            expect(args['submission_id']).to eq(submission.id)
           end
         end
       end

@@ -96,7 +96,7 @@ module V2
           Rails.logger.info(decrypted_submission)
           Rails.logger.info('*****************')
           Rails.logger.info('*****************')
-          send_to_ms_list(submission:)
+          post_to_ms_list(decrypted_submission, submission.id)
           # end
         else
           Rails.logger.warn "Unknown action type '#{action}' for submission id #{submission.id}"
@@ -128,11 +128,7 @@ module V2
       )
     end
 
-    def send_to_ms_list(submission)
-      ms_graph_adapter.post_to_ms_list(submission)
-    end
-
-    delegate :send_attachment_to_drive, to: :ms_graph_adapter
+    delegate :send_attachment_to_drive, :post_to_ms_list, to: :ms_graph_adapter
 
     def ms_graph_adapter(action = nil)
       @ms_graph_adapter ||= V2::SendToMsGraphService.new(action)
