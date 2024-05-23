@@ -23,7 +23,7 @@ module V2
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'application/json'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
-        req.body = payload
+        req.body = payload.to_json
       end
 
       parsed_response = JSON.parse(response.body)
@@ -92,7 +92,7 @@ module V2
         result_hash.merge!(hash)
       end
 
-      new_data['fields'].merge!(result_hash).to_json
+      new_data['fields'].merge!(result_hash)
     end
 
     private
