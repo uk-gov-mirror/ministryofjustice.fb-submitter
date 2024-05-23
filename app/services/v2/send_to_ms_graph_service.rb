@@ -38,7 +38,7 @@ module V2
     end
 
     def send_attachment_to_drive(attachment)
-      uri = URI.parse("#{root_graph_url}/sites/#{site_id}/drive/items/#{drive_id}:/#{attachment.filename}:/content")
+      uri = URI.parse("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{attachment.filename}:/content")
 
       @connection ||= Faraday.new(uri) do |conn|
       end
