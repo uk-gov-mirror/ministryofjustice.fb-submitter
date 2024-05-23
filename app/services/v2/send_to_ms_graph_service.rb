@@ -79,7 +79,7 @@ module V2
 
       submission['pages'].each do |page|
         page['answers'].each do |answer|
-          keystring = answer['field_name'].to_s
+          keystring = answer['field_id'].to_s
           md5name = Digest::MD5.hexdigest keystring
           md5stripped = md5name.tr('0-9', '')
           merge_data << { md5stripped => answer['answer'] }
