@@ -49,7 +49,7 @@ module V2
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'text/plain'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
-        req.body = attachment
+        req.body = File.read(attachment.file)
       end
 
       parsed_response = JSON.parse(response.body)
