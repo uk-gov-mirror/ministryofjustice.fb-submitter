@@ -70,8 +70,6 @@ module V2
           ms_graph_adapter(action)
 
           if action['include_attachments'] == true
-            Rails.logger.info('*****************')
-            Rails.logger.info('Posting attachments')
             attachments = download_attachments(
               decrypted_submission['attachments'],
               submission.encrypted_user_id_and_token,
@@ -79,6 +77,9 @@ module V2
             )
 
             attachments.each do |attachment|
+              Rails.logger.info('*****************')
+              Rails.logger.info('Posting attachment')
+              Rails.logger.info(attachment.filename)
               send_attachment_to_drive(attachment)
             end
           end
