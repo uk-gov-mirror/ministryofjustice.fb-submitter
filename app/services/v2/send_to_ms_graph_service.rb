@@ -42,7 +42,7 @@ module V2
       Rails.logger.info('sending file to')
       Rails.logger.info("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{filename}:/content")
 
-      response = @connection.post do |req|
+      response = @connection.put do |req|
         req.headers['Content-Type'] = 'text/plain'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
         req.body = File.read(attachment.path)
