@@ -23,7 +23,7 @@ module V2
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'application/json'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
-        req.body = payload.to_json
+        req.body = { 'fields' => payload }.to_json
       end
 
       parsed_response = JSON.parse(response.body)
