@@ -39,12 +39,8 @@ module V2
       end
 
       Rails.logger.info('=============')
-      Rails.logger.info('sending file')
-      Rails.logger.info(attachment)
-      Rails.logger.info('=============')
-      Rails.logger.info('to drive')
-      Rails.logger.info(drive_id)
-      Rails.logger.info('=============')
+      Rails.logger.info('sending file to')
+      Rails.logger.info("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{filename}:/content")
 
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'text/plain'
