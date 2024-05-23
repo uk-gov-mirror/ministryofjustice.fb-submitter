@@ -17,12 +17,15 @@ module V2
       @connection ||= Faraday.new(uri) do |conn|
       end
 
-      payload = ms_list_payload(submission, id)
+      Rails.logger.info('=============')
+      Rails.logger.info('sending payload')
+      answers_payload = ms_list_payload(submission, id)
+      Rails.logger.info(answers_payload)
 
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'application/json'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
-        req.body = { 'fields' => payload }.to_json
+        req.body = { 'fields' => answers_payload }.to_json
       end
 
       parsed_response = JSON.parse(response.body)
