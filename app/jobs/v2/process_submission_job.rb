@@ -89,11 +89,6 @@ module V2
           #     send_attachments_to_drive(attachment)
           #   end
           # end
-
-          Rails.logger.info('*****************')
-          Rails.logger.info(decrypted_submission)
-          Rails.logger.info('*****************')
-          Rails.logger.info('*****************')
           post_to_ms_list(decrypted_submission, submission.id)
           # end
         else
