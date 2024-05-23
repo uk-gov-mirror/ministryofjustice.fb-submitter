@@ -89,9 +89,7 @@ module V2
           #     send_attachments_to_drive(attachment)
           #   end
           # end
-          Rails.logger.info('*****************')
-          Rails.logger.info('Sending submission')
-          Rails.logger.info(submission)
+
           Rails.logger.info('*****************')
           Rails.logger.info(decrypted_submission)
           Rails.logger.info('*****************')

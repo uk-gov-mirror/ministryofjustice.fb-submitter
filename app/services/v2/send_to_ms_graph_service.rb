@@ -18,9 +18,6 @@ module V2
       end
 
       payload = ms_list_payload(submission, id)
-      Rails.logger.info('=============')
-      Rails.logger.info('sending this payload:')
-      Rails.logger.info(payload)
 
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'application/json'
@@ -29,12 +26,7 @@ module V2
       end
 
       parsed_response = JSON.parse(response.body)
-      Rails.logger.info('=============')
-      Rails.logger.info(response)
-      Rails.logger.info(response.status)
-      Rails.logger.info('=============')
       Rails.logger.info(parsed_response)
-      Rails.logger.info('=============')
 
       parsed_response
     end
@@ -46,6 +38,14 @@ module V2
       @connection ||= Faraday.new(uri) do |conn|
       end
 
+      Rails.logger.info('=============')
+      Rails.logger.info('sending file')
+      Rails.logger.info(attachment)
+      Rails.logger.info('=============')
+      Rails.logger.info('to drive')
+      Rails.logger.info(drive_id)
+      Rails.logger.info('=============')
+
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'text/plain'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
@@ -53,7 +53,12 @@ module V2
       end
 
       parsed_response = JSON.parse(response.body)
+      Rails.logger.info('=============')
+      Rails.logger.info(response)
+      Rails.logger.info(response.status)
+      Rails.logger.info('=============')
       Rails.logger.info(parsed_response)
+      Rails.logger.info('=============')
 
       parsed_response
     end
