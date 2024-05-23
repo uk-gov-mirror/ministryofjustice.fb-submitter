@@ -99,7 +99,7 @@ module V2
         result_hash.merge!(hash)
       end
 
-      new_data['fields'].merge!(result_hash)
+      new_data['fields'].merge!(result_hash.to_json)
     end
 
     private
