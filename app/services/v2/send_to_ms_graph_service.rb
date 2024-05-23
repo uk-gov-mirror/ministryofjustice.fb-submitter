@@ -1,3 +1,5 @@
+require 'cgi'
+
 module V2
   class SendToMsGraphService
     attr_accessor :site_id, :list_id, :drive_id, :root_graph_url
@@ -38,7 +40,7 @@ module V2
     end
 
     def send_attachment_to_drive(attachment)
-      uri = URI.parse(URI::encode("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{attachment.filename}:/content"))
+      uri = URI.parse(CGI.escape("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{attachment.filename}:/content"))
 
       @connection ||= Faraday.new(uri) do |conn|
       end
