@@ -38,14 +38,14 @@ module V2
       filename = CGI.escape(attachment.filename)
       uri = URI.parse("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{filename}:/content")
 
-      @connection ||= Faraday.new(uri) do |conn|
+      connection = Faraday.new(uri) do |conn|
       end
 
       Rails.logger.info('=============')
       Rails.logger.info('sending file to')
       Rails.logger.info("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{filename}:/content")
 
-      response = @connection.put do |req|
+      response = connection.put do |req|
         req.headers['Content-Type'] = 'text/plain'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
         req.body = File.read(attachment.path)
@@ -99,7 +99,7 @@ module V2
         result_hash.merge!(hash)
       end
 
-      new_data['fields'].merge!(result_hash.to_json)
+      new_data['fields'].merge!(result_hash.to_s)
     end
 
     private
