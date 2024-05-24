@@ -86,10 +86,10 @@ module V2
 
       submission['pages'].each do |page|
         page['answers'].each do |answer|
+          value = answer['answer'].is_a?(Hash) ? answer['answer'].to_json : answer['answer']
           keystring = answer['field_id'].to_s
-          md5name = Digest::MD5.hexdigest keystring
-          md5stripped = md5name.tr('0-9', '')
-          merge_data << { md5stripped => answer['answer'] }
+          colname = Digest::MD5.hexdigest(keystring).tr('0-9', '')
+          merge_data << { colname => value }
         end
       end
 
@@ -99,7 +99,7 @@ module V2
         result_hash.merge!(hash)
       end
 
-      new_data['fields'].merge!(result_hash.to_s)
+      new_data['fields'].merge!(result_hash)
     end
 
     private
