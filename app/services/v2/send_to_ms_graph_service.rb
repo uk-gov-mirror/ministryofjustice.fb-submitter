@@ -86,7 +86,7 @@ module V2
 
       submission['pages'].each do |page|
         page['answers'].each do |answer|
-          value = answer['answer'].is_a?(Hash) ? answer['answer'].to_json : answer['answer']
+          value = answer['answer'].is_a?(Hash) ? answer_from_hash(answer) : answer['answer']
           keystring = answer['field_id'].to_s
           colname = Digest::MD5.hexdigest(keystring).tr('0-9', '')
           merge_data << { colname => value }
@@ -100,6 +100,10 @@ module V2
       end
 
       new_data['fields'].merge!(result_hash)
+    end
+
+    def answer_from_hash(answer)
+      answer.map { |_k, v| v }.join('; ')
     end
 
     private
