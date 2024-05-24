@@ -80,7 +80,7 @@ module V2
               Rails.logger.info('*****************')
               Rails.logger.info('Posting attachment')
               Rails.logger.info(attachment.filename)
-              send_attachment_to_drive(attachment)
+              send_attachment_to_drive(attachment, submission.id)
             end
           end
 
