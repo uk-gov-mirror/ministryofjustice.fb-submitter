@@ -76,11 +76,13 @@ module V2
               submission.access_token
             )
 
+            created_folder = create_folder_in_drive(submission.id)
+
             attachments.each do |attachment|
               Rails.logger.info('*****************')
               Rails.logger.info('Posting attachment')
               Rails.logger.info(attachment.filename)
-              send_attachment_to_drive(attachment, submission.id)
+              send_attachment_to_drive(attachment, submission.id, created_folder)
             end
           end
 
@@ -122,7 +124,7 @@ module V2
       )
     end
 
-    delegate :send_attachment_to_drive, :post_to_ms_list, to: :ms_graph_adapter
+    delegate :send_attachment_to_drive, :post_to_ms_list, :create_folder_in_drive, to: :ms_graph_adapter
 
     def ms_graph_adapter(action = nil)
       @ms_graph_adapter ||= V2::SendToMsGraphService.new(action)
