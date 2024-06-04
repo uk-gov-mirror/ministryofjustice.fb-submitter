@@ -34,9 +34,31 @@ module V2
       parsed_response
     end
 
-    def send_attachment_to_drive(attachment, id)
+    def create_folder_in_drive(submission_id)
+      drive_name = CGI.escape("#{submission_id}-attachments")
+
+      uri = URI.parse("#{root_graph_url}/sites/#{site_id}/drive/items/#{drive_id}/children")
+
+      connection ||= Faraday.new(uri) do |conn|
+      end
+
+      body = {
+        'name' => drive_name,
+        'folder' => {}
+      }
+
+      response = connection.post do |req|
+        req.headers['Content-Type'] = 'application/json'
+        req.headers['Authorization'] = "Bearer #{get_auth_token}"
+        req.body = body.to_json
+      end
+
+      response.status == 201 ? JSON.parse(response.body)['id'] : drive_id
+    end
+
+    def send_attachment_to_drive(attachment, id, folder)
       filename = CGI.escape("#{id}-#{attachment.filename}")
-      uri = URI.parse("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{filename}:/content")
+      uri = URI.parse("#{root_graph_url}sites/#{site_id}/drive/items/#{folder}:/#{filename}:/content")
 
       connection = Faraday.new(uri) do |conn|
       end
