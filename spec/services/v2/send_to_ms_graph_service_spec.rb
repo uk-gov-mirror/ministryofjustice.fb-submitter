@@ -219,17 +219,18 @@ RSpec.describe V2::SendToMsGraphService do
 
     context 'successfully' do
       before do
-        stub_request(:put, "https://graph-url.microsoft.comsites/1234/drive/items/folder_path:/#{submission_id}-filename.png:/content").
-          with(
+        stub_request(:put, "https://graph-url.microsoft.comsites/1234/drive/items/folder_path:/#{submission_id}-filename.png:/content")
+          .with(
             body: "hello world\n",
             headers: {
-          'Accept'=>'*/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Authorization'=>'Bearer valid_token',
-          'Content-Type'=>'text/plain',
-          'User-Agent'=>'Faraday v1.10.3'
-            }).
-          to_return(status: 200, body: response.to_json, headers: {})
+              'Accept' => '*/*',
+              'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'Authorization' => 'Bearer valid_token',
+              'Content-Type' => 'text/plain',
+              'User-Agent' => 'Faraday v1.10.3'
+            }
+          )
+          .to_return(status: 200, body: response.to_json, headers: {})
 
         stub_request(:post, 'https://authurl.example.com')
           .to_return(status: 200, body: { 'access_token' => 'valid_token' }.to_json, headers: {})
@@ -258,29 +259,30 @@ RSpec.describe V2::SendToMsGraphService do
 
       let(:answers_payload) do
         {
-          "fields"=>                                                               
+          'fields' =>
           {
-            "Title"=>submission_id,                       
-            "bfebbbeafabacdef"=>"Stormtrooper",                                    
-            "cbddedd"=>"FN-b0046eb3-37ff-400d-85f8-8bbb5c11183b",                  
-            "dddddbccfbd"=>"fb-acceptance-tests@digital.justice.gov.uk",           
-            "bebcdcfeeeda"=>"postal-address_address_1; Your postal address; {\"address_line_one\"=>\"1 road\", \"address_line_two\"=>\"\", \"city\"=>\"ruby town\", \"county\"=>\"\", \"postcode\"=>\"99 999\", \"country\"=>\"ruby land\"}"
+            'Title' => submission_id,
+            'bfebbbeafabacdef' => 'Stormtrooper',
+            'cbddedd' => 'FN-b0046eb3-37ff-400d-85f8-8bbb5c11183b',
+            'dddddbccfbd' => 'fb-acceptance-tests@digital.justice.gov.uk',
+            'bebcdcfeeeda' => 'postal-address_address_1; Your postal address; {"address_line_one"=>"1 road", "address_line_two"=>"", "city"=>"ruby town", "county"=>"", "postcode"=>"99 999", "country"=>"ruby land"}'
           }
         }
       end
 
       before do
-        stub_request(:post, "https://graph-url.microsoft.com/sites/1234/lists/5678/items").
-          with(
+        stub_request(:post, 'https://graph-url.microsoft.com/sites/1234/lists/5678/items')
+          .with(
             body: answers_payload.to_json,
             headers: {
-          'Accept'=>'*/*',
-          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-          'Authorization'=>'Bearer valid_token',
-          'Content-Type'=>'application/json',
-          'User-Agent'=>'Faraday v1.10.3'
-            }).
-          to_return(status: 200, body: response.to_json, headers: {})
+              'Accept' => '*/*',
+              'Accept-Encoding' => 'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+              'Authorization' => 'Bearer valid_token',
+              'Content-Type' => 'application/json',
+              'User-Agent' => 'Faraday v1.10.3'
+            }
+          )
+          .to_return(status: 200, body: response.to_json, headers: {})
 
         stub_request(:post, 'https://authurl.example.com')
           .to_return(status: 200, body: { 'access_token' => 'valid_token' }.to_json, headers: {})
