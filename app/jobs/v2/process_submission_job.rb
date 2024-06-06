@@ -65,8 +65,6 @@ module V2
 
           send_email(submission:, action:, attachments: [csv_attachment])
         when 'mslist'
-          Rails.logger.info('*****************')
-          Rails.logger.info('Creating adapter')
           ms_graph_adapter(action)
 
           if action['include_attachments'] == true
@@ -79,21 +77,11 @@ module V2
             created_folder = create_folder_in_drive(submission.id)
 
             attachments.each do |attachment|
-              Rails.logger.info('*****************')
-              Rails.logger.info('Posting attachment')
-              Rails.logger.info(attachment.filename)
               send_attachment_to_drive(attachment, submission.id, created_folder)
             end
           end
 
-          # if send_to_ms_list(submission:)
-          # if action['include_attachments'] == true
-          #   attachments.each do |attachment|
-          #     send_attachments_to_drive(attachment)
-          #   end
-          # end
           post_to_ms_list(decrypted_submission, submission.id)
-          # end
         else
           Rails.logger.warn "Unknown action type '#{action}' for submission id #{submission.id}"
         end

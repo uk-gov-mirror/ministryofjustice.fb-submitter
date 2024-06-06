@@ -17,10 +17,7 @@ module V2
       @connection ||= Faraday.new(uri) do |conn|
       end
 
-      Rails.logger.info('=============')
-      Rails.logger.info('sending payload')
       answers_payload = ms_list_payload(submission, id)
-      Rails.logger.info(answers_payload)
 
       response = @connection.post do |req|
         req.headers['Content-Type'] = 'application/json'
@@ -28,10 +25,7 @@ module V2
         req.body = { 'fields' => answers_payload }.to_json
       end
 
-      parsed_response = JSON.parse(response.body)
-      Rails.logger.info(parsed_response)
-
-      parsed_response
+      JSON.parse(response.body)
     end
 
     def create_folder_in_drive(submission_id)
@@ -63,25 +57,15 @@ module V2
       connection = Faraday.new(uri) do |conn|
       end
 
-      Rails.logger.info('=============')
-      Rails.logger.info('sending file to')
       Rails.logger.info("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{filename}:/content")
-
+      # byebug
       response = connection.put do |req|
         req.headers['Content-Type'] = 'text/plain'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
         req.body = File.read(attachment.path)
       end
 
-      parsed_response = JSON.parse(response.body)
-      Rails.logger.info('=============')
-      Rails.logger.info(response)
-      Rails.logger.info(response.status)
-      Rails.logger.info('=============')
-      Rails.logger.info(parsed_response)
-      Rails.logger.info('=============')
-
-      parsed_response
+      JSON.parse(response.body)
     end
 
     def get_auth_token
@@ -96,8 +80,6 @@ module V2
     end
 
     def ms_list_payload(submission, id)
-      # submission.to_json
-
       new_data = {
         'fields' => {
           'Title' => id
