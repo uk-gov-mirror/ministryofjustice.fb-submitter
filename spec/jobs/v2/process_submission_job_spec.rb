@@ -224,6 +224,10 @@ RSpec.describe V2::ProcessSubmissionJob do
           stub_request(:post, 'https://rooturl.graph.example.com/sites/site_id/drive/items/root:/basset-hound-dog-picture.png:/content')
             .to_return(status: 200, body: response.to_json, headers: {})
 
+          # post create folder stub
+          stub_request(:post, 'https://rooturl.graph.example.com/sites/site_id/drive/items/root/children')
+          .to_return(status: 201, body: { id: 'a-folder' }.to_json, headers: {})
+
           # post to list
           stub_request(:post, 'https://rooturl.graph.example.com/sites/site_id/lists/list_id')
             .to_return(status: 200, body: response.to_json, headers: {})
@@ -233,24 +237,24 @@ RSpec.describe V2::ProcessSubmissionJob do
             .to_return(status: 200, body: { 'access_token' => 'valid_token' }.to_json, headers: {})
 
           allow(ENV).to receive(:[])
-          # allow(ENV).to receive(:[]).with('MS_SITE_ID').and_return('site_id')
-          # allow(ENV).to receive(:[]).with('MS_DRIVE_ID').and_return('root')
-          # allow(ENV).to receive(:[]).with('MS_LIST_ID').and_return('list_id')
-          # allow(ENV).to receive(:[]).with('MS_GRAPH_ROOT_URL').and_return('https://rooturl.graph.example.com')
-          # allow(ENV).to receive(:[]).with('MS_OAUTH_URL').and_return('https://authurl.example.com')
+
           allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(key)
           allow(EmailOutputService).to receive(:new).and_return(email_output_service)
+          allow(ms_graph_service).to receive(:create_folder_in_drive).and_return('a-folder')
         end
 
         it 'sends to graph api then attachments to drive api' do
           perform_job
 
-          expect(ms_graph_service).to have_received(:send_attachment_to_drive) do |args|
-            expect(args.filename).to match(/basset-hound-dog-picture.png/)
+          expect(ms_graph_service).to have_received(:send_attachment_to_drive) do |arg1, arg2, arg3|
+            expect(arg1.filename).to match(/basset-hound-dog-picture.png/)
+            expect(arg2).to eq(submission.id)
+            expect(arg3).to eq('a-folder')
           end
 
-          expect(ms_graph_service).to have_received(:post_to_ms_list) do |args|
-            expect(args['submission_id']).to eq(submission.id)
+          expect(ms_graph_service).to have_received(:post_to_ms_list) do |arg1, arg2|
+            expect(arg1['submission_id']).to eq(submission.id)
+            expect(arg2).to eq(submission.id)
           end
         end
       end
