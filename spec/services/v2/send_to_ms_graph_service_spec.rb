@@ -85,8 +85,8 @@ RSpec.describe V2::SendToMsGraphService do
   end
   let(:action) { payload['actions'][0].to_json }
 
-  context 'create a folder' do
-    context 'successfully' do
+  context 'when creating a folder for this submission' do
+    context 'when successful' do
       before do
         stub_request(:post, 'https://graph-url.microsoft.com/sites/1234/drive/items/root/children')
         .to_return(status: 201, body: { id: 'a-folder' }.to_json, headers: {})
@@ -104,7 +104,7 @@ RSpec.describe V2::SendToMsGraphService do
       end
     end
 
-    context 'api error' do
+    context 'when api responds with error' do
       before do
         stub_request(:post, 'https://graph-url.microsoft.com/sites/1234/drive/items/root/children')
         .to_return(status: 500, body: {}.to_json, headers: {})
@@ -123,8 +123,8 @@ RSpec.describe V2::SendToMsGraphService do
     end
   end
 
-  context 'get auth token' do
-    context 'success' do
+  context 'when authenticating' do
+    context 'when successful' do
       before do
         stub_request(:post, 'https://graph-url.microsoft.com/sites/1234/drive/items/root/children')
         .to_return(status: 500, body: {}.to_json, headers: {})
@@ -148,11 +148,11 @@ RSpec.describe V2::SendToMsGraphService do
       end
 
       it 'calls the api with the form and return the value' do
-        expect(subject.get_auth_token).to eq('valid_token')
+        expect(graph_service.get_auth_token).to eq('valid_token')
       end
     end
 
-    context 'api error' do
+    context 'when api responds with error' do
       before do
         stub_request(:post, 'https://graph-url.microsoft.com/sites/1234/drive/items/root/children')
         .to_return(status: 500, body: {}.to_json, headers: {})
@@ -176,11 +176,11 @@ RSpec.describe V2::SendToMsGraphService do
       end
 
       it 'calls the api with the form and return the value' do
-        expect { subject.get_auth_token }.to raise_error(Faraday::ServerError)
+        expect { graph_service.get_auth_token }.to raise_error(Faraday::ServerError)
       end
     end
 
-    context 'permission denied' do
+    context 'when permission denied' do
       before do
         stub_request(:post, 'https://graph-url.microsoft.com/sites/1234/drive/items/root/children')
         .to_return(status: 500, body: {}.to_json, headers: {})
@@ -204,12 +204,12 @@ RSpec.describe V2::SendToMsGraphService do
       end
 
       it 'calls the api with the form and return the value' do
-        expect { subject.get_auth_token }.to raise_error(Faraday::ForbiddenError)
+        expect { graph_service.get_auth_token }.to raise_error(Faraday::ForbiddenError)
       end
     end
   end
 
-  context 'send attachment to drive' do
+  context 'when sending attachment to drive' do
     let(:response) do
       {
         'webUrl' => 'file_in_drive'
@@ -217,7 +217,7 @@ RSpec.describe V2::SendToMsGraphService do
     end
     let(:attachment) { instance_spy(Attachment) }
 
-    context 'successfully' do
+    context 'when successful' do
       before do
         stub_request(:put, "https://graph-url.microsoft.comsites/1234/drive/items/folder_path:/#{submission_id}-filename.png:/content")
           .with(
@@ -249,8 +249,8 @@ RSpec.describe V2::SendToMsGraphService do
     end
   end
 
-  context 'send answers to list' do
-    context 'successfully' do
+  context 'when sending answers to list' do
+    context 'when successful' do
       let(:response) do
         {
           'list_updated' => 'today'
