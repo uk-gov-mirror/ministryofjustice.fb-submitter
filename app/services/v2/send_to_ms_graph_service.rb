@@ -57,8 +57,6 @@ module V2
       connection = Faraday.new(uri) do |conn|
       end
 
-      Rails.logger.info("#{root_graph_url}sites/#{site_id}/drive/items/#{drive_id}:/#{filename}:/content")
-      # byebug
       response = connection.put do |req|
         req.headers['Content-Type'] = 'text/plain'
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
