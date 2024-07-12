@@ -80,7 +80,7 @@ module V2
     def ms_list_payload(submission, id)
       new_data = {
         'fields' => {
-          'Title' => id
+          Digest::MD5.hexdigest('Submission ID').tr('0-9', '') => id
         }
       }
 
