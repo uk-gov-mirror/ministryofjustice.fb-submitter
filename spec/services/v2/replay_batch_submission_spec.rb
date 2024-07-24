@@ -1,5 +1,27 @@
 require 'rails_helper'
 
+VALID_DOMAINS =
+[
+  'justice.gov.uk',
+  'digital.justice.gov.uk',
+  'cica.gov.uk',
+  'ccrc.gov.uk',
+  'judicialappointments.gov.uk',
+  'judicialombudsman.gov.uk',
+  'ospt.gov.uk',
+  'gov.sscl.com',
+  'hmcts.net'
+]
+
+INVALID_DOMAINS =
+[
+  'fake-justice.gov.uk',
+  'digita.justice.gov.uk',
+  'cico.gov.uk'
+]
+
+TWENTY_EIGHT_DAYS_IN_SECONDS = 28*24*60*60
+
 RSpec.describe V2::ReplayBatchSubmission do
   let(:subject) { described_class.new(date_from:, date_to:, service_slug:, new_destination_email:, resend_json:, resend_mslist:) }
 
@@ -9,28 +31,6 @@ RSpec.describe V2::ReplayBatchSubmission do
   let(:new_destination_email) { 'valid@justice.gov.uk' }
   let(:resend_json) { false }
   let(:resend_mslist) { false }
-
-  VALID_DOMAINS =
-    [
-      'justice.gov.uk',
-      'digital.justice.gov.uk',
-      'cica.gov.uk',
-      'ccrc.gov.uk',
-      'judicialappointments.gov.uk',
-      'judicialombudsman.gov.uk',
-      'ospt.gov.uk',
-      'gov.sscl.com',
-      'hmcts.net'
-    ]
-
-  INVALID_DOMAINS =
-    [
-      'fake-justice.gov.uk',
-      'digita.justice.gov.uk',
-      'cico.gov.uk'
-    ]
-
-  TWENTY_EIGHT_DAYS_IN_SECONDS = 28*24*60*60
 
   describe '#call' do
     context 'when there are valid params' do
@@ -163,10 +163,11 @@ RSpec.describe V2::ReplayBatchSubmission do
     end
 
     context 'no submissions in date range' do
-      let(:reprocessed_submission) { create(:submission, payload: encrypted_payload, access_token:, created_at: 5.days.ago, service_slug:) }
+      before do
+        create(:submission, payload: encrypted_payload, access_token:, created_at: 5.days.ago, service_slug:)
+      end
 
       it 'enqueues no jobs' do
-        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
         subject.process_submissions
 
         expect(Submission.all.count).to eq(1)
