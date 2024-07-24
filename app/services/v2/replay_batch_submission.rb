@@ -1,6 +1,6 @@
 module V2
   class ReplayBatchSubmission
-    attr_accessor :date_from, :date_to, :service_slug, :new_destination_email
+    attr_accessor :date_from, :date_to, :service_slug, :new_destination_email, :resend_json, :resend_mslist
 
     ALLOWED_DOMAINS = [
       'justice.gov.uk',
@@ -14,13 +14,15 @@ module V2
       'hmcts.net'
     ].freeze
 
-    TWENTY_EIGHT_DAYS_IN_SECONDS = 28*24*60*60
+    TWENTY_EIGHT_DAYS_IN_SECONDS = 28 * 24 * 60 * 60
 
-    def initialize(date_from:, date_to:, service_slug:, new_destination_email:)
+    def initialize(date_from:, date_to:, service_slug:, new_destination_email:, resend_json: false, resend_mslist: false)
       @date_from = DateTime.parse(date_from)
       @date_to = DateTime.parse(date_to)
       @service_slug = service_slug
       @new_destination_email = new_destination_email
+      @resend_json = resend_json
+      @resend_mslist = resend_mslist
     end
 
     def call
@@ -39,14 +41,43 @@ module V2
     end
 
     def process_submissions
+      submissions = get_submissions_to_process
+
+      submissions.each do |submission|
+        new_actions = []
+        payload = submission.decrypted_submission
+
+        email_action = payload['actions'].find { |a| a['kind'] == 'email' && a['variant'] == 'submission' }
+        if email_action.present?
+          email_action['to'] = new_destination_email
+          new_actions << email_action
+        end
+
+        csv_action = payload['actions'].find { |a| a['kind'] == 'csv' }
+        if csv_action.present?
+          csv_action['to'] = new_destination_email
+          new_actions << csv_action
+        end
+
+        new_actions << payload['actions'].find { |a| a['kind'] == 'json' } if resend_json
+        new_actions << payload['actions'].find { |a| a['kind'] == 'mslist' } if resend_mslist
+
+        payload['actions'] = new_actions
+
+        cloned_submission = submission.dup # copy with nil id so we can resave with new payload
+        cloned_submission.update!(payload: SubmissionEncryption.new.encrypt(payload))
+        cloned_submission.save!
+
+        V2::ProcessSubmissionJob.perform_later(
+          submission_id: cloned_submission.id,
+          request_id: SecureRandom.uuid,
+          jwt_skew_override: TWENTY_EIGHT_DAYS_IN_SECONDS
+        )
+      end
     end
 
     def get_submissions_to_process
       Submission.where(created_at: date_from..date_to, service_slug:)
     end
-
-    private
-
-
   end
 end

@@ -1,12 +1,14 @@
 require 'rails_helper'
 
 RSpec.describe V2::ReplayBatchSubmission do
-  let(:subject) { described_class.new(date_from:, date_to:, service_slug:, new_destination_email:) }
+  let(:subject) { described_class.new(date_from:, date_to:, service_slug:, new_destination_email:, resend_json:, resend_mslist:) }
 
   let(:date_from) { 3.days.ago.to_s }
   let(:date_to) { 1.days.ago.to_s }
   let(:service_slug) { 'my-service-slug' }
   let(:new_destination_email) { 'valid@justice.gov.uk' }
+  let(:resend_json) { false }
+  let(:resend_mslist) { false }
 
   VALID_DOMAINS =
     [
@@ -29,6 +31,34 @@ RSpec.describe V2::ReplayBatchSubmission do
     ]
 
   TWENTY_EIGHT_DAYS_IN_SECONDS = 28*24*60*60
+
+  describe '#call' do
+    context 'when there are valid params' do
+      it 'calls process submissions' do
+        expect(subject).to receive(:process_submissions).and_return(true)
+        subject.call
+      end
+    end
+
+    context 'dates are invalid' do
+      let(:date_from) { 1.days.ago.to_s }
+      let(:date_to) { 3.days.ago.to_s }
+
+      it 'does not call process submissions' do
+        expect(subject).to_not receive(:process_submissions)
+        subject.call
+      end
+    end
+
+    context 'destination invalid' do
+      let(:new_destination_email) { 'invalid@wrongdomain.gov.uk' }
+
+      it 'does not call process submissions' do
+        expect(subject).to_not receive(:process_submissions)
+        subject.call
+      end
+    end
+  end
 
   describe '#validate_dates' do
     context 'when dates are valid' do
@@ -112,21 +142,115 @@ RSpec.describe V2::ReplayBatchSubmission do
   end
 
   describe '#process_submissions' do
-    context 'there are submissions' do
-      let(:reprocessed_submission) { create(:submission, created_at: 2.days.ago, service_slug:) }
+    let(:access_token) { 'user_and_session_id' }
+    let(:key) { SecureRandom.uuid[0..31] }
+    let(:payload_fixture) do
+      JSON.parse(File.read(Rails.root.join('spec/fixtures/payloads/valid_submission.json')))
+    end
+    let(:encrypted_payload) do
+      fixture = payload_fixture
+      fixture['actions'] << { 'kind' => 'email', 'variant' => 'confirmation' }
+      SubmissionEncryption.new(key:).encrypt(fixture)
+    end
 
+    before do
+      allow(ENV).to receive(:[])
+      allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(key)
+    end
+
+    after do
+      ActiveJob::Base.queue_adapter.enqueued_jobs = []
+    end
+
+    context 'no submissions in date range' do
+      let(:reprocessed_submission) { create(:submission, payload: encrypted_payload, access_token:, created_at: 5.days.ago, service_slug:) }
+
+      it 'enqueues no jobs' do
+        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+        subject.process_submissions
+
+        expect(Submission.all.count).to eq(1)
+
+        expect {
+          subject.process_submissions
+        }.to change {
+          ActiveJob::Base.queue_adapter.enqueued_jobs.count
+        }.by 0
+
+        expect {
+          subject.process_submissions
+        }.to change(Submission, :count).by(0)
+      end
+    end
+
+    context 'there are submissions' do
+      let(:reprocessed_submission) { create(:submission, payload: encrypted_payload, access_token:, created_at: 2.days.ago, service_slug:) }
 
       it 'duplicates the old submission' do
-        old_id = reprocessed_submission.id
-        subject.process_submissions
-        new_submission = Submission.last
+        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
 
-        expect(new_submission.submission_id).to_not eq(old_id)
-        expect(new_submission.decrypted_payload['actions'][0]['to']).to be(new_destination_email)
-        expect(V2::ProcessSubmissionJob)to receive(:perform_later).with(
-          submission_id: new_id,
-          jwt_skew_override: TWENTY_EIGHT_DAYS_IN_SECONDS
-        )
+        subject.process_submissions
+
+        # select the cloned submission we expect irrespective of ordering
+        new_submission = Submission.select { |s| s.id != old_id }.first
+
+        expect(new_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'email' }['to']).to eq(new_destination_email)
+        expect(new_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'csv' }['to']).to eq(new_destination_email)
+      end
+
+      it 'leaves the old submission intact' do
+        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+
+        subject.process_submissions
+
+        expect(reprocessed_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'email' }['to']).to eq('captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com')
+        expect(reprocessed_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'csv' }['to']).to eq('captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com')
+        expect(reprocessed_submission.decrypted_submission['actions'].count).to eq(5)
+      end
+
+      it 'discards other actions by default' do
+        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+
+        subject.process_submissions
+
+        # select the cloned submission we expect irrespective of ordering
+        new_submission = Submission.select { |s| s.id != old_id }.first
+
+        expect(new_submission.decrypted_submission['actions'].count).to eq(2)
+      end
+
+      context 'resending non email actions' do
+        let(:resend_json) { true }
+        let(:resend_mslist) { true }
+
+        it 'can resend mslist and json actions if configured' do
+          old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+
+          subject.process_submissions
+
+          # select the cloned submission we expect irrespective of ordering
+          new_submission = Submission.select { |s| s.id != old_id }.first
+
+          expect(new_submission.decrypted_submission['actions'].count).to eq(4)
+        end
+      end
+
+      it 'enqueues a job for each submission' do
+        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+        subject.process_submissions
+        new_submission = Submission.select { |s| s.id != old_id }.first
+
+        expect {
+          subject.process_submissions
+        }.to change {
+          ActiveJob::Base.queue_adapter.enqueued_jobs.count
+        }.by 1
+
+        enqueued_job = ActiveJob::Base.queue_adapter.enqueued_jobs[0]
+
+        expect(enqueued_job['arguments'][0]['submission_id']).to eq(new_submission.id)
+        expect(enqueued_job['job_class']).to eq("V2::ProcessSubmissionJob")
+        expect(enqueued_job['arguments'][0]['jwt_skew_override']).to eq(TWENTY_EIGHT_DAYS_IN_SECONDS)
       end
     end
   end
