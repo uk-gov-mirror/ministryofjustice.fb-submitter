@@ -65,15 +65,15 @@ module V2
 
         payload['actions'] = new_actions
 
-        cloned_submission = submission.dup # copy with nil id so we can resave with new payload
-        cloned_submission.update!(payload: SubmissionEncryption.new.encrypt(payload))
-        cloned_submission.save!
+        submission.update!(payload: SubmissionEncryption.new.encrypt(payload))
+        submission.save!
+        # cloned_submission.save!
 
-        Rails.logger.info("Saved new copy with id: #{cloned_submission.id}")
-        Rails.logger.info("Creating new send job for: #{cloned_submission.id} to new destination: #{new_destination_email}")
+        # Rails.logger.info("Saved new copy with id: #{cloned_submission.id}")
+        Rails.logger.info("Creating new send job for: #{submission.id} to new destination: #{new_destination_email}")
 
         V2::ProcessSubmissionJob.perform_later(
-          submission_id: cloned_submission.id,
+          submission_id: submission.id,
           request_id: SecureRandom.uuid,
           jwt_skew_override: TWENTY_EIGHT_DAYS_IN_SECONDS
         )

@@ -190,58 +190,42 @@ RSpec.describe V2::ReplayBatchSubmission do
       let(:reprocessed_submission) { create(:submission, payload: encrypted_payload, access_token:, created_at: 2.days.ago, service_slug:) }
 
       it 'duplicates the old submission with new submission and csv actions' do
-        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
-
-        replay_batch_submissions.process_submissions
-
-        # select the cloned submission we expect irrespective of ordering
-        new_submission = Submission.all.reject { |s| s.id == old_id }.first
-
-        expect(new_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'email' }['to']).to eq(new_destination_email)
-        expect(new_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'csv' }['to']).to eq(new_destination_email)
-      end
-
-      it 'leaves the old submission intact' do
         reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
 
         replay_batch_submissions.process_submissions
 
-        expect(reprocessed_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'email' }['to']).to eq('captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com')
-        expect(reprocessed_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'csv' }['to']).to eq('captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com')
-        expect(reprocessed_submission.decrypted_submission['actions'].count).to eq(5)
+        after_processing_submission = Submission.find(reprocessed_submission.id)
+
+        expect(after_processing_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'email' }['to']).to eq(new_destination_email)
+        expect(after_processing_submission.decrypted_submission['actions'].find { |a| a['kind'] == 'csv' }['to']).to eq(new_destination_email)
       end
 
       it 'discards other actions by default' do
-        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+        reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
 
         replay_batch_submissions.process_submissions
+        after_processing_submission = Submission.find(reprocessed_submission.id)
 
-        # select the cloned submission we expect irrespective of ordering
-        new_submission = Submission.all.reject { |s| s.id == old_id }.first
-
-        expect(new_submission.decrypted_submission['actions'].count).to eq(2)
+        expect(after_processing_submission.decrypted_submission['actions'].count).to eq(2)
       end
 
       context 'when resending non email actions' do
         let(:resend_json) { true }
         let(:resend_mslist) { true }
 
-        it 'can resend mslist and json actions if configured' do
-          old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+        it 'can resend mslist and json actions if configured but leaves confirmation email out' do
+          reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
 
           replay_batch_submissions.process_submissions
+          after_processing_submission = Submission.find(reprocessed_submission.id)
 
-          # select the cloned submission we expect irrespective of ordering
-          new_submission = Submission.all.reject { |s| s.id == old_id }.first
-
-          expect(new_submission.decrypted_submission['actions'].count).to eq(4)
+          expect(after_processing_submission.decrypted_submission['actions'].count).to eq(4)
         end
       end
 
       it 'enqueues a job for each submission' do
-        old_id = reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
+        reprocessed_submission.id # this also ensures rspec creates it before we process submisisons
         replay_batch_submissions.process_submissions
-        new_submission = Submission.all.reject { |s| s.id == old_id }.first
 
         expect {
           replay_batch_submissions.process_submissions
@@ -251,7 +235,7 @@ RSpec.describe V2::ReplayBatchSubmission do
 
         enqueued_job = ActiveJob::Base.queue_adapter.enqueued_jobs[0]
 
-        expect(enqueued_job['arguments'][0]['submission_id']).to eq(new_submission.id)
+        expect(enqueued_job['arguments'][0]['submission_id']).to eq(reprocessed_submission.id)
         expect(enqueued_job['job_class']).to eq('V2::ProcessSubmissionJob')
         expect(enqueued_job['arguments'][0]['jwt_skew_override']).to eq(TWENTY_EIGHT_DAYS_IN_SECONDS)
       end
