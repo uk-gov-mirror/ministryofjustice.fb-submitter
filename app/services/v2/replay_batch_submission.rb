@@ -75,7 +75,7 @@ module V2
         V2::ProcessSubmissionJob.perform_later(
           submission_id: submission.id,
           request_id: SecureRandom.uuid,
-          jwt_skew_override: TWENTY_EIGHT_DAYS_IN_SECONDS
+          jwt_skew_override: TWENTY_EIGHT_DAYS_IN_SECONDS.to_s
         )
       end
     end

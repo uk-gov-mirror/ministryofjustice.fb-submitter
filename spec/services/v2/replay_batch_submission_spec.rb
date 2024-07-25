@@ -237,7 +237,7 @@ RSpec.describe V2::ReplayBatchSubmission do
 
         expect(enqueued_job['arguments'][0]['submission_id']).to eq(reprocessed_submission.id)
         expect(enqueued_job['job_class']).to eq('V2::ProcessSubmissionJob')
-        expect(enqueued_job['arguments'][0]['jwt_skew_override']).to eq(TWENTY_EIGHT_DAYS_IN_SECONDS)
+        expect(enqueued_job['arguments'][0]['jwt_skew_override']).to eq(TWENTY_EIGHT_DAYS_IN_SECONDS.to_s)
       end
     end
   end
