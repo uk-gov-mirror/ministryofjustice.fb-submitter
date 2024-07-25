@@ -67,9 +67,7 @@ module V2
 
         submission.update!(payload: SubmissionEncryption.new.encrypt(payload))
         submission.save!
-        # cloned_submission.save!
 
-        # Rails.logger.info("Saved new copy with id: #{cloned_submission.id}")
         Rails.logger.info("Creating new send job for: #{submission.id} to new destination: #{new_destination_email}")
 
         V2::ProcessSubmissionJob.perform_later(
