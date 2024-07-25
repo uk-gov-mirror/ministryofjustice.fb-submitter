@@ -26,8 +26,8 @@ module V2
     end
 
     def call
-      return unless validate_dates
-      return unless validate_destination
+      raise StandardError, 'Date from must be before Date to' unless validate_dates
+      raise StandardError, 'New destination email must be on the allow list' unless validate_destination
 
       process_submissions
     end
@@ -44,6 +44,7 @@ module V2
       submissions = get_submissions_to_process
 
       submissions.each do |submission|
+        Rails.logger.info("Processing submission: #{submission.id} from #{submission.created_at}")
         new_actions = []
         payload = submission.decrypted_submission
 
@@ -67,6 +68,9 @@ module V2
         cloned_submission = submission.dup # copy with nil id so we can resave with new payload
         cloned_submission.update!(payload: SubmissionEncryption.new.encrypt(payload))
         cloned_submission.save!
+
+        Rails.logger.info("Saved new copy with id: #{cloned_submission.id}")
+        Rails.logger.info("Creating new send job for: #{cloned_submission.id} to new destination: #{new_destination_email}")
 
         V2::ProcessSubmissionJob.perform_later(
           submission_id: cloned_submission.id,

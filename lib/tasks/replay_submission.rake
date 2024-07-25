@@ -47,4 +47,34 @@ namespace :replay_submission do
       end
     end
   end
+
+  desc "
+  Replay a batch of successful submissions for a given services within a date range
+  Usage
+  rake replay_submission:successful_batch[<date_from>,<date_to>,<service_slug>,<new_destination_email>]
+  "
+  task :successful_batch, [:date_from, :date_to, :service_slug, :new_destination_email] => :environment do |_t, args|
+    # if args are nil
+    if args[:date_from].nil? || args[:date_to].nil? || args[:service_slug].nil? || args[:new_destination_email].nil?
+      puts 'Date from is required' if args[:date_from].nil?
+      puts 'Date to is required' if args[:date_to].nil?
+      puts 'Service slug is required' if args[:service_slug].nil?
+      puts 'New destination email is required' if args[:new_destination_email].nil?
+    else
+      begin
+        V2.ReplayBatchSubmission.new(
+          date_from: args[:date_from],
+          date_to: args[:date_to],
+          service_slug: args[:service_slug],
+          new_destination_email: args[:new_destination_email],
+          resend_json: false,
+          resend_mslist: false
+        ).call
+      rescue Date::Error
+        puts 'Could not parse date input - enter a string that can be parsed using DateTime.parse'
+      rescue StandardError => e
+        puts e.message
+      end
+    end
+  end
 end

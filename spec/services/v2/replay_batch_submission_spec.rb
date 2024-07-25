@@ -49,20 +49,16 @@ RSpec.describe V2::ReplayBatchSubmission do
       let(:date_from) { 1.day.ago.to_s }
       let(:date_to) { 3.days.ago.to_s }
 
-      it 'does not call process submissions' do
-        replay_batch_submissions.call
-
-        expect(replay_batch_submissions).not_to have_received(:process_submissions)
+      it 'raises an error' do
+        expect { replay_batch_submissions.call }.to raise_error(StandardError, 'Date from must be before Date to')
       end
     end
 
     context 'when destination invalid' do
       let(:new_destination_email) { 'invalid@wrongdomain.gov.uk' }
 
-      it 'does not call process submissions' do
-        replay_batch_submissions.call
-
-        expect(replay_batch_submissions).not_to have_received(:process_submissions)
+      it 'raises an error' do
+        expect { replay_batch_submissions.call }.to raise_error(StandardError, 'New destination email must be on the allow list')
       end
     end
   end
