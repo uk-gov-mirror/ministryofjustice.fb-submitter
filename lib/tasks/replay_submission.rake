@@ -62,7 +62,7 @@ namespace :replay_submission do
       puts 'New destination email is required' if args[:new_destination_email].nil?
     else
       begin
-        V2.ReplayBatchSubmission.new(
+        V2::ReplayBatchSubmission.new(
           date_from: args[:date_from],
           date_to: args[:date_to],
           service_slug: args[:service_slug],
