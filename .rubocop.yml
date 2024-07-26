@@ -42,3 +42,9 @@ RSpec/ExampleLength:
 
 Style/RedundantParentheses:
   Enabled: false
+
+RSpec/SubjectStub:
+  Enabled: false
+
+Style/DateTime:
+  Enabled: false
