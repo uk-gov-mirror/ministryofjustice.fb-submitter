@@ -2,13 +2,14 @@ require 'cgi'
 
 module V2
   class SendToMsGraphService
-    attr_accessor :site_id, :list_id, :drive_id, :root_graph_url
+    attr_accessor :site_id, :list_id, :drive_id, :root_graph_url, :reference_number
 
     def initialize(action)
       @root_graph_url = action['graph_url']
       @site_id = action['site_id']
       @list_id = action['list_id']
       @drive_id = action['drive_id']
+      @reference_number = action['reference_number']
     end
 
     def post_to_ms_list(submission, id)
@@ -80,7 +81,8 @@ module V2
     def ms_list_payload(submission, id)
       new_data = {
         'fields' => {
-          Digest::MD5.hexdigest('Submission ID').tr('0-9', '') => id
+          Digest::MD5.hexdigest('Submission ID').tr('0-9', '') => id,
+          Digest::MD5.hexdigest('Reference Number').tr('0-9', '') => @reference_number
         }
       }
 

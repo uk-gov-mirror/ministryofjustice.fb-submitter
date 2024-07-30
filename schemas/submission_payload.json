@@ -122,6 +122,9 @@
         },
         "drive_id": {
           "type": "string"
+        },
+        "reference_number": {
+          "type": "string"
         }
       },
       "anyOf":[

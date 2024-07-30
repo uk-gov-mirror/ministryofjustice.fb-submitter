@@ -27,6 +27,7 @@ RSpec.describe V2::SendToMsGraphService do
           "site_id": '1234',
           "list_id": '5678',
           "drive_id": 'root',
+          "reference_number": 'ref-123-xyz',
           "include_attachments": true
         }
       ],
@@ -262,6 +263,7 @@ RSpec.describe V2::SendToMsGraphService do
           'fields' =>
           {
             'debcefbcbdf' => submission_id,
+            'bdfaeebcbe' => 'ref-123-xyz',
             'bfebbbeafabacdef' => 'Stormtrooper',
             'cbddedd' => 'FN-b0046eb3-37ff-400d-85f8-8bbb5c11183b',
             'dddddbccfbd' => 'fb-acceptance-tests@digital.justice.gov.uk',
