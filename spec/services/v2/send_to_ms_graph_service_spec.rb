@@ -223,7 +223,7 @@ RSpec.describe V2::SendToMsGraphService do
 
     context 'when successful' do
       before do
-        stub_request(:put, "https://graph-url.microsoft.comsites/1234/drive/items/folder_path:/file+name.png:/content")
+        stub_request(:put, 'https://graph-url.microsoft.comsites/1234/drive/items/folder_path:/file+name.png:/content')
           .with(
             body: "hello world\n",
             headers: {

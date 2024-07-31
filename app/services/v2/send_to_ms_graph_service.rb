@@ -58,7 +58,7 @@ module V2
       end
     end
 
-    def send_attachment_to_drive(attachment, id, folder)
+    def send_attachment_to_drive(attachment, _id, folder)
       filename = CGI.escape(attachment.filename)
       uri = URI.parse("#{root_graph_url}sites/#{site_id}/drive/items/#{folder}:/#{filename}:/content")
 
