@@ -26,7 +26,7 @@ module V2
         req.body = { 'fields' => answers_payload }.to_json
       end
 
-      Rails.logger.info(response)
+      Rails.logger.info(response.to_hash)
 
       JSON.parse(response.body)
     end
@@ -53,7 +53,7 @@ module V2
       if response.status == 201
         JSON.parse(response.body)['id']
       else
-        Rails.logger.info(response)
+        Rails.logger.info(response.to_hash)
         drive_id
       end
     end
@@ -71,7 +71,7 @@ module V2
         req.body = File.read(attachment.path)
       end
 
-      Rails.logger.info(response)
+      Rails.logger.info(response.to_hash)
 
       JSON.parse(response.body)
     end
