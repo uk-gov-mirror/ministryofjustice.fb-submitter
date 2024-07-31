@@ -26,6 +26,8 @@ module V2
         req.body = { 'fields' => answers_payload }.to_json
       end
 
+      Rails.logger.info(response)
+
       JSON.parse(response.body)
     end
 
@@ -48,7 +50,12 @@ module V2
         req.body = body.to_json
       end
 
-      response.status == 201 ? JSON.parse(response.body)['id'] : drive_id
+      if response.status == 201
+        JSON.parse(response.body)['id']
+      else
+        Rails.logger.info(response)
+        drive_id
+      end
     end
 
     def send_attachment_to_drive(attachment, id, folder)
@@ -63,6 +70,8 @@ module V2
         req.headers['Authorization'] = "Bearer #{get_auth_token}"
         req.body = File.read(attachment.path)
       end
+
+      Rails.logger.info(response)
 
       JSON.parse(response.body)
     end
