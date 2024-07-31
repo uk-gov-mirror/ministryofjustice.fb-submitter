@@ -26,7 +26,7 @@ module V2
         req.body = { 'fields' => answers_payload }.to_json
       end
 
-      Rails.logger.info(response.to_hash)
+      Sentry.capture_message("#{response.status} from MS API, error: #{response.body}") unless response.success?
 
       JSON.parse(response.body)
     end
@@ -53,7 +53,7 @@ module V2
       if response.status == 201
         JSON.parse(response.body)['id']
       else
-        Rails.logger.info(response.to_hash)
+        Sentry.capture_message("#{response.status} from MS API, error: #{response.body}") unless response.success?
         drive_id
       end
     end
@@ -71,7 +71,7 @@ module V2
         req.body = File.read(attachment.path)
       end
 
-      Rails.logger.info(response.to_hash)
+      Sentry.capture_message("#{response.status} from MS API, error: #{response.body}") unless response.success?
 
       JSON.parse(response.body)
     end
