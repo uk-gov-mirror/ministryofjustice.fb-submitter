@@ -59,7 +59,7 @@ module V2
     end
 
     def send_attachment_to_drive(attachment, id, folder)
-      filename = CGI.escape("#{id}-#{attachment.filename}")
+      filename = CGI.escape(attachment.filename)
       uri = URI.parse("#{root_graph_url}sites/#{site_id}/drive/items/#{folder}:/#{filename}:/content")
 
       connection = Faraday.new(uri) do |conn|

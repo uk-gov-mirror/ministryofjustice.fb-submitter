@@ -223,7 +223,7 @@ RSpec.describe V2::SendToMsGraphService do
 
     context 'when successful' do
       before do
-        stub_request(:put, "https://graph-url.microsoft.comsites/1234/drive/items/folder_path:/#{submission_id}-filename.png:/content")
+        stub_request(:put, "https://graph-url.microsoft.comsites/1234/drive/items/folder_path:/file+name.png:/content")
           .with(
             body: "hello world\n",
             headers: {
@@ -243,7 +243,7 @@ RSpec.describe V2::SendToMsGraphService do
 
         allow(ENV).to receive(:[]).with('MS_OAUTH_URL').and_return('https://authurl.example.com')
 
-        allow(attachment).to receive(:filename).and_return('filename.png')
+        allow(attachment).to receive(:filename).and_return('file name.png')
         allow(attachment).to receive(:path).and_return(Rails.root.join('spec/fixtures/files/hello_world.txt'))
       end
 
