@@ -116,10 +116,13 @@ RSpec.describe V2::SendToMsGraphService do
         allow(ENV).to receive(:[])
 
         allow(ENV).to receive(:[]).with('MS_OAUTH_URL').and_return('https://authurl.example.com')
+
+        allow(Sentry).to receive(:capture_message)
       end
 
       it 'sends the error to sentry and defaults to the parent drive' do
         expect(graph_service.create_folder_in_drive(submission_id)).to eq('root')
+        expect(Sentry).to have_received(:capture_message)
       end
     end
   end
