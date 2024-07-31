@@ -215,6 +215,10 @@ RSpec.describe V2::ProcessSubmissionJob do
       end
 
       context 'when including attachments' do
+        let(:payload_fixture) do
+          JSON.parse(File.read(Rails.root.join('spec/fixtures/payloads/valid_submission_with_file.json')))
+        end
+
         before do
           # download attachment stub
           stub_request(:get, 'http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/dog-contest/user/1/123')
@@ -241,9 +245,10 @@ RSpec.describe V2::ProcessSubmissionJob do
           allow(ENV).to receive(:[]).with('SUBMISSION_DECRYPTION_KEY').and_return(key)
           allow(EmailOutputService).to receive(:new).and_return(email_output_service)
           allow(ms_graph_service).to receive(:create_folder_in_drive).and_return('a-folder')
+          allow(ms_graph_service).to receive(:send_attachment_to_drive).and_return({ 'webUrl' => 'https://drive/basset-hound-dog-picture.png' })
         end
 
-        it 'sends to graph api then attachments to drive api' do
+        it 'sends attachments to drive' do
           perform_job
 
           expect(ms_graph_service).to have_received(:send_attachment_to_drive) do |arg1, arg2, arg3|
@@ -251,9 +256,15 @@ RSpec.describe V2::ProcessSubmissionJob do
             expect(arg2).to eq(submission.id)
             expect(arg3).to eq('a-folder')
           end
+        end
+
+        it 'sends to graph api with drive links' do
+          perform_job
 
           expect(ms_graph_service).to have_received(:post_to_ms_list) do |arg1, arg2|
-            expect(arg1['submission_id']).to eq(submission.id)
+            expect(arg1['actions'][0]['kind']).to eq('mslist')
+            expect(arg1['pages'][1]['answers'][0]['answer']).to match(/https:\/\/drive\/basset-hound-dog-picture.png/)
+            expect(arg1['pages'][1]['answers'][0]['answer']).to match(/basset-hound-dog-picture.png/)
             expect(arg2).to eq(submission.id)
           end
         end

@@ -75,9 +75,22 @@ module V2
             )
 
             created_folder = create_folder_in_drive(submission.id)
+            uploaded_files = []
 
             attachments.each do |attachment|
-              send_attachment_to_drive(attachment, submission.id, created_folder)
+              response = send_attachment_to_drive(attachment, submission.id, created_folder)
+              uploaded_files << {
+                'filename' => attachment.filename,
+                'ms_url' => response['webUrl']
+              }
+            end
+
+            uploaded_files.each do |file|
+              decrypted_submission['pages'].each do |page|
+                page['answers'].each do |answer|
+                  answer['answer'] = "#{answer['answer']} #{file['ms_url']}" if answer['answer'].include?(file['filename'])
+                end
+              end
             end
           end
 

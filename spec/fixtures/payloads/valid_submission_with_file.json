@@ -1,0 +1,125 @@
+{
+  "service": {
+    "id": "fd5ef840-5f0f-4c1f-997e-5d6d89adf04f",
+    "slug": "mos-eisley",
+    "name": "Mos Eisley"
+  },
+  "meta": {
+    "pdf_heading":"Complain about working conditions on the star destroyer",
+    "pdf_subheading":"A copy of your complaint about working on a star destroyer"
+  },
+  "actions": [
+    {
+      "kind":"email",
+      "variant": "submission",
+      "to": "captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com",
+      "from":"\"Email Output Acceptance Test Service\" <moj-online@digital.justice.gov.uk>",
+      "subject":"Email Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032",
+      "email_body":"Please find an application attached",
+      "include_pdf":true,
+      "include_attachments": true
+    },
+    {
+      "kind":"csv",
+      "variant": null,
+      "to": "captain.needa@star-destroyer.com,admiral.piett@star-destroyer.com",
+      "from":"\"Email Output Acceptance Test Service\" <moj-online@digital.justice.gov.uk>",
+      "subject":"CSV Output Acceptance Test submission: fc242acb-c03f-439e-b41d-bec76fa0f032",
+      "email_body":"",
+      "include_pdf": false,
+      "include_attachments": true
+    },
+    {
+      "kind": "json",
+      "variant": null,
+      "url": "http://api-endpoint.com",
+      "key": "fb730a667840d79c",
+      "include_attachments": false
+    },
+    {
+      "kind": "mslist",
+      "variant": null,
+      "graph_url": "graph-url.microsoft.com",
+      "site_id": "1234",
+      "list_id": "5678",
+      "drive_id": "root",
+      "include_attachments": true
+    }
+  ],
+  "pages": [
+    {
+      "heading": "",
+      "answers": [
+        {
+          "field_id": "name_text_1",
+          "field_name": "Full name",
+          "answer": "Captain Needa"
+        }
+      ]
+    },
+    {
+      "heading": "",
+      "answers": [
+        {
+          "field_id": "files_multiupload_1",
+          "field_name": "Upload a picture of each dog",
+          "answer": "basset-hound-dog-picture.png"
+        }
+      ]
+    },
+    {
+      "heading": "",
+      "answers": [
+        {
+          "field_id": "burgers_checkboxes_1",
+          "field_name": "What would you like on your burger?",
+          "answer": ["Beef, cheese, tomato", "Mozzarella, cheddar, feta"]
+        }
+      ]
+    },
+    {
+      "heading": "Your favourite droid",
+      "answers": [
+        {
+          "field_id": "multiple_question_1",
+          "field_name": "Multiple Question 1",
+          "answer": "C3P0"
+        },
+        {
+          "field_id": "multiple_question_2",
+          "field_name": "Multiple Question 2",
+          "answer": "R2D2"
+        },
+        {
+          "field_id": "multiple_question_3",
+          "field_name": "Multiple Question 3",
+          "answer": "BB8"
+        }
+      ]
+    },
+    {
+      "heading": "",
+      "answers": [
+        {
+          "field_id": "postal-address_address_1",
+          "field_name": "Your postal address",
+          "answer": {
+            "address_line_one": "1 road",
+            "address_line_two": "",
+            "city": "ruby town",
+            "county": "",
+            "postcode": "99 999",
+            "country": "ruby land"
+          }
+        }
+      ]
+    }
+  ],
+  "attachments": [
+    {
+      "filename": "basset-hound-dog-picture.png",
+      "mimetype": "image/png",
+      "url": "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/dog-contest/user/1/123"
+    }
+  ]
+}
