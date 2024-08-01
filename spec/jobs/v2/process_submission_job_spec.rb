@@ -264,7 +264,6 @@ RSpec.describe V2::ProcessSubmissionJob do
           expect(ms_graph_service).to have_received(:post_to_ms_list) do |arg1, arg2|
             expect(arg1['actions'][0]['kind']).to eq('mslist')
             expect(arg1['pages'][1]['answers'][0]['answer']).to match(/https:\/\/drive\/basset-hound-dog-picture.png/)
-            expect(arg1['pages'][1]['answers'][0]['answer']).to match(/basset-hound-dog-picture.png/)
             expect(arg2).to eq(submission.id)
           end
         end
