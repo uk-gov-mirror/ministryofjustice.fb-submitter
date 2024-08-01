@@ -63,7 +63,7 @@
         {
           "field_id": "files_multiupload_1",
           "field_name": "Upload a picture of each dog",
-          "answer": "basset-hound-dog-picture.png"
+          "answer": "basset-hound-dog-picture.png; basset-hound-dog-picture (1).png"
         }
       ]
     },
@@ -120,6 +120,11 @@
       "filename": "basset-hound-dog-picture.png",
       "mimetype": "image/png",
       "url": "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/dog-contest/user/1/123"
+    },
+    {
+      "filename": "basset-hound-dog-picture (1).png",
+      "mimetype": "image/png",
+      "url": "http://fb-user-filestore-api-svc-test-dev.formbuilder-platform-test-dev/service/dog-contest/user/1/456"
     }
   ]
 }

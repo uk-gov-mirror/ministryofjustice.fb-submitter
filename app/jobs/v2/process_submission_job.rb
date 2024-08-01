@@ -88,8 +88,10 @@ module V2
             uploaded_files.each do |file|
               decrypted_submission['pages'].each do |page|
                 page['answers'].each do |answer|
+                  next unless answer['field_id'].match?(/upload/) || answer['field_id'].match?(/multiupload/)
+
                   # replace filename with link in answer, use gsub so it works on multiupload answers
-                  answer['answer'] = answer['answer'].gsub(file['filename'], file['ms_url']) if answer['answer'].include?(file['filename'])
+                  answer['answer'] = answer['answer'].gsub(file['filename'], file['ms_url'])
                 end
               end
             end
