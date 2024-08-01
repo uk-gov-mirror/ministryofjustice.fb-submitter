@@ -89,7 +89,7 @@ module V2
               decrypted_submission['pages'].each do |page|
                 page['answers'].each do |answer|
                   # replace filename with link in answer, use gsub so it works on multiupload answers
-                  answer['answer'] = answer['answer'].gsub(file['filename'], file['ms_url']) if answer['answer'] == file['filename']
+                  answer['answer'] = answer['answer'].gsub(file['filename'], file['ms_url']) if answer['answer'].include?(file['filename'])
                 end
               end
             end
