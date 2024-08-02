@@ -75,9 +75,25 @@ module V2
             )
 
             created_folder = create_folder_in_drive(submission.id)
+            uploaded_files = []
 
             attachments.each do |attachment|
-              send_attachment_to_drive(attachment, submission.id, created_folder)
+              response = send_attachment_to_drive(attachment, submission.id, created_folder)
+              uploaded_files << {
+                'filename' => attachment.filename,
+                'ms_url' => response['webUrl']
+              }
+            end
+
+            uploaded_files.each do |file|
+              decrypted_submission['pages'].each do |page|
+                page['answers'].each do |answer|
+                  next unless answer['field_id'].match?(/upload/) || answer['field_id'].match?(/multiupload/)
+
+                  # replace filename with link in answer, use gsub so it works on multiupload answers
+                  answer['answer'] = answer['answer'].gsub(file['filename'], file['ms_url'])
+                end
+              end
             end
           end
 
