@@ -105,8 +105,7 @@ module V2
     end
 
     def rich_text_link_for_file(filename, url)
-      "{\\colortbl ;\\red0\\green0\\blue238;}
-      \\field{\\*\\fldinst HYPERLINK \"#{url}\"}{\\fldrslt{\\ul\\cf1#{filename}}}}"
+      "<a href=\"#{url}\">#{filename}</a>"
     end
 
     def download_attachments(attachments, encrypted_user_id_and_token, access_token)
