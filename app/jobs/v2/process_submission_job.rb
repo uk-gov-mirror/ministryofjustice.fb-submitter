@@ -91,7 +91,7 @@ module V2
                   next unless answer['field_id'].match?(/upload/) || answer['field_id'].match?(/multiupload/)
 
                   # replace filename with link in answer, use gsub so it works on multiupload answers
-                  answer['answer'] = answer['answer'].gsub(file['filename'], file['ms_url'])
+                  answer['answer'] = answer['answer'].gsub(file['filename'], rich_text_link_for_file(file['filename'], file['ms_url']))
                 end
               end
             end
@@ -102,6 +102,10 @@ module V2
           Rails.logger.warn "Unknown action type '#{action}' for submission id #{submission.id}"
         end
       end
+    end
+
+    def rich_text_link_for_file(filename, url)
+      "<a href=\"#{url}\">#{filename}</a>"
     end
 
     def download_attachments(attachments, encrypted_user_id_and_token, access_token)
