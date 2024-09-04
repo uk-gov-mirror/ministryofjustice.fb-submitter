@@ -2,14 +2,15 @@ require 'cgi'
 
 module V2
   class SendToMsGraphService
-    attr_accessor :site_id, :list_id, :drive_id, :root_graph_url, :reference_number
+    attr_accessor :site_id, :list_id, :drive_id, :root_graph_url, :reference_number, :service_slug
 
-    def initialize(action)
+    def initialize(action, service_slug)
       @root_graph_url = action['graph_url']
       @site_id = action['site_id']
       @list_id = action['list_id']
       @drive_id = action['drive_id']
       @reference_number = action['reference_number']
+      @service_slug = service_slug
     end
 
     def post_to_ms_list(submission, id)
@@ -26,7 +27,7 @@ module V2
         req.body = { 'fields' => answers_payload }.to_json
       end
 
-      Sentry.capture_message("#{response.status} from MS API, error: #{response.body}") unless response.success?
+      Sentry.capture_message("#{response.status} from MS API for #{service_slug}, error: #{response.body}") unless response.success?
 
       JSON.parse(response.body)
     end
@@ -53,7 +54,7 @@ module V2
       if response.status == 201
         JSON.parse(response.body)['id']
       else
-        Sentry.capture_message("#{response.status} from MS API, error: #{response.body}") unless response.success?
+        Sentry.capture_message("#{response.status} from MS API for #{service_slug}, error: #{response.body}") unless response.success?
         drive_id
       end
     end
@@ -71,7 +72,7 @@ module V2
         req.body = File.read(attachment.path)
       end
 
-      Sentry.capture_message("#{response.status} from MS API, error: #{response.body}") unless response.success?
+      Sentry.capture_message("#{response.status} from MS API for #{service_slug}, error: #{response.body}") unless response.success?
 
       JSON.parse(response.body)
     end

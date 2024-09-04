@@ -65,7 +65,7 @@ module V2
 
           send_email(submission:, action:, attachments: [csv_attachment])
         when 'mslist'
-          ms_graph_adapter(action)
+          ms_graph_adapter(action, submission.service_slug)
 
           if action['include_attachments'] == true
             attachments = download_attachments(
@@ -134,8 +134,8 @@ module V2
 
     delegate :send_attachment_to_drive, :post_to_ms_list, :create_folder_in_drive, to: :ms_graph_adapter
 
-    def ms_graph_adapter(action = nil)
-      @ms_graph_adapter ||= V2::SendToMsGraphService.new(action)
+    def ms_graph_adapter(action = nil, service_slug = nil)
+      @ms_graph_adapter ||= V2::SendToMsGraphService.new(action, service_slug)
     end
   end
 end

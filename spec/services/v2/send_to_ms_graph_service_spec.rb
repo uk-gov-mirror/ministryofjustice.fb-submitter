@@ -2,7 +2,7 @@ require 'rails_helper'
 require 'webmock/rspec'
 
 RSpec.describe V2::SendToMsGraphService do
-  subject(:graph_service) { described_class.new(JSON.parse(action)) }
+  subject(:graph_service) { described_class.new(JSON.parse(action), 'service-slug') }
 
   let(:submission_id) { SecureRandom.uuid }
   let(:submission_at) { Time.zone.now.iso8601(3) }
