@@ -40,6 +40,9 @@ RSpec/MultipleMemoizedHelpers:
 RSpec/ExampleLength:
   Enabled: false
 
+RSpec/IndexedLet:
+  Enabled: false
+
 Style/RedundantParentheses:
   Enabled: false
 
