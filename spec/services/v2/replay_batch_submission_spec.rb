@@ -176,13 +176,13 @@ RSpec.describe V2::ReplayBatchSubmission do
 
         expect {
           replay_batch_submissions.process_submissions
-        }.to change {
+        }.not_to(change do
           ActiveJob::Base.queue_adapter.enqueued_jobs.count
-        }.by 0
+        end)
 
         expect {
           replay_batch_submissions.process_submissions
-        }.to change(Submission, :count).by(0)
+        }.not_to change(Submission, :count)
       end
     end
 

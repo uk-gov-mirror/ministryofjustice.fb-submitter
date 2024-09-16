@@ -7,7 +7,7 @@ RSpec.describe ServiceTokenService do
 
   let(:service_slug) { 'some-service' }
   let(:request_id) { '12345' }
-  let(:fake_client) { instance_double('Adapters::ServiceTokenCacheClient') }
+  let(:fake_client) { instance_double(Adapters::ServiceTokenCacheClient) }
 
   describe '#public_key' do
     before do

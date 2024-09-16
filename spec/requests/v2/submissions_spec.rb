@@ -233,7 +233,7 @@ describe 'V2 Submissions endpoint', type: :request do
         end
       end
 
-      context 'when application not present ' do
+      context 'when application not present' do
         before do
           allow(fb_jwt_auth).to receive(:verify!).and_raise(
             Fb::Jwt::Auth::IssuerNotPresentError, 'Issuer is not present'

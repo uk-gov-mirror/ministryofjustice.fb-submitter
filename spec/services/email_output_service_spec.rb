@@ -142,7 +142,7 @@ RSpec.describe EmailOutputService do
       let(:include_attachments) { true }
       let(:include_pdf) { true }
 
-      it 'groups attachments per email, pdf submission first remainder based on attachment size, ' do
+      it 'groups attachments per email, pdf submission first remainder based on attachment size,' do
         first_email_attachments = [pdf_attachment, upload1, upload2]
         second_email_attachments = [upload3]
 

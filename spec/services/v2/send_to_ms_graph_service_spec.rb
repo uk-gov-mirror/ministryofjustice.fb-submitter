@@ -243,8 +243,7 @@ RSpec.describe V2::SendToMsGraphService do
 
         allow(ENV).to receive(:[]).with('MS_OAUTH_URL').and_return('https://authurl.example.com')
 
-        allow(attachment).to receive(:filename).and_return('file name.png')
-        allow(attachment).to receive(:path).and_return(Rails.root.join('spec/fixtures/files/hello_world.txt'))
+        allow(attachment).to receive_messages(filename: 'file name.png', path: Rails.root.join('spec/fixtures/files/hello_world.txt'))
       end
 
       it 'returns file info' do

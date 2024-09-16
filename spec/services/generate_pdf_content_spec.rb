@@ -3,7 +3,7 @@ require_relative '../../app/services/generate_pdf_content'
 describe GeneratePdfContent do
   subject(:pdf_service) { described_class.new(pdf_api_gateway: gateway, payload:) }
 
-  let(:gateway) { instance_spy('Adapters::PdfApi', generate_pdf: 'some pdf contents') }
+  let(:gateway) { instance_spy(Adapters::PdfApi, generate_pdf: 'some pdf contents') }
   let(:submission_id) { 'some-submission-id' }
   let(:pdf_data) { { some: 'payload', submission_id: } }
   let(:payload) { { submission: pdf_data } }
