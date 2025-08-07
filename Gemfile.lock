@@ -175,7 +175,8 @@ GEM
     json (2.7.2)
     json-schema (4.1.1)
       addressable (>= 2.8)
-    jwe (0.4.0)
+    jwe (1.1.1)
+      base64
     jwt (2.8.2)
       base64
     language_server-protocol (3.17.0.3)
@@ -402,7 +403,7 @@ DEPENDENCIES
   guard-rspec
   guard-shell
   json-schema (~> 4.1.1)
-  jwe (~> 0.4.0)
+  jwe (~> 1.1.1)
   jwt
   listen
   mime-types
