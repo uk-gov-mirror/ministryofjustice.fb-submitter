@@ -269,7 +269,7 @@ RSpec.describe V2::SendToMsGraphService do
             'bfebbbeafabacdef' => 'Stormtrooper',
             'cbddedd' => 'FN-b0046eb3-37ff-400d-85f8-8bbb5c11183b',
             'dddddbccfbd' => 'fb-acceptance-tests@digital.justice.gov.uk',
-            'bebcdcfeeeda' => 'postal-address_address_1; Your postal address; {"address_line_one"=>"1 road", "address_line_two"=>"", "city"=>"ruby town", "county"=>"", "postcode"=>"99 999", "country"=>"ruby land"}'
+            'bebcdcfeeeda' => 'postal-address_address_1; Your postal address; {"address_line_one" => "1 road", "address_line_two" => "", "city" => "ruby town", "county" => "", "postcode" => "99 999", "country" => "ruby land"}'
           }
         }
       end
