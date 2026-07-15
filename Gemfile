@@ -4,6 +4,7 @@ ruby File.read('.ruby-version').strip
 
 gem 'aws-sdk-sesv2', '~> 1.43'
 gem 'bootsnap', '>= 1.1.0', require: false
+gem 'csv'
 gem 'daemons'
 gem 'delayed_job_active_record', '~> 4.1.10'
 gem 'faraday', '~> 2.14.1'

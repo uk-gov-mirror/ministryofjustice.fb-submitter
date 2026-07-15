@@ -111,6 +111,7 @@ GEM
       bigdecimal
       rexml
     crass (1.0.6)
+    csv (3.3.5)
     daemons (1.4.1)
     database_cleaner-active_record (2.2.2)
       activerecord (>= 5.a)
@@ -424,6 +425,7 @@ DEPENDENCIES
   bootsnap (>= 1.1.0)
   brakeman
   byebug
+  csv
   daemons
   database_cleaner-active_record (~> 2.2.0)
   delayed_job_active_record (~> 4.1.10)
@@ -454,7 +456,7 @@ DEPENDENCIES
   webmock (~> 3.24.0)
 
 RUBY VERSION
-   ruby 3.3.11p205
+   ruby 3.4.9p82
 
 BUNDLED WITH
    2.4.6
